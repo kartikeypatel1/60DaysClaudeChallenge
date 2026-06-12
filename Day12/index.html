@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kartikey Patel — Job Search Toolkit</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.10.0/tabler-icons.min.css" />
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --bg2: #141414;
+    --bg3: #1a1a1a;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #f0ece4;
+    --muted: #8a8478;
+    --accent: #EF9F27;
+    --accent2: #BA7517;
+    --accent-light: #FAEEDA;
+    --amber-dark: #412402;
+    --green: #639922;
+    --teal: #1D9E75;
+    --blue: #378ADD;
+    --coral: #D85A30;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* Grid overlay background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(239,159,39,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(239,159,39,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; padding: 2rem 1.25rem; }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: var(--bg2);
+    border: 0.5px solid var(--border2);
+    border-top: 2px solid var(--accent);
+    border-radius: var(--radius);
+    margin-bottom: 1.5rem;
+  }
+  .header-icon {
+    width: 72px; height: 72px;
+    background: rgba(239,159,39,0.08);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .header-icon img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; cursor: pointer; }
+  .header-icon i { font-size: 22px; color: var(--accent); position: absolute; }
+  .header-icon .fallback-icon { opacity: 0.85; }
+  .header-title { font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+  .header-sub { font-size: 13px; color: var(--muted); }
+  .header-badges { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+  .hbadge {
+    font-size: 11px; padding: 2px 9px;
+    border-radius: 20px;
+    background: rgba(239,159,39,0.1);
+    color: var(--accent);
+    border: 0.5px solid rgba(239,159,39,0.25);
+  }
+
+  /* Nav */
+  .nav-wrap {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px;
+    margin-bottom: 1.25rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  .nav-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 12px; padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    border: 0.5px solid transparent;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .nav-btn i { font-size: 13px; }
+  .nav-btn:hover { background: var(--bg3); color: var(--text); border-color: var(--border); }
+  .nav-btn.active {
+    background: rgba(239,159,39,0.12);
+    color: var(--accent);
+    border-color: rgba(239,159,39,0.3);
+    font-weight: 500;
+  }
+
+  /* Section */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* Card */
+  .card {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .card-label {
+    font-size: 10px; font-weight: 600;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
+  }
+  .card-title {
+    font-size: 15px; font-weight: 600;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+
+  /* Content box */
+  .content-box {
+    background: var(--bg3);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 1rem 1.1rem;
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--text);
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: 'Consolas', 'Monaco', monospace;
+  }
+  .copy-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    margin-top: 10px;
+    font-size: 12px; padding: 6px 14px;
+    border-radius: var(--radius-sm);
+    border: 0.5px solid var(--border2);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .copy-btn:hover { background: var(--bg3); color: var(--text); border-color: var(--border2); }
+  .copy-btn.copied { color: #639922; border-color: #639922; }
+
+  /* Badges */
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; padding: 3px 9px;
+    border-radius: 20px; font-weight: 500; margin: 3px;
+  }
+  .badge i { font-size: 11px; }
+  .badge-amber { background: rgba(239,159,39,0.12); color: var(--accent); border: 0.5px solid rgba(239,159,39,0.25); }
+  .badge-teal { background: rgba(29,158,117,0.1); color: #1D9E75; border: 0.5px solid rgba(29,158,117,0.25); }
+  .badge-blue { background: rgba(55,138,221,0.1); color: var(--blue); border: 0.5px solid rgba(55,138,221,0.25); }
+  .badge-green { background: rgba(99,153,34,0.1); color: var(--green); border: 0.5px solid rgba(99,153,34,0.25); }
+  .badge-coral { background: rgba(216,90,48,0.1); color: var(--coral); border: 0.5px solid rgba(216,90,48,0.25); }
+
+  /* Strength rows */
+  .strength-row {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 12px 0;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .strength-row:last-child { border-bottom: none; }
+  .strength-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: rgba(239,159,39,0.1);
+    border: 0.5px solid rgba(239,159,39,0.2);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .strength-icon i { font-size: 16px; color: var(--accent); }
+  .strength-text h4 { font-size: 13.5px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+  .strength-text p { font-size: 12.5px; color: var(--muted); line-height: 1.55; }
+
+  /* Job titles grid */
+  .jobtitle-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+  .jt-card {
+    background: var(--bg3);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    transition: border-color 0.15s;
+  }
+  .jt-card:hover { border-color: rgba(239,159,39,0.3); }
+  .jt-num { font-size: 10px; font-weight: 600; color: var(--accent); margin-bottom: 2px; letter-spacing: 0.05em; }
+  .jt-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+  .jt-sub { font-size: 11px; color: var(--muted); line-height: 1.4; }
+
+  /* Skill gap */
+  .gap-section { margin-bottom: 1.5rem; }
+  .gap-section h4 {
+    font-size: 11px; font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .skill-row { padding: 8px 0; border-bottom: 0.5px solid var(--border); }
+  .skill-row:last-child { border-bottom: none; }
+  .skill-name { font-size: 13px; color: var(--text); margin-bottom: 4px; display: flex; justify-content: space-between; }
+  .skill-name span { font-size: 11px; color: var(--muted); }
+  .bar-wrap { background: var(--bg3); border-radius: 3px; height: 4px; }
+  .bar-fill { height: 4px; border-radius: 3px; background: var(--accent); }
+
+  /* Roadmap */
+  .roadmap-step { display: flex; gap: 10px; padding: 8px 0; }
+  .r-num {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: rgba(239,159,39,0.15);
+    border: 0.5px solid rgba(239,159,39,0.3);
+    color: var(--accent);
+    font-size: 11px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+  }
+  .r-text { font-size: 13px; color: var(--text); line-height: 1.55; }
+
+  /* Brand blocks */
+  .brand-block {
+    border-left: 3px solid var(--accent);
+    padding: 10px 14px;
+    background: var(--bg3);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    margin-bottom: 14px;
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: var(--text);
+  }
+  .brand-label { font-size: 10px; font-weight: 600; color: var(--accent2); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 5px; margin-top: 14px; }
+  .brand-label:first-child { margin-top: 0; }
+
+  /* Interview points */
+  .interview-point { padding: 12px 0; border-bottom: 0.5px solid var(--border); }
+  .interview-point:last-child { border-bottom: none; }
+  .interview-point h4 { font-size: 13.5px; font-weight: 600; color: var(--text); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+  .interview-point h4::before {
+    content: '';
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+  .interview-point p { font-size: 12.5px; color: var(--muted); line-height: 1.6; padding-left: 12px; }
+
+  /* 30s intro special */
+  .intro-card {
+    background: var(--bg3);
+    border: 0.5px solid rgba(239,159,39,0.2);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    font-size: 15px;
+    line-height: 1.9;
+    color: var(--text);
+    font-style: italic;
+    position: relative;
+  }
+  .intro-card::before {
+    content: '"';
+    position: absolute;
+    top: -10px; left: 16px;
+    font-size: 60px;
+    color: var(--accent);
+    opacity: 0.25;
+    font-style: normal;
+    line-height: 1;
+  }
+
+  /* Footer */
+  .footer {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 0.5px solid var(--border);
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+  @media (max-width: 600px) {
+    .app { padding: 1rem 0.75rem; }
+    .jobtitle-grid { grid-template-columns: 1fr 1fr; }
+    .header { flex-direction: column; gap: 0.75rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- Header -->
+  <div class="header">
+    <div>
+      <div class="header-title">Kartikey Patel — Job Search & Branding Toolkit</div>
+      <div class="header-sub">B.Tech Information Technology · ABES Engineering College · Class of 2027 · CGPA 8.46</div>
+      <div class="header-badges">
+        <span class="hbadge">MERN Stack</span>
+        <span class="hbadge">AWS Certified</span>
+        <span class="hbadge">Oracle Gen AI Pro</span>
+        <span class="hbadge">260+ LeetCode</span>
+        <span class="hbadge">Open to Internships</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nav -->
+  <div class="nav-wrap" id="nav"></div>
+
+  <!-- Sections -->
+  <div id="sections"></div>
+
+  <!-- Edit / Download controls -->
+  <div style="max-width:860px;margin:0 auto 1rem;padding:0 1.25rem;display:flex;gap:8px;justify-content:flex-end;">
+    <button id="toggleEdit" class="copy-btn">Edit</button>
+    <button id="saveBtn" class="copy-btn" style="display:none">Save</button>
+    <button id="downloadPdf" class="copy-btn">Download PDF</button>
+  </div>
+  <div class="footer">Kartikey Patel · kp0543985@gmail.com · +91 7398892403 · github.com/kartikeypatel1</div>
+</div>
+
+<script>
+const SECTIONS = [
+  { id: "s1",  label: "Cover Letter",       icon: "ti-file-text" },
+  { id: "s2",  label: "Recruiter Email",    icon: "ti-mail" },
+  { id: "s3",  label: "Hiring Mgr Email",   icon: "ti-send" },
+  { id: "s4",  label: "LinkedIn Note",      icon: "ti-brand-linkedin" },
+  { id: "s5",  label: "Referral Request",   icon: "ti-users" },
+  { id: "s6",  label: "Follow-Up Email",    icon: "ti-clock" },
+  { id: "s7",  label: "30-Sec Intro",       icon: "ti-microphone" },
+  { id: "s8",  label: "Job Titles",         icon: "ti-list-numbers" },
+  { id: "s9",  label: "Key Strengths",      icon: "ti-star" },
+  { id: "s10", label: "Skill Gap",          icon: "ti-chart-bar" },
+  { id: "s11", label: "Personal Brand",     icon: "ti-award" },
+  { id: "s12", label: "Interview Points",   icon: "ti-message-circle" }
+];
+
+const COPY_CONTENT = {
+  s1: `[Your Name]
+Ghaziabad, Uttar Pradesh | 7398892403 | kp0543985@gmail.com
+
+[Date]
+
+Hiring Manager
+[Company Name]
+[City, State]
+
+Dear Hiring Manager,
+
+I am writing to express my strong interest in the [Role Name] position at [Company Name]. As a third-year B.Tech Information Technology student at ABES Engineering College (CGPA: 8.46), I bring hands-on full-stack development experience, a track record of shipping production-ready applications, and a demonstrated ability to learn and apply new technologies rapidly.
+
+My most significant project, StoryStudio, is an AI-powered storytelling platform built with React, Node.js, MongoDB, ExpressJS, and TailwindCSS. The platform enables context-aware multi-scene narrative generation, integrating Cohere for AI text and Leonardo AI for image generation — deployed live on Vercel and Railway. This project required me to architect a full backend API, manage AI API integrations, and design an animated, responsive frontend entirely on my own.
+
+In addition to StoryStudio, I developed CalcPro (a feature-rich calculator web app in React/Tailwind) and a pixel-precise Razorpay landing page clone — demonstrating both functional product thinking and UI craftsmanship. During my IBM MOOC Web Development internship, I independently built a Bookstore Web Application with full CRUD operations and cart functionality, delivering a complete product in a virtual, self-managed environment.
+
+Beyond engineering, I have earned certifications in AWS Cloud Architecting, Oracle Cloud Infrastructure Generative AI, and IBM Enterprise Design Thinking — giving me a foundation that bridges technical execution with product and cloud-aware thinking. As a STEM Camp Instructor, I taught basic electronics to 50+ underprivileged students, developing communication skills I bring to team environments.
+
+I am proficient in C++, JavaScript, Python, and SQL, and experienced with React, Node.js, Express, MongoDB, Redux, TailwindCSS, Git, Postman, Figma, Vercel, and Netlify. I solve 260+ LeetCode problems and hold a 2-star rating on CodeChef, reflecting consistent algorithmic practice.
+
+I am eager to contribute to [Company Name]'s engineering goals, bring full-stack ownership to real problems, and grow through challenges that push beyond the classroom. I would welcome the opportunity to discuss how my skills align with your team's needs.
+
+Thank you for your time and consideration.
+
+Sincerely,
+Kartikey Patel
+GitHub: kartikeypatel1 | LinkedIn: Kartikey Patel`,
+
+  s2: `Subject: Full-Stack Developer Intern — B.Tech IT, ABES Engineering College (2027)
+
+Hi [Recruiter Name],
+
+I came across [Company Name] while researching [specific reason] and wanted to reach out directly.
+
+I'm a third-year B.Tech IT student at ABES Engineering College (CGPA: 8.46) with hands-on experience building full-stack web applications. My flagship project, StoryStudio, is a live AI storytelling platform built with the MERN stack + TailwindCSS, integrating Cohere and Leonardo AI APIs — deployed end-to-end on Vercel and Railway.
+
+Quick snapshot of what I bring:
+• Full-stack: React, Node.js, MongoDB, Express, TailwindCSS
+• Cloud & Tools: AWS (Cloud Architecting certified), Vercel, Netlify, Git, Postman
+• Competitive Programming: 260+ LeetCode | CodeChef 2-star
+• Certifications: Oracle Generative AI Professional, IBM Design Thinking
+
+I'm actively looking for a summer internship where I can contribute to a real engineering team while continuing to grow. Would love to know if [Company Name] has openings that fit this profile.
+
+Portfolio & GitHub: github.com/kartikeypatel1
+Resume attached.
+
+Thank you for your time.
+
+Best regards,
+Kartikey Patel
++91 7398892403 | kp0543985@gmail.com`,
+
+  s3: `Subject: Internship Application — Full-Stack Developer | MERN Stack + AI Integration Experience
+
+Hi [Hiring Manager Name],
+
+I'm Kartikey Patel, a third-year B.Tech Information Technology student at ABES Engineering College (CGPA: 8.46), writing to express my interest in joining your engineering team as a development intern.
+
+I don't just study web development — I build with it. My project StoryStudio is a production-deployed AI storytelling platform (React + Node.js + MongoDB + Cohere + Leonardo AI) that handles multi-scene story generation with AI-generated illustrations. I architected it solo: from API design to deployment on Vercel and Railway.
+
+What makes me a strong fit:
+• I take full ownership — all three of my key projects were designed, built, and deployed by me independently
+• I work across the full stack — frontend (React, TailwindCSS), backend (Node.js, Express), and data (MongoDB, SQL)
+• I understand cloud infrastructure — AWS Cloud Architecting certified, with hands-on Vercel/Netlify deployment experience
+• I have strong fundamentals — 260+ LeetCode problems and consistent competitive programming practice
+
+During my IBM MOOC internship, I independently delivered a full-featured Bookstore Web Application with CRUD and cart functionality in a virtual environment.
+
+I would love a 15-minute conversation to learn more about what your team is building and how I can contribute. Is there a good time this week or next?
+
+GitHub: github.com/kartikeypatel1
+
+Warm regards,
+Kartikey Patel
++91 7398892403 | kp0543985@gmail.com`,
+
+  s4: `Hi [Name], I'm a MERN stack developer (B.Tech IT, 2027) who built a live AI storytelling platform. I admire [Company/work] and would love to connect, learn from your journey, and explore opportunities. Thanks!`,
+
+  s5: `Hi [Name],
+
+Hope you're doing well! I came across your profile while exploring [Company Name] and noticed you work there as a [Role].
+
+I'm Kartikey Patel, a B.Tech IT student (ABES Engineering College, CGPA: 8.46, 2027) with full-stack development experience — React, Node.js, MongoDB, Express, TailwindCSS. I've built and deployed a live AI-powered platform (StoryStudio) and hold certifications in AWS and Oracle Generative AI.
+
+I saw that [Company Name] is hiring for [Role]. I've attached my resume and would genuinely appreciate it if you could refer me or point me to the right person on the team. I'm committed to doing my absolute best if given the opportunity.
+
+I completely understand if it's not possible — even a quick word of advice on how to apply effectively would mean a lot.
+
+Thank you so much for your time.
+
+Best,
+Kartikey Patel
+GitHub: github.com/kartikeypatel1 | +91 7398892403`,
+
+  s6: `Subject: Following Up — [Original Subject Line]
+
+Hi [Name],
+
+I wanted to follow up on my email from [date], regarding the [Role/Internship] at [Company Name].
+
+I remain very interested in the opportunity and believe my background in full-stack development — particularly my MERN stack experience, live deployed projects, and AWS and Oracle AI certifications — aligns well with what your team is building.
+
+If you have had a chance to review my profile, I'd love to hear your thoughts. If this isn't the right fit right now, I'd genuinely appreciate any guidance you might offer.
+
+Happy to share my GitHub (github.com/kartikeypatel1) or portfolio project links if it helps.
+
+Thank you again for your time.
+
+Best regards,
+Kartikey Patel
++91 7398892403 | kp0543985@gmail.com`,
+
+  s7: `"Hi, I'm Kartikey Patel — a full-stack web developer and third-year B.Tech IT student at ABES Engineering College in Ghaziabad, graduating in 2027 with an 8.46 CGPA.
+
+I build end-to-end web applications — my flagship project is StoryStudio, a live AI storytelling platform I built solo using React, Node.js, MongoDB, and integrated AI APIs from Cohere and Leonardo. It's deployed and live today.
+
+Beyond projects, I'm AWS Cloud Architecting certified, an Oracle Generative AI Professional, and I've solved 260+ problems on LeetCode. I also did a web development internship with IBM MOOC where I shipped a full Bookstore application independently.
+
+I'm actively looking for a software engineering or full-stack development internship where I can contribute to a real team and grow fast. I'd love to tell you more about what I've built and what I'm working on next."`
+};
+
+const JOB_TITLES = [
+  { num: "01", title: "Full-Stack Developer Intern",      sub: "React + Node.js + MongoDB — your core stack" },
+  { num: "02", title: "MERN Stack Developer Intern",      sub: "Exact tech match to your project portfolio" },
+  { num: "03", title: "Frontend Developer Intern",        sub: "React, TailwindCSS, Redux — strong fit" },
+  { num: "04", title: "Backend Developer Intern",         sub: "Node.js, Express, MongoDB, REST APIs" },
+  { num: "05", title: "Software Engineering Intern",      sub: "Broad SWE role at product companies" },
+  { num: "06", title: "Web Developer Intern",             sub: "Agencies, startups, product companies" },
+  { num: "07", title: "AI-Integrated App Developer",      sub: "Cohere, Leonardo AI experience stands out" },
+  { num: "08", title: "Cloud Application Intern",         sub: "AWS certification + Vercel/Netlify deployment" },
+  { num: "09", title: "Junior React Developer",           sub: "React + Redux proficiency, live projects" },
+  { num: "10", title: "NOC / Platform Intern",            sub: "Nagravision-style roles; CS fundamentals apply" }
+];
+
+const STRENGTHS = [
+  { icon: "ti-rocket",       title: "Solo end-to-end project ownership",      desc: "Built, integrated, and deployed StoryStudio entirely alone — frontend, backend, AI APIs, and cloud hosting." },
+  { icon: "ti-code",         title: "Production-deployed MERN stack apps",    desc: "Not just side projects — StoryStudio is live on Vercel + Railway, demonstrating real deployment experience." },
+  { icon: "ti-certificate",  title: "Multi-cloud & AI certifications",        desc: "AWS Cloud Architecting, Oracle Generative AI Professional — rare for a pre-final year student." },
+  { icon: "ti-brain",        title: "Strong DSA fundamentals",                desc: "260+ LeetCode problems + CodeChef 2-star shows consistent algorithmic discipline valued by product companies." },
+  { icon: "ti-users",        title: "Leadership & communication skills",      desc: "Taught STEM subjects to 50+ underprivileged students as Camp Instructor — signals maturity beyond coding." },
+  { icon: "ti-trending-up",  title: "Growth mindset and public learning",     desc: "Actively documents learning on LinkedIn and GitHub — signals professional seriousness and personal branding awareness." }
+];
+
+const CURRENT_SKILLS = [
+  { name: "React / Redux / TailwindCSS",      pct: 80 },
+  { name: "Node.js / Express / MongoDB",      pct: 75 },
+  { name: "C++ / DSA (LeetCode 260+)",        pct: 72 },
+  { name: "Git / Vercel / Netlify deployment",pct: 80 },
+  { name: "Python basics",                    pct: 65 },
+  { name: "AWS fundamentals (certified)",     pct: 60 }
+];
+
+const MISSING_SKILLS = [
+  { icon: "ti-database",        label: "PostgreSQL / SQL in production",     cls: "badge-blue" },
+  { icon: "ti-container",       label: "Docker & Kubernetes basics",         cls: "badge-amber" },
+  { icon: "ti-brand-typescript",label: "TypeScript (critical for industry)", cls: "badge-coral" },
+  { icon: "ti-test-pipe",       label: "Unit testing (Jest / Vitest)",       cls: "badge-teal" },
+  { icon: "ti-cloud",           label: "CI/CD pipelines (GitHub Actions)",   cls: "badge-green" },
+  { icon: "ti-chart-dots",      label: "System Design fundamentals",         cls: "badge-blue" },
+  { icon: "ti-key",             label: "REST + GraphQL API best practices",  cls: "badge-amber" }
+];
+
+const ROADMAP = [
+  "Learn TypeScript — convert one of your existing React projects to TS (2–3 weeks)",
+  "Add Jest/Vitest unit tests to StoryStudio backend (1 week)",
+  "Set up a GitHub Actions CI pipeline for any project (1 week)",
+  "Complete a free Docker Fundamentals course (1 week) and containerize an app",
+  "Study System Design basics: load balancing, caching, databases — use Grokking System Design",
+  "Build one project with PostgreSQL instead of MongoDB to diversify DB experience",
+  "Learn GraphQL — add a GraphQL API layer to an existing Express project"
+];
+
+const INTERVIEW_POINTS = [
+  {
+    title: "StoryStudio — the full ownership story",
+    desc: "Walk through your architecture decisions: why MERN, how you integrated Cohere + Leonardo AI, how you handled async AI API calls, and what you'd improve (TypeScript, testing). This is your #1 talking point — it shows real system thinking."
+  },
+  {
+    title: "IBM MOOC internship — CRUD app delivery",
+    desc: "Emphasize that you managed a full development cycle (requirements → build → test → deploy) in a self-directed virtual environment. Recruiters at MNCs care about self-management as much as coding skill."
+  },
+  {
+    title: "Teaching 50+ students — the soft skills story",
+    desc: "Use this when asked about communication, teamwork, or leadership. Breaking down electronics for underprivileged students is a genuine story about empathy, clarity, and influence — not a checkbox."
+  },
+  {
+    title: "LeetCode 260+ — your problem-solving approach",
+    desc: "Don't just cite the number. Be ready to discuss a specific challenging problem, how you approached it, and what pattern you extracted. Preferred: dynamic programming or graph problems."
+  },
+  {
+    title: "AWS + Oracle AI certifications — your why",
+    desc: "Recruiters may ask why you pursued certifications as a student. Answer: you wanted to understand cloud infrastructure and AI services at a production level, not just theoretically — so you could build real things with them."
+  },
+  {
+    title: "Areas likely to be probed",
+    desc: "Why no internship at a product company yet? (Answer: focused on projects + certifications, actively seeking now.) Do you know system design? (Answer: familiar with basics, actively studying.) What's next for StoryStudio? (Show roadmap thinking.)"
+  }
+];
+
+const nav = document.getElementById("nav");
+const sectionsEl = document.getElementById("sections");
+
+function makeCopyBtn(text) {
+  const btn = document.createElement("button");
+  btn.className = "copy-btn";
+  btn.innerHTML = `<i class="ti ti-copy"></i> Copy to clipboard`;
+  btn.addEventListener("click", () => {
+    navigator.clipboard.writeText(text).then(() => {
+      btn.innerHTML = `<i class="ti ti-check"></i> Copied!`;
+      btn.classList.add("copied");
+      setTimeout(() => {
+        btn.innerHTML = `<i class="ti ti-copy"></i> Copy to clipboard`;
+        btn.classList.remove("copied");
+      }, 2000);
+    });
+  });
+  return btn;
+}
+
+function buildSection(s, i) {
+  const div = document.createElement("div");
+  div.id = s.id;
+  div.className = "section" + (i === 0 ? " active" : "");
+
+  const card = document.createElement("div");
+  card.className = "card";
+
+  const lbl = document.createElement("div");
+  lbl.className = "card-label";
+  lbl.textContent = "Section " + (i + 1);
+  card.appendChild(lbl);
+
+  const title = document.createElement("div");
+  title.className = "card-title";
+  title.innerHTML = `<i class="ti ${s.icon}" style="font-size:15px;margin-right:6px;color:var(--accent);vertical-align:-2px;"></i>${s.label}`;
+  card.appendChild(title);
+
+  if (COPY_CONTENT[s.id]) {
+    if (s.id === "s7") {
+      const box = document.createElement("div");
+      box.className = "intro-card";
+      box.textContent = COPY_CONTENT[s.id];
+      card.appendChild(box);
+    } else {
+      const box = document.createElement("div");
+      box.className = "content-box";
+      box.textContent = COPY_CONTENT[s.id];
+      card.appendChild(box);
+    }
+    card.appendChild(makeCopyBtn(COPY_CONTENT[s.id]));
+  }
+  else if (s.id === "s8") {
+    const grid = document.createElement("div");
+    grid.className = "jobtitle-grid";
+    JOB_TITLES.forEach(j => {
+      const jc = document.createElement("div");
+      jc.className = "jt-card";
+      jc.innerHTML = `<div class="jt-num">${j.num}</div><div class="jt-title">${j.title}</div><div class="jt-sub">${j.sub}</div>`;
+      grid.appendChild(jc);
+    });
+    card.appendChild(grid);
+  }
+  else if (s.id === "s9") {
+    STRENGTHS.forEach(st => {
+      const row = document.createElement("div");
+      row.className = "strength-row";
+      row.innerHTML = `<div class="strength-icon"><i class="ti ${st.icon}"></i></div><div class="strength-text"><h4>${st.title}</h4><p>${st.desc}</p></div>`;
+      card.appendChild(row);
+    });
+  }
+  else if (s.id === "s10") {
+    // Current skills
+    const g1 = document.createElement("div");
+    g1.className = "gap-section";
+    g1.innerHTML = `<h4>Current Strengths</h4>`;
+    CURRENT_SKILLS.forEach(sk => {
+      const row = document.createElement("div");
+      row.className = "skill-row";
+      row.innerHTML = `<div class="skill-name">${sk.name}<span>${sk.pct}%</span></div><div class="bar-wrap"><div class="bar-fill" style="width:${sk.pct}%"></div></div>`;
+      g1.appendChild(row);
+    });
+    card.appendChild(g1);
+
+    // Missing
+    const g2 = document.createElement("div");
+    g2.className = "gap-section";
+    g2.innerHTML = `<h4>Missing / Underdeveloped Skills</h4>`;
+    const bw = document.createElement("div");
+    bw.style.cssText = "display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;";
+    MISSING_SKILLS.forEach(ms => {
+      const b = document.createElement("span");
+      b.className = "badge " + ms.cls;
+      b.innerHTML = `<i class="ti ${ms.icon}"></i>${ms.label}`;
+      bw.appendChild(b);
+    });
+    g2.appendChild(bw);
+    card.appendChild(g2);
+
+    // Roadmap
+    const g3 = document.createElement("div");
+    g3.className = "gap-section";
+    g3.innerHTML = `<h4>Recommended Learning Roadmap</h4>`;
+    ROADMAP.forEach((step, i) => {
+      const rs = document.createElement("div");
+      rs.className = "roadmap-step";
+      rs.innerHTML = `<div class="r-num">${i + 1}</div><div class="r-text">${step}</div>`;
+      g3.appendChild(rs);
+    });
+    card.appendChild(g3);
+  }
+  else if (s.id === "s11") {
+    const items = [
+      {
+        label: "Unique Value Proposition",
+        text: "I am a pre-final year developer who builds production-grade, deployed applications — not just academic exercises. I combine strong full-stack ownership (MERN), applied AI integration, cloud certification, and algorithmic fundamentals into a single, demonstrable package that most 3rd-year candidates simply don't have."
+      },
+      {
+        label: "Professional Positioning Statement",
+        text: "Full-stack web developer and B.Tech IT student with hands-on MERN stack experience, a live AI-powered application in production, and certifications in AWS and Oracle Generative AI — seeking an engineering internship where I can deliver real impact, not just run test cases."
+      },
+      {
+        label: "Recruiter Headline (use on LinkedIn)",
+        text: "Full-Stack Developer (React · Node.js · MongoDB) | AI App Builder | AWS Certified | 260+ LeetCode | B.Tech IT @ ABES '27 | Open to Internships"
+      }
+    ];
+
+    items.forEach(item => {
+      const lbl2 = document.createElement("div");
+      lbl2.className = "brand-label";
+      lbl2.textContent = item.label;
+      const bb = document.createElement("div");
+      bb.className = "brand-block";
+      bb.textContent = item.text;
+      card.appendChild(lbl2);
+      card.appendChild(bb);
+    });
+
+    card.appendChild(makeCopyBtn(items.map(i => `${i.label}:\n${i.text}`).join("\n\n")));
+  }
+  else if (s.id === "s12") {
+    INTERVIEW_POINTS.forEach(pt => {
+      const row = document.createElement("div");
+      row.className = "interview-point";
+      row.innerHTML = `<h4>${pt.title}</h4><p>${pt.desc}</p>`;
+      card.appendChild(row);
+    });
+  }
+
+  div.appendChild(card);
+  return div;
+}
+
+SECTIONS.forEach((s, i) => {
+  // Nav button
+  const btn = document.createElement("button");
+  btn.className = "nav-btn" + (i === 0 ? " active" : "");
+  btn.innerHTML = `<i class="ti ${s.icon}"></i>${s.label}`;
+  btn.addEventListener("click", () => {
+    nav.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    sectionsEl.querySelectorAll(".section").forEach(el => el.classList.remove("active"));
+    document.getElementById(s.id).classList.add("active");
+    document.getElementById(s.id).scrollIntoView({ behavior: "smooth", block: "nearest" });
+  });
+  nav.appendChild(btn);
+
+  // Section
+  sectionsEl.appendChild(buildSection(s, i));
+});
+</script>
+  <!-- html2pdf CDN and editor/download handlers -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+  <script>
+  const toggleEdit = document.getElementById('toggleEdit');
+  const saveBtn = document.getElementById('saveBtn');
+  const downloadBtn = document.getElementById('downloadPdf');
+  let editing = false;
+  };
+  
+  // Profile picture upload + persistence
+  (function(){
+    const profileImg = document.getElementById('profilePic');
+    if (!profileImg) return;
+
+    // load from localStorage if present
+    const saved = localStorage.getItem('profilePicData');
+    if (saved) profileImg.src = saved;
+
+    // hidden file input
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.style.display = 'none';
+    document.body.appendChild(fileInput);
+
+    profileImg.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', (e) => {
+      const f = e.target.files && e.target.files[0];
+      if (!f) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        profileImg.src = reader.result;
+        try { localStorage.setItem('profilePicData', reader.result); } catch(e) { console.warn('Could not save image to localStorage', e); }
+      };
+      reader.readAsDataURL(f);
+    });
+  })();
+  </script>
+  function setEditable(sectionEl, val) {
+    sectionEl.querySelectorAll('.content-box, .intro-card, .brand-block').forEach(el => {
+      el.contentEditable = val;
+      if (val) el.style.outline = '2px dashed rgba(239,159,39,0.18)';
+      else el.style.outline = 'none';
+    });
+  }
+
+  toggleEdit.addEventListener('click', () => {
+    editing = !editing;
+    toggleEdit.textContent = editing ? 'Cancel' : 'Edit';
+    saveBtn.style.display = editing ? 'inline-flex' : 'none';
+    // make only the active section editable
+    document.querySelectorAll('.section').forEach(sec => setEditable(sec, false));
+    const active = document.querySelector('.section.active');
+    if (active) setEditable(active, editing);
+  });
+
+  saveBtn.addEventListener('click', () => {
+    // Persist changes to in-memory COPY_CONTENT object
+    const active = document.querySelector('.section.active');
+    if (!active) return;
+    const id = active.id;
+    const editedEl = active.querySelector('.content-box, .intro-card, .brand-block');
+    if (editedEl) {
+      COPY_CONTENT[id] = editedEl.innerText.trim();
+      // revert editable state
+      setEditable(active, false);
+      editing = false;
+      toggleEdit.textContent = 'Edit';
+      saveBtn.style.display = 'none';
+    }
+  });
+
+  downloadBtn.addEventListener('click', () => {
+    // generate PDF of the visible app area
+    const opt = {
+      margin:       0.4,
+      filename:     'profile.pdf',
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+    };
+    const el = document.querySelector('.app');
+    if (el) html2pdf().set(opt).from(el).save();
+  });
+  </script>
+</body>
+</html>
