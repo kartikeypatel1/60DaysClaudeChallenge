@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stock Fundamental Analysis Poster</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0d0d;
+    --bg2: #141414;
+    --bg3: #1a1a1a;
+    --bg4: #222;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #f0f0f0;
+    --muted: #888;
+    --muted2: #666;
+    --amber: #f59e0b;
+    --amber2: #d97706;
+    --green: #22c55e;
+    --red: #ef4444;
+    --blue: #3b82f6;
+    --teal: #14b8a6;
+    --purple: #a78bfa;
+    --font: 'Inter', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* Setup screen */
+  #setup {
+    max-width: 640px;
+    margin: 60px auto;
+    padding: 2rem;
+  }
+  .setup-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 2rem; }
+  .setup-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--amber); }
+  .setup-title { font-size: 22px; font-weight: 600; color: var(--text); }
+  .setup-sub { font-size: 13px; color: var(--muted); margin-bottom: 2.5rem; }
+  .form-group { margin-bottom: 1.25rem; }
+  .form-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; display: block; }
+  .form-input {
+    width: 100%; background: var(--bg3); border: 1px solid var(--border2);
+    border-radius: 8px; color: var(--text); font-family: var(--font);
+    font-size: 14px; padding: 10px 14px; outline: none; transition: border-color 0.2s;
+  }
+  .form-input:focus { border-color: var(--amber); }
+  .mode-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+  .mode-pill {
+    padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer;
+    border: 1px solid var(--border2); background: transparent; color: var(--muted);
+    transition: all 0.2s; font-family: var(--font);
+  }
+  .mode-pill.active { background: var(--amber); color: #000; border-color: var(--amber); font-weight: 600; }
+  .run-btn {
+    width: 100%; margin-top: 1.5rem; padding: 13px;
+    background: var(--amber); color: #000; border: none; border-radius: 8px;
+    font-size: 15px; font-weight: 600; cursor: pointer; font-family: var(--font);
+    transition: opacity 0.2s;
+  }
+  .run-btn:hover { opacity: 0.88; }
+  .run-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .compare-field { display: none; }
+  .error { color: var(--red); font-size: 12px; margin-top: 8px; }
+
+  /* Loading */
+  #loading {
+    display: none; text-align: center; padding: 80px 20px;
+  }
+  .spinner {
+    width: 36px; height: 36px; border: 3px solid var(--border2);
+    border-top-color: var(--amber); border-radius: 50%;
+    animation: spin 0.8s linear infinite; margin: 0 auto 1rem;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { color: var(--muted); font-size: 14px; }
+  .loading-steps { margin-top: 1.5rem; display: flex; flex-direction: column; gap: 6px; align-items: center; }
+  .lstep { font-size: 12px; color: var(--muted2); }
+  .lstep.active { color: var(--amber); }
+
+  /* Poster */
+  #poster { display: none; padding: 16px; }
+
+  .poster-header {
+    display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px 20px; margin-bottom: 12px; gap: 16px;
+  }
+  .company-badge { display: flex; align-items: center; gap: 10px; }
+  .company-logo {
+    width: 44px; height: 44px; border-radius: 8px; display: flex;
+    align-items: center; justify-content: center; font-weight: 700; font-size: 13px;
+  }
+  .logo-tcs { background: #1a3a6e; color: #fff; }
+  .logo-infy { background: #004d99; color: #fff; }
+  .logo-reliance { background: #1a1a2e; color: var(--amber); }
+  .logo-generic { background: var(--bg4); color: var(--amber); }
+  .company-name { font-size: 16px; font-weight: 600; color: var(--text); }
+  .company-meta { font-size: 11px; color: var(--muted); }
+  .vs-badge {
+    text-align: center; font-size: 28px; font-weight: 700; padding: 0 20px;
+  }
+  .vs-sub { font-size: 10px; color: var(--muted); text-align: center; margin-top: 2px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .header-right { text-align: right; }
+
+  /* Section grid */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .panel {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px;
+  }
+  .panel-title {
+    font-size: 10px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--amber); margin-bottom: 10px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .panel-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* Metric rows */
+  .metric-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .metric-row:last-child { border-bottom: none; }
+  .metric-key { color: var(--muted); font-size: 12px; }
+  .metric-val { font-size: 12px; font-weight: 500; }
+  .green { color: var(--green); }
+  .red { color: var(--red); }
+  .amber { color: var(--amber); }
+  .blue { color: var(--blue); }
+  .muted { color: var(--muted); }
+
+  /* KPI strip */
+  .kpi-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 10px; }
+  .kpi-card {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .kpi-label { font-size: 10px; color: var(--muted); margin-bottom: 4px; }
+  .kpi-value { font-size: 20px; font-weight: 700; color: var(--text); font-family: var(--mono); }
+  .kpi-sub { font-size: 10px; color: var(--muted2); margin-top: 2px; }
+  .kpi-change { font-size: 11px; font-weight: 500; }
+
+  /* Chart */
+  .chart-wrap { position: relative; height: 160px; }
+
+  /* Badge pill */
+  .badge {
+    display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 8px;
+    border-radius: 4px; text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .badge-green { background: rgba(34,197,94,0.15); color: var(--green); }
+  .badge-red { background: rgba(239,68,68,0.15); color: var(--red); }
+  .badge-amber { background: rgba(245,158,11,0.15); color: var(--amber); }
+  .badge-blue { background: rgba(59,130,246,0.15); color: var(--blue); }
+  .badge-muted { background: var(--bg4); color: var(--muted); }
+
+  /* Bullet list */
+  .bullet-list { list-style: none; }
+  .bullet-list li { padding: 4px 0; font-size: 12px; color: var(--text); display: flex; gap: 8px; align-items: flex-start; }
+  .bullet-list li::before { content: '▸'; color: var(--amber); flex-shrink: 0; margin-top: 1px; }
+  .bullet-list.red li::before { color: var(--red); content: '▾'; }
+  .bullet-list.green li::before { color: var(--green); content: '▸'; }
+
+  /* Comparison table */
+  .comp-table { width: 100%; border-collapse: collapse; }
+  .comp-table th { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; padding: 6px 8px; text-align: left; border-bottom: 1px solid var(--border2); }
+  .comp-table td { padding: 6px 8px; font-size: 12px; border-bottom: 1px solid var(--border); }
+  .comp-table tr:last-child td { border-bottom: none; }
+  .comp-table .metric-col { color: var(--muted); }
+  .comp-table .highlight { font-weight: 600; }
+
+  /* Quick take center */
+  .qt-center {
+    background: var(--bg3); border: 1px solid var(--border2); border-radius: 10px;
+    padding: 14px; margin-bottom: 10px;
+  }
+  .qt-title { font-size: 11px; color: var(--amber); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+  .qt-row { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .qt-row:last-child { border-bottom: none; }
+  .qt-icon { width: 20px; flex-shrink: 0; text-align: center; }
+  .qt-label { color: var(--muted); width: 120px; flex-shrink: 0; }
+  .qt-desc { color: var(--text); flex: 1; line-height: 1.5; }
+
+  /* Disclaimer */
+  .disclaimer {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 14px; margin-top: 12px; font-size: 10px; color: var(--muted2);
+    line-height: 1.6; text-align: center;
+  }
+
+  /* Reset btn */
+  .reset-btn {
+    position: fixed; top: 16px; right: 16px; z-index: 100;
+    background: var(--bg3); border: 1px solid var(--border2); color: var(--muted);
+    padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 12px;
+    font-family: var(--font); transition: all 0.2s;
+  }
+  .reset-btn:hover { color: var(--text); border-color: var(--amber); }
+
+  /* Deep single stock */
+  .full-width { grid-column: 1 / -1; }
+
+  /* Ownership donut placeholder */
+  .donut-wrap { position: relative; height: 120px; }
+
+  /* Health indicators */
+  .health-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .health-row:last-child { border-bottom: none; }
+  .health-label { font-size: 12px; color: var(--muted); }
+  .health-val { font-size: 12px; font-weight: 500; }
+  .health-badge { font-size: 10px; }
+
+  /* Sector tag */
+  .sector-tag {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 10px; background: var(--bg4); color: var(--muted);
+    margin: 2px 3px 2px 0;
+  }
+
+  /* Strengths / risks grid */
+  .insight-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .insight-card { background: var(--bg3); border-radius: 8px; padding: 10px 12px; }
+  .insight-head { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .insight-head.pos { color: var(--green); }
+  .insight-head.neg { color: var(--red); }
+
+  .divider-line { height: 1px; background: var(--border); margin: 10px 0; }
+
+  /* watermark */
+  .watermark { text-align: center; font-size: 10px; color: var(--muted2); margin-top: 8px; letter-spacing: 0.06em; }
+
+  /* Peer table */
+  .peer-verdict { font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 3px; }
+  .pv-cheap { background: rgba(34,197,94,0.15); color: var(--green); }
+  .pv-fair { background: rgba(245,158,11,0.15); color: var(--amber); }
+  .pv-premium { background: rgba(239,68,68,0.15); color: var(--red); }
+  .pv-avg { background: rgba(99,102,241,0.15); color: #818cf8; }
+</style>
+</head>
+<body>
+
+<!-- Setup Screen -->
+<div id="setup">
+  <div class="setup-logo">
+    <div class="setup-dot"></div>
+    <span class="setup-title">Stock Analysis Poster</span>
+  </div>
+  <p class="setup-sub">AI-powered fundamental analysis • NSE / BSE • Educational only — not investment advice</p>
+
+  <div class="form-group">
+    <label class="form-label">Stock 1 (required)</label>
+    <input class="form-input" id="s1" type="text" placeholder="e.g. TCS, Infosys, HDFC Bank, Reliance…" />
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">Analysis mode</label>
+    <div class="mode-pills">
+      <button class="mode-pill active" data-mode="compare">Compare two stocks</button>
+      <button class="mode-pill" data-mode="deep">Deep dive (single)</button>
+    </div>
+  </div>
+
+  <div class="form-group compare-field" id="compareField">
+    <label class="form-label">Stock 2 (for comparison)</label>
+    <input class="form-input" id="s2" type="text" placeholder="e.g. Wipro, HCL Tech, ICICI Bank…" />
+  </div>
+
+  <button class="run-btn" id="runBtn" onclick="startAnalysis()">Generate Analysis Poster</button>
+  <div class="error" id="errMsg"></div>
+</div>
+
+<!-- Loading Screen -->
+<div id="loading">
+  <div class="spinner"></div>
+  <p class="loading-text">Fetching live fundamentals…</p>
+  <div class="loading-steps">
+    <div class="lstep active" id="ls1">Searching Screener, Tickertape, NSE…</div>
+    <div class="lstep" id="ls2">Pulling financials & ratios…</div>
+    <div class="lstep" id="ls3">Running peer comparison…</div>
+    <div class="lstep" id="ls4">Composing research report…</div>
+  </div>
+</div>
+
+<!-- Poster Output -->
+<div id="poster"></div>
+
+<script>
+const ANTHROPIC_API_KEY = ''; // Add your Anthropic API key here for local testing
+let mode = 'compare';
+
+document.querySelectorAll('.mode-pill').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-pill').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    mode = btn.dataset.mode;
+    document.getElementById('compareField').style.display = mode === 'compare' ? 'block' : 'none';
+  });
+});
+
+function animateLoadingSteps() {
+  const steps = ['ls1','ls2','ls3','ls4'];
+  let i = 0;
+  const iv = setInterval(() => {
+    steps.forEach(s => document.getElementById(s).classList.remove('active'));
+    if (i < steps.length) { document.getElementById(steps[i]).classList.add('active'); i++; }
+    else clearInterval(iv);
+  }, 2200);
+}
+
+async function startAnalysis() {
+  const s1 = document.getElementById('s1').value.trim();
+  const s2 = document.getElementById('s2').value.trim();
+  const err = document.getElementById('errMsg');
+  err.textContent = '';
+  if (!s1) { err.textContent = 'Please enter a stock name.'; return; }
+  if (mode === 'compare' && !s2) { err.textContent = 'Please enter the second stock for comparison.'; return; }
+
+  document.getElementById('setup').style.display = 'none';
+  document.getElementById('loading').style.display = 'block';
+  animateLoadingSteps();
+
+  const prompt = mode === 'compare' ? buildComparePrompt(s1, s2) : buildDeepPrompt(s1);
+
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (ANTHROPIC_API_KEY) headers['x-api-key'] = ANTHROPIC_API_KEY;
+
+    const res = await fetch('https://api.anthropic.com/v1/chat/completions', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens_to_sample: 1000,
+        messages: [
+          { role: 'system', content: 'You are a helpful assistant.' },
+          { role: 'user', content: prompt }
+        ]
+      })
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`API request failed (${res.status}): ${errText}`);
+    }
+
+    const data = await res.json();
+    const content = data?.choices?.[0]?.message?.content;
+    if (!content) {
+      throw new Error('API response missing message content.');
+    }
+
+    const jsonMatch = content.match(/<JSONDATA>([\s\S]*?)<\/JSONDATA>/);
+    if (!jsonMatch) {
+      throw new Error('Could not parse analysis data. Response did not include <JSONDATA> block.');
+    }
+
+    let json;
+    try { json = JSON.parse(jsonMatch[1].trim()); }
+    catch(e) { throw new Error('JSON parse failed: ' + e.message); }
+
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('poster').style.display = 'block';
+    if (mode === 'compare') renderComparePoster(json);
+    else renderDeepPoster(json);
+  } catch(e) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('setup').style.display = 'block';
+    document.getElementById('errMsg').textContent = 'Error: ' + e.message;
+    console.error(e);
+  }
+}
+
+function buildComparePrompt(s1, s2) {
+  return `You are a stock fundamental research engine. Analyze ${s1} vs ${s2} using live web search. Fetch data from Screener.in, Tickertape, Moneycontrol, NSE India.
+
+Return ONLY a JSON block wrapped in <JSONDATA>...</JSONDATA> tags. No other text. The JSON must follow this exact schema:
+
+{
+  "mode": "compare",
+  "date": "Jun 2026",
+  "stock1": {
+    "name": "Full Company Name",
+    "ticker": "NSE:TICKER",
+    "sector": "Sector name",
+    "founded": "YYYY",
+    "employees": "X,XXX+",
+    "logo": "2-3 letter abbrev",
+    "cmp": "₹X,XXX",
+    "cmp_change": "-X% from 52W high",
+    "week52h": "₹X,XXX",
+    "week52l": "₹X,XXX",
+    "mcap": "₹X.XXCr",
+    "mcap_usd": "~$XXB",
+    "pe": "XXx",
+    "pe_avg5y": "~XXx",
+    "pb": "X.Xx",
+    "face_value": "₹X",
+    "dividend": "₹XX/sh",
+    "roe": "XX%",
+    "roce": "XX%",
+    "roe3y": "XX%",
+    "roce3y": "XX%",
+    "de": "X.XX",
+    "de_label": "Debt Free",
+    "interest_coverage": ">Xx",
+    "ic_label": "Healthy",
+    "current_ratio": "X.X",
+    "cr_label": "Comfortable",
+    "fcf": ">100%",
+    "fcf_label": "Strong",
+    "revenue_cagr5y": "XX%",
+    "profit_cagr5y": "XX%",
+    "ebitda_margin": "XX%",
+    "npm": "XX%",
+    "q_revenue": "₹XX,XXXCr",
+    "q_revenue_yoy": "+X%",
+    "q_profit": "₹XX,XXXCr",
+    "q_profit_yoy": "+X%",
+    "op_margin": "XX%",
+    "promoter": "XX%",
+    "promoter_trend": "Stable",
+    "pledged": "X%",
+    "fii": "XX%",
+    "dii": "XX%",
+    "div_yield": "X.X%",
+    "guidance_rev": "X-X%",
+    "guidance_margin": "XX-XX%",
+    "strengths": ["Strength 1", "Strength 2", "Strength 3", "Strength 4"],
+    "risks": ["Risk 1", "Risk 2", "Risk 3"],
+    "price_data": [P1,P2,P3,P4,P5,P6,P7,P8],
+    "price_labels": ["Q1FY24","Q2FY24","Q3FY24","Q4FY24","Q1FY25","Q2FY25","Q3FY25","Q4FY25"],
+    "quality": "Strong",
+    "valuation_verdict": "Fair",
+    "revenue_breakdown": [{"label":"Segment A","pct":35},{"label":"Segment B","pct":30},{"label":"Segment C","pct":20},{"label":"Others","pct":15}],
+    "recent_deals": ["Deal 1 description", "Deal 2 description"]
+  },
+  "stock2": { [same schema as stock1] },
+  "comparison": {
+    "metrics": [
+      {"metric":"Market Cap","s1":"₹X","s2":"₹X"},
+      {"metric":"CMP","s1":"₹X","s2":"₹X"},
+      {"metric":"P/E (TTM)","s1":"Xx","s2":"Xx"},
+      {"metric":"P/B","s1":"X.X","s2":"X.X"},
+      {"metric":"ROE (FY26)","s1":"XX%","s2":"XX%"},
+      {"metric":"ROCE (FY26)","s1":"XX%","s2":"XX%"},
+      {"metric":"D/E","s1":"~X","s2":"~X"},
+      {"metric":"Dividend Yield","s1":"X%","s2":"X%"},
+      {"metric":"5Y Revenue CAGR","s1":"XX%","s2":"XX%"},
+      {"metric":"Employees","s1":"X,XX,XXX","s2":"X,XX,XXX"},
+      {"metric":"HQ","s1":"City","s2":"City"},
+      {"metric":"Founded","s1":"YYYY","s2":"YYYY"}
+    ],
+    "s1_leads": ["Point 1 (metric-backed)", "Point 2", "Point 3"],
+    "s2_leads": ["Point 1 (metric-backed)", "Point 2", "Point 3"],
+    "quick_take": [
+      {"icon":"📐","label":"Scale advantage","desc":"One-line factual comparison"},
+      {"icon":"💰","label":"Profitability edge","desc":"One-line factual comparison"},
+      {"icon":"📈","label":"Growth edge","desc":"One-line factual comparison"},
+      {"icon":"💲","label":"Valuation","desc":"One-line factual comparison"},
+      {"icon":"🏦","label":"Dividend","desc":"One-line factual comparison"}
+    ],
+    "peers": [
+      {"name":"Company","pe":"XX","verdict":"Fair"},
+      {"name":"Company","pe":"XX","verdict":"Cheap"},
+      {"name":"Company","pe":"XX","verdict":"Premium"},
+      {"name":"Company","pe":"XX","verdict":"Premium"},
+      {"name":"Peer Avg","pe":"XX","verdict":"avg"}
+    ],
+    "summary": "2-3 sentence neutral summary without buy/sell recommendation"
+  }
+}
+
+CRITICAL: Use real approximate data from web search. Fill every field. Return ONLY the JSON inside <JSONDATA></JSONDATA>. No preamble, no explanation.`;
+}
+
+function buildDeepPrompt(s1) {
+  return `You are a stock fundamental research engine. Perform a deep-dive analysis of ${s1} using live web search. Fetch data from Screener.in, Tickertape, Moneycontrol, NSE India.
+
+Return ONLY a JSON block wrapped in <JSONDATA>...</JSONDATA> tags. No other text. The JSON must follow this exact schema:
+
+{
+  "mode": "deep",
+  "date": "Jun 2026",
+  "stock": {
+    "name": "Full Company Name",
+    "ticker": "NSE:TICKER",
+    "sector": "Sector",
+    "founded": "YYYY",
+    "employees": "X,XXX+",
+    "logo": "2-3 letter abbrev",
+    "about": "2-sentence company description",
+    "cmp": "₹X,XXX",
+    "cmp_change": "-X% from 52W high",
+    "week52h": "₹X,XXX",
+    "week52l": "₹X,XXX",
+    "mcap": "₹X.XXLCr",
+    "mcap_usd": "~$XXB",
+    "pe": "XXx",
+    "pe_avg5y": "~XXx",
+    "pe_sector": "~XXx",
+    "pb": "X.Xx",
+    "ev_ebitda": "XX-XXx",
+    "face_value": "₹X",
+    "dividend": "₹XX/sh FY26",
+    "div_yield": "X.X%",
+    "roe": "XX%",
+    "roce": "XX%",
+    "roe3y": "XX%",
+    "roce3y": "XX%",
+    "roe5y": "XX%",
+    "roce5y": "XX%",
+    "de": "X.XX",
+    "de_label": "Safe",
+    "interest_coverage": "XXx",
+    "ic_label": "Healthy",
+    "current_ratio": "X.X",
+    "cr_label": "Comfortable",
+    "fcf": "₹X,XXXCr",
+    "fcf_label": "Strong",
+    "revenue_cagr3y": "XX%",
+    "revenue_cagr5y": "XX%",
+    "profit_cagr3y": "XX%",
+    "profit_cagr5y": "XX%",
+    "ebitda_margin": "XX%",
+    "npm": "XX%",
+    "npm_trend": "Stable",
+    "q_revenue": "₹XX,XXXCr",
+    "q_revenue_yoy": "+X%",
+    "q_profit": "₹XX,XXXCr",
+    "q_profit_yoy": "+X%",
+    "op_margin": "XX%",
+    "promoter": "XX%",
+    "promoter_trend": "Stable/Rising/Falling",
+    "pledged": "X%",
+    "fii": "XX%",
+    "dii": "XX%",
+    "public": "XX%",
+    "moat": "Brief description of competitive moat",
+    "pricing_power": "High/Moderate/Low",
+    "market_share": "~XX% in segment",
+    "tailwinds": ["Tailwind 1", "Tailwind 2", "Tailwind 3"],
+    "headwinds": ["Headwind 1", "Headwind 2"],
+    "mgmt_quality": "Brief management quality note",
+    "strengths": ["S1","S2","S3","S4","S5"],
+    "risks": ["R1","R2","R3","R4"],
+    "key_metric": "Metric to watch",
+    "quality": "Strong/Moderate/Weak",
+    "valuation_verdict": "Cheap/Fair/Expensive",
+    "data_confidence": "High/Moderate/Low",
+    "guidance_rev": "X-X%",
+    "guidance_margin": "XX-XX%",
+    "price_data": [P1,P2,P3,P4,P5,P6,P7,P8],
+    "price_labels": ["Q1FY24","Q2FY24","Q3FY24","Q4FY24","Q1FY25","Q2FY25","Q3FY25","Q4FY25"],
+    "revenue_breakdown": [{"label":"Segment","pct":40},{"label":"Segment","pct":30},{"label":"Segment","pct":20},{"label":"Others","pct":10}],
+    "quarterly_eps": [{"q":"Q1FY25","eps":25},{"q":"Q2FY25","eps":26},{"q":"Q3FY25","eps":27},{"q":"Q4FY25","eps":28}],
+    "peers": [
+      {"name":"Company","pe":"XX","pb":"X.X","roe":"XX%","rev_growth":"XX%","de":"X.X","verdict":"Fair"},
+      {"name":"Company","pe":"XX","pb":"X.X","roe":"XX%","rev_growth":"XX%","de":"X.X","verdict":"Cheap"},
+      {"name":"Company","pe":"XX","pb":"X.X","roe":"XX%","rev_growth":"XX%","de":"X.X","verdict":"Premium"}
+    ],
+    "recent_news": ["News item 1", "News item 2", "News item 3"]
+  }
+}
+
+CRITICAL: Use real approximate data from web search. Fill every field with real values. Return ONLY the JSON inside <JSONDATA></JSONDATA>.`;
+}
+
+// ─── Renderers ────────────────────────────────────────────────────────────────
+
+function qColor(v) {
+  if (!v) return '';
+  const n = parseFloat(v.replace(/[^0-9.\-]/g,''));
+  return isNaN(n) ? '' : (n > 0 ? 'green' : 'red');
+}
+
+function verdictBadge(v) {
+  const map = { 'Cheap':'pv-cheap','Fair':'pv-fair','Premium':'pv-premium','avg':'pv-avg','Below Avg':'pv-cheap','Expensive':'pv-premium' };
+  return `<span class="peer-verdict ${map[v]||'pv-avg'}">${v}</span>`;
+}
+
+function qualBadge(q) {
+  const map = { 'Strong':'badge-green','Moderate':'badge-amber','Weak':'badge-red' };
+  return `<span class="badge ${map[q]||'badge-muted'}">${q}</span>`;
+}
+
+function valBadge(v) {
+  const map = { 'Cheap':'badge-green','Fair':'badge-amber','Expensive':'badge-red' };
+  return `<span class="badge ${map[v]||'badge-muted'}">${v}</span>`;
+}
+
+function renderStockHeader(s, side) {
+  const color = side === 'left' ? '#1a3a6e' : '#004d99';
+  return `
+    <div class="company-badge">
+      <div class="company-logo" style="background:${color};color:#fff">${s.logo||s.ticker.split(':')[1]?.slice(0,3)||'STK'}</div>
+      <div>
+        <div class="company-name">${s.name}</div>
+        <div class="company-meta">${s.ticker} | ${s.sector} | Founded: ${s.founded}</div>
+        <div class="company-meta">Employees: ${s.employees}</div>
+      </div>
+    </div>`;
+}
+
+function renderKPIs(s) {
+  return `
+    <div class="kpi-strip">
+      <div class="kpi-card">
+        <div class="kpi-label">CMP (NSE)</div>
+        <div class="kpi-value">${s.cmp}</div>
+        <div class="kpi-sub ${qColor(s.cmp_change)}">${s.cmp_change}</div>
+        <div class="kpi-sub">52W H: ${s.week52h} | L: ${s.week52l}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Market Cap</div>
+        <div class="kpi-value">${s.mcap}</div>
+        <div class="kpi-sub">${s.mcap_usd}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">P/E (TTM)</div>
+        <div class="kpi-value">${s.pe}</div>
+        <div class="kpi-sub">5Y avg: ${s.pe_avg5y}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Face Value</div>
+        <div class="kpi-value">${s.face_value}</div>
+        <div class="kpi-sub">${s.dividend}</div>
+      </div>
+    </div>`;
+}
+
+function makeChart(canvasId, labels, data, color) {
+  setTimeout(() => {
+    const ctx = document.getElementById(canvasId);
+    if (!ctx) return;
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          data,
+          borderColor: color,
+          backgroundColor: color + '18',
+          fill: true,
+          tension: 0.35,
+          borderWidth: 2,
+          pointRadius: 2
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { font: { size: 9 }, color: '#666', maxRotation: 45, autoSkip: false }, grid: { color: 'rgba(255,255,255,0.04)' } },
+          y: { ticks: { font: { size: 9 }, color: '#666', callback: v => '₹'+v }, grid: { color: 'rgba(255,255,255,0.06)' } }
+        }
+      }
+    });
+  }, 150);
+}
+
+function makeDonut(canvasId, data) {
+  setTimeout(() => {
+    const ctx = document.getElementById(canvasId);
+    if (!ctx) return;
+    const colors = ['#f59e0b','#3b82f6','#22c55e','#a78bfa','#14b8a6','#f97316'];
+    new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: data.map(d => d.label),
+        datasets: [{ data: data.map(d => d.pct), backgroundColor: colors.slice(0, data.length), borderWidth: 0 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false, cutout: '65%',
+        plugins: {
+          legend: {
+            position: 'right',
+            labels: { font: { size: 10 }, color: '#888', boxWidth: 10, padding: 8 }
+          }
+        }
+      }
+    });
+  }, 200);
+}
+
+function makeBarChart(canvasId, labels, data) {
+  setTimeout(() => {
+    const ctx = document.getElementById(canvasId);
+    if (!ctx) return;
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{ data, backgroundColor: '#f59e0b88', borderColor: '#f59e0b', borderWidth: 1, borderRadius: 3 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { font: { size: 9 }, color: '#666' }, grid: { color: 'rgba(255,255,255,0.04)' } },
+          y: { ticks: { font: { size: 9 }, color: '#666' }, grid: { color: 'rgba(255,255,255,0.06)' } }
+        }
+      }
+    });
+  }, 250);
+}
+
+function renderComparePoster(d) {
+  const s1 = d.stock1, s2 = d.stock2, cmp = d.comparison;
+  const poster = document.getElementById('poster');
+
+  poster.innerHTML = `
+  <button class="reset-btn" onclick="resetToSetup()">← New Analysis</button>
+
+  <div class="poster-header">
+    ${renderStockHeader(s1, 'left')}
+    <div>
+      <div class="vs-badge"><span style="color:#f59e0b">${s1.logo||'A'}</span> vs <span style="color:#3b82f6">${s2.logo||'B'}</span></div>
+      <div class="vs-sub">Comparative Analysis — ${d.date}</div>
+    </div>
+    <div class="header-right">
+      ${renderStockHeader(s2, 'right')}
+    </div>
+  </div>
+
+  ${renderKPIs(s1)}
+
+  <div class="two-col">
+    <div class="panel">
+      <div class="panel-title">1Y price performance — ${s1.name.split(' ')[0]}</div>
+      <div class="chart-wrap"><canvas id="ch1" role="img" aria-label="Price trend for ${s1.name}"></canvas></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">1Y price performance — ${s2.name.split(' ')[0]}</div>
+      <div class="chart-wrap"><canvas id="ch2" role="img" aria-label="Price trend for ${s2.name}"></canvas></div>
+    </div>
+  </div>
+
+  <div class="two-col" style="margin-bottom:10px;">
+    <div>
+      <div class="two-col">
+        <div class="panel">
+          <div class="panel-title">Q4 FY26 highlights — ${s1.name.split(' ')[0]}</div>
+          <div class="metric-row"><span class="metric-key">Revenue</span><span class="metric-val">${s1.q_revenue}</span></div>
+          <div class="metric-row"><span class="metric-key">YoY</span><span class="metric-val ${qColor(s1.q_revenue_yoy)}">${s1.q_revenue_yoy}</span></div>
+          <div class="metric-row"><span class="metric-key">Net Profit</span><span class="metric-val">${s1.q_profit}</span></div>
+          <div class="metric-row"><span class="metric-key">Profit YoY</span><span class="metric-val ${qColor(s1.q_profit_yoy)}">${s1.q_profit_yoy}</span></div>
+          <div class="metric-row"><span class="metric-key">Op. Margin</span><span class="metric-val">${s1.op_margin}</span></div>
+          <div class="metric-row"><span class="metric-key">Net Margin</span><span class="metric-val">${s1.npm}</span></div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">Key strengths</div>
+          <ul class="bullet-list green">
+            ${s1.strengths.map(s => `<li>${s}</li>`).join('')}
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="two-col">
+        <div class="panel">
+          <div class="panel-title">Q4 FY26 highlights — ${s2.name.split(' ')[0]}</div>
+          <div class="metric-row"><span class="metric-key">Revenue</span><span class="metric-val">${s2.q_revenue}</span></div>
+          <div class="metric-row"><span class="metric-key">YoY</span><span class="metric-val ${qColor(s2.q_revenue_yoy)}">${s2.q_revenue_yoy}</span></div>
+          <div class="metric-row"><span class="metric-key">Net Profit</span><span class="metric-val">${s2.q_profit}</span></div>
+          <div class="metric-row"><span class="metric-key">Profit YoY</span><span class="metric-val ${qColor(s2.q_profit_yoy)}">${s2.q_profit_yoy}</span></div>
+          <div class="metric-row"><span class="metric-key">Op. Margin</span><span class="metric-val">${s2.op_margin}</span></div>
+          <div class="metric-row"><span class="metric-key">Net Margin</span><span class="metric-val">${s2.npm}</span></div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">Key strengths</div>
+          <ul class="bullet-list green">
+            ${s2.strengths.map(s => `<li>${s}</li>`).join('')}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="three-col">
+    <div class="panel">
+      <div class="panel-title">Revenue breakdown — ${s1.name.split(' ')[0]}</div>
+      <div class="donut-wrap"><canvas id="dnt1" role="img" aria-label="Revenue breakdown ${s1.name}"></canvas></div>
+    </div>
+
+    <div class="qt-center">
+      <div class="qt-title">Quick take comparison</div>
+      ${cmp.quick_take.map(q => `
+        <div class="qt-row">
+          <div class="qt-icon">${q.icon}</div>
+          <div class="qt-label">${q.label}</div>
+          <div class="qt-desc">${q.desc}</div>
+        </div>`).join('')}
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Revenue breakdown — ${s2.name.split(' ')[0]}</div>
+      <div class="donut-wrap"><canvas id="dnt2" role="img" aria-label="Revenue breakdown ${s2.name}"></canvas></div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-bottom:10px;">
+    <div class="panel-title">Key metrics comparison</div>
+    <table class="comp-table">
+      <thead><tr><th>Metric</th><th>${s1.name.split(' ')[0]}</th><th>${s2.name.split(' ')[0]}</th></tr></thead>
+      <tbody>
+        ${cmp.metrics.map(m => `<tr><td class="metric-col">${m.metric}</td><td>${m.s1}</td><td>${m.s2}</td></tr>`).join('')}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="two-col">
+    <div class="panel">
+      <div class="panel-title">Return ratios — ${s1.name.split(' ')[0]}</div>
+      <div class="metric-row"><span class="metric-key">ROE (FY26)</span><span class="metric-val green">${s1.roe}</span></div>
+      <div class="metric-row"><span class="metric-key">ROCE (FY26)</span><span class="metric-val green">${s1.roce}</span></div>
+      <div class="metric-row"><span class="metric-key">ROE 3Y avg</span><span class="metric-val">${s1.roe3y}</span></div>
+      <div class="metric-row"><span class="metric-key">ROCE 3Y avg</span><span class="metric-val">${s1.roce3y}</span></div>
+      <div class="divider-line"></div>
+      <div class="panel-title" style="margin-top:8px;">Financial health</div>
+      <div class="health-row"><span class="health-label">D/E</span><span class="health-val green">${s1.de}</span><span class="badge badge-green">${s1.de_label}</span></div>
+      <div class="health-row"><span class="health-label">Interest coverage</span><span class="health-val">${s1.interest_coverage}</span><span class="badge badge-green">${s1.ic_label}</span></div>
+      <div class="health-row"><span class="health-label">Current ratio</span><span class="health-val">${s1.current_ratio}</span><span class="badge badge-amber">${s1.cr_label}</span></div>
+      <div class="health-row"><span class="health-label">FCF/Net profit</span><span class="health-val">${s1.fcf}</span><span class="badge badge-green">${s1.fcf_label}</span></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Return ratios — ${s2.name.split(' ')[0]}</div>
+      <div class="metric-row"><span class="metric-key">ROE (FY26)</span><span class="metric-val green">${s2.roe}</span></div>
+      <div class="metric-row"><span class="metric-key">ROCE (FY26)</span><span class="metric-val green">${s2.roce}</span></div>
+      <div class="metric-row"><span class="metric-key">ROE 3Y avg</span><span class="metric-val">${s2.roe3y}</span></div>
+      <div class="metric-row"><span class="metric-key">ROCE 3Y avg</span><span class="metric-val">${s2.roce3y}</span></div>
+      <div class="divider-line"></div>
+      <div class="panel-title" style="margin-top:8px;">Financial health</div>
+      <div class="health-row"><span class="health-label">D/E</span><span class="health-val green">${s2.de}</span><span class="badge badge-green">${s2.de_label}</span></div>
+      <div class="health-row"><span class="health-label">Interest coverage</span><span class="health-val">${s2.interest_coverage}</span><span class="badge badge-green">${s2.ic_label}</span></div>
+      <div class="health-row"><span class="health-label">Current ratio</span><span class="health-val">${s2.current_ratio}</span><span class="badge badge-amber">${s2.cr_label}</span></div>
+      <div class="health-row"><span class="health-label">FCF/Net profit</span><span class="health-val">${s2.fcf}</span><span class="badge badge-green">${s2.fcf_label}</span></div>
+    </div>
+  </div>
+
+  <div class="two-col" style="margin-top:10px;">
+    <div class="panel">
+      <div class="panel-title">FY27 guidance — ${s1.name.split(' ')[0]}</div>
+      <div class="metric-row"><span class="metric-key">Revenue growth (CC)</span><span class="metric-val amber">${s1.guidance_rev}</span></div>
+      <div class="metric-row"><span class="metric-key">Operating margin</span><span class="metric-val amber">${s1.guidance_margin}</span></div>
+      <div class="divider-line"></div>
+      <div class="panel-title" style="margin-top:8px;">Recent large deals</div>
+      <ul class="bullet-list">
+        ${(s1.recent_deals||[]).map(d => `<li>${d}</li>`).join('')}
+      </ul>
+    </div>
+    <div class="panel">
+      <div class="panel-title">FY27 guidance — ${s2.name.split(' ')[0]}</div>
+      <div class="metric-row"><span class="metric-key">Revenue growth (CC)</span><span class="metric-val amber">${s2.guidance_rev}</span></div>
+      <div class="metric-row"><span class="metric-key">Operating margin</span><span class="metric-val amber">${s2.guidance_margin}</span></div>
+      <div class="divider-line"></div>
+      <div class="panel-title" style="margin-top:8px;">Recent large deals</div>
+      <ul class="bullet-list">
+        ${(s2.recent_deals||[]).map(d => `<li>${d}</li>`).join('')}
+      </ul>
+    </div>
+  </div>
+
+  <div class="three-col" style="margin-top:10px;">
+    <div class="panel">
+      <div class="panel-title">Where ${s1.name.split(' ')[0]} leads</div>
+      <ul class="bullet-list green">
+        ${cmp.s1_leads.map(p => `<li>${p}</li>`).join('')}
+      </ul>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Valuation vs peers (Fwd P/E)</div>
+      <table class="comp-table">
+        <thead><tr><th>Company</th><th>P/E</th><th>Verdict</th></tr></thead>
+        <tbody>
+          ${cmp.peers.map(p => `<tr><td>${p.name}</td><td>${p.pe}</td><td>${verdictBadge(p.verdict)}</td></tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Where ${s2.name.split(' ')[0]} leads</div>
+      <ul class="bullet-list green">
+        ${cmp.s2_leads.map(p => `<li>${p}</li>`).join('')}
+      </ul>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:10px;">
+    <div class="panel-title">Ownership — ${s1.name.split(' ')[0]} | ${s2.name.split(' ')[0]}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div>
+        <div class="metric-row"><span class="metric-key">Promoter</span><span class="metric-val">${s1.promoter} <span class="muted" style="font-size:10px;">(${s1.promoter_trend})</span></span></div>
+        <div class="metric-row"><span class="metric-key">FII</span><span class="metric-val">${s1.fii}</span></div>
+        <div class="metric-row"><span class="metric-key">DII</span><span class="metric-val">${s1.dii}</span></div>
+        <div class="metric-row"><span class="metric-key">Pledged</span><span class="metric-val ${parseFloat(s1.pledged)>10?'red':'green'}">${s1.pledged}</span></div>
+      </div>
+      <div>
+        <div class="metric-row"><span class="metric-key">Promoter</span><span class="metric-val">${s2.promoter} <span class="muted" style="font-size:10px;">(${s2.promoter_trend})</span></span></div>
+        <div class="metric-row"><span class="metric-key">FII</span><span class="metric-val">${s2.fii}</span></div>
+        <div class="metric-row"><span class="metric-key">DII</span><span class="metric-val">${s2.dii}</span></div>
+        <div class="metric-row"><span class="metric-key">Pledged</span><span class="metric-val ${parseFloat(s2.pledged)>10?'red':'green'}">${s2.pledged}</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:10px; background:#0f1a0f; border-color:#1a3a1a;">
+    <div class="panel-title" style="color:#22c55e;">Fundamental verdict</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div>
+        <div style="font-size:13px;font-weight:600;color:#f0f0f0;margin-bottom:6px;">${s1.name.split(' ')[0]}: ${qualBadge(s1.quality)} &nbsp; ${valBadge(s1.valuation_verdict)}</div>
+        <ul class="bullet-list red">
+          ${s1.risks.map(r => `<li>${r}</li>`).join('')}
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:#f0f0f0;margin-bottom:6px;">${s2.name.split(' ')[0]}: ${qualBadge(s2.quality)} &nbsp; ${valBadge(s2.valuation_verdict)}</div>
+        <ul class="bullet-list red">
+          ${s2.risks.map(r => `<li>${r}</li>`).join('')}
+        </ul>
+      </div>
+    </div>
+    <div class="divider-line"></div>
+    <div style="font-size:12px;color:#888;line-height:1.6;">${cmp.summary}</div>
+  </div>
+
+  <div class="disclaimer">
+    ⚠ This is a view of the fundamentals for educational purposes only. It is NOT investment advice and NOT a buy/sell/hold recommendation. Verify all figures independently at Screener.in, Tickertape, Moneycontrol, NSE, BSE. The final decision is yours. &nbsp;|&nbsp; Sources: Screener, Tickertape, Moneycontrol, NSE, Company Filings
+  </div>
+  <div class="watermark">ABTalks · Stock Fundamental Research · Powered by Claude AI</div>`;
+
+  makeChart('ch1', s1.price_labels, s1.price_data, '#f59e0b');
+  makeChart('ch2', s2.price_labels, s2.price_data, '#3b82f6');
+  if (s1.revenue_breakdown) makeDonut('dnt1', s1.revenue_breakdown);
+  if (s2.revenue_breakdown) makeDonut('dnt2', s2.revenue_breakdown);
+}
+
+function renderDeepPoster(d) {
+  const s = d.stock;
+  const poster = document.getElementById('poster');
+
+  poster.innerHTML = `
+  <button class="reset-btn" onclick="resetToSetup()">← New Analysis</button>
+
+  <div class="poster-header" style="grid-template-columns:auto 1fr auto;">
+    <div class="company-badge">
+      <div class="company-logo logo-generic">${s.logo||s.ticker.split(':')[1]?.slice(0,3)||'STK'}</div>
+      <div>
+        <div class="company-name">${s.name}</div>
+        <div class="company-meta">${s.ticker} | Sector: ${s.sector} | Founded: ${s.founded}</div>
+        <div class="company-meta">Employees: ${s.employees}</div>
+      </div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-size:22px;font-weight:700;color:var(--amber)">Deep Dive Analysis</div>
+      <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;">Fundamental Research — ${d.date}</div>
+    </div>
+    <div style="text-align:right;max-width:300px;">
+      <div style="font-size:12px;color:var(--muted);line-height:1.6;">${s.about}</div>
+    </div>
+  </div>
+
+  ${renderKPIs(s)}
+
+  <div class="two-col">
+    <div class="panel">
+      <div class="panel-title">1Y price performance</div>
+      <div class="chart-wrap"><canvas id="ch1" role="img" aria-label="Price trend for ${s.name}"></canvas></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Quarterly EPS trend</div>
+      <div class="chart-wrap"><canvas id="epsChart" role="img" aria-label="EPS trend for ${s.name}"></canvas></div>
+    </div>
+  </div>
+
+  <div class="three-col">
+    <div class="panel">
+      <div class="panel-title">Snapshot</div>
+      <div class="metric-row"><span class="metric-key">Market Cap</span><span class="metric-val">${s.mcap}</span></div>
+      <div class="metric-row"><span class="metric-key">P/E (TTM)</span><span class="metric-val">${s.pe}</span></div>
+      <div class="metric-row"><span class="metric-key">Sector P/E</span><span class="metric-val">${s.pe_sector||'--'}</span></div>
+      <div class="metric-row"><span class="metric-key">5Y avg P/E</span><span class="metric-val">${s.pe_avg5y}</span></div>
+      <div class="metric-row"><span class="metric-key">P/B</span><span class="metric-val">${s.pb}</span></div>
+      <div class="metric-row"><span class="metric-key">EV/EBITDA</span><span class="metric-val">${s.ev_ebitda}</span></div>
+      <div class="metric-row"><span class="metric-key">Dividend yield</span><span class="metric-val">${s.div_yield}</span></div>
+      <div class="metric-row"><span class="metric-key">Valuation</span><span class="metric-val">${valBadge(s.valuation_verdict)}</span></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Revenue breakdown</div>
+      <div class="donut-wrap"><canvas id="dnt1" role="img" aria-label="Revenue breakdown ${s.name}"></canvas></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Growth (CAGR)</div>
+      <div class="metric-row"><span class="metric-key">Revenue 3Y</span><span class="metric-val green">${s.revenue_cagr3y}</span></div>
+      <div class="metric-row"><span class="metric-key">Revenue 5Y</span><span class="metric-val green">${s.revenue_cagr5y}</span></div>
+      <div class="metric-row"><span class="metric-key">Profit 3Y</span><span class="metric-val green">${s.profit_cagr3y}</span></div>
+      <div class="metric-row"><span class="metric-key">Profit 5Y</span><span class="metric-val green">${s.profit_cagr5y}</span></div>
+      <div class="metric-row"><span class="metric-key">EBITDA margin</span><span class="metric-val">${s.ebitda_margin}</span></div>
+      <div class="metric-row"><span class="metric-key">Net profit margin</span><span class="metric-val">${s.npm}</span></div>
+      <div class="metric-row"><span class="metric-key">NPM trend</span><span class="metric-val amber">${s.npm_trend}</span></div>
+    </div>
+  </div>
+
+  <div class="three-col" style="margin-top:0;">
+    <div class="panel">
+      <div class="panel-title">Financial health</div>
+      <div class="health-row"><span class="health-label">D/E</span><span class="health-val green">${s.de}</span><span class="badge badge-green">${s.de_label}</span></div>
+      <div class="health-row"><span class="health-label">Interest coverage</span><span class="health-val">${s.interest_coverage}</span><span class="badge badge-green">${s.ic_label}</span></div>
+      <div class="health-row"><span class="health-label">Current ratio</span><span class="health-val">${s.current_ratio}</span><span class="badge badge-amber">${s.cr_label}</span></div>
+      <div class="health-row"><span class="health-label">FCF</span><span class="health-val">${s.fcf}</span><span class="badge badge-green">${s.fcf_label}</span></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Return ratios</div>
+      <div class="metric-row"><span class="metric-key">ROE (current)</span><span class="metric-val green">${s.roe}</span></div>
+      <div class="metric-row"><span class="metric-key">ROE 3Y avg</span><span class="metric-val">${s.roe3y}</span></div>
+      <div class="metric-row"><span class="metric-key">ROE 5Y avg</span><span class="metric-val">${s.roe5y}</span></div>
+      <div class="metric-row"><span class="metric-key">ROCE (current)</span><span class="metric-val green">${s.roce}</span></div>
+      <div class="metric-row"><span class="metric-key">ROCE 3Y avg</span><span class="metric-val">${s.roce3y}</span></div>
+      <div class="metric-row"><span class="metric-key">ROCE 5Y avg</span><span class="metric-val">${s.roce5y}</span></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Ownership</div>
+      <div class="metric-row"><span class="metric-key">Promoter</span><span class="metric-val">${s.promoter} <span class="muted">(${s.promoter_trend})</span></span></div>
+      <div class="metric-row"><span class="metric-key">FII</span><span class="metric-val blue">${s.fii}</span></div>
+      <div class="metric-row"><span class="metric-key">DII</span><span class="metric-val">${s.dii}</span></div>
+      <div class="metric-row"><span class="metric-key">Public</span><span class="metric-val">${s.public}</span></div>
+      <div class="metric-row"><span class="metric-key">Pledged</span><span class="metric-val ${parseFloat(s.pledged)>10?'red':'green'}">${s.pledged}</span></div>
+    </div>
+  </div>
+
+  <div class="two-col" style="margin-top:10px;">
+    <div class="panel">
+      <div class="panel-title">Competitive position</div>
+      <div class="metric-row"><span class="metric-key">Moat</span><span class="metric-val" style="max-width:220px;text-align:right;">${s.moat}</span></div>
+      <div class="metric-row"><span class="metric-key">Pricing power</span><span class="metric-val amber">${s.pricing_power}</span></div>
+      <div class="metric-row"><span class="metric-key">Market share</span><span class="metric-val">${s.market_share}</span></div>
+      <div class="divider-line"></div>
+      <div class="panel-title" style="margin-top:6px;">Sector tailwinds</div>
+      <ul class="bullet-list green">${s.tailwinds.map(t=>`<li>${t}</li>`).join('')}</ul>
+      <div class="panel-title" style="margin-top:8px;">Headwinds</div>
+      <ul class="bullet-list red">${s.headwinds.map(h=>`<li>${h}</li>`).join('')}</ul>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Peer comparison</div>
+      <table class="comp-table">
+        <thead><tr><th>Company</th><th>P/E</th><th>P/B</th><th>ROE</th><th>Rev.G</th><th>D/E</th><th>Valuation</th></tr></thead>
+        <tbody>
+          ${s.peers.map(p=>`<tr><td>${p.name}</td><td>${p.pe}</td><td>${p.pb}</td><td>${p.roe}</td><td>${p.rev_growth}</td><td>${p.de}</td><td>${verdictBadge(p.verdict)}</td></tr>`).join('')}
+        </tbody>
+      </table>
+      <div class="divider-line"></div>
+      <div class="panel-title" style="margin-top:6px;">FY27 guidance</div>
+      <div class="metric-row"><span class="metric-key">Revenue growth (CC)</span><span class="metric-val amber">${s.guidance_rev}</span></div>
+      <div class="metric-row"><span class="metric-key">Operating margin</span><span class="metric-val amber">${s.guidance_margin}</span></div>
+      <div class="panel-title" style="margin-top:8px;">Recent news</div>
+      <ul class="bullet-list">${(s.recent_news||[]).map(n=>`<li>${n}</li>`).join('')}</ul>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:10px;background:#0f1a0f;border-color:#1a3a1a;">
+    <div class="panel-title" style="color:#22c55e;">Fundamental view</div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+      <div>Overall quality: ${qualBadge(s.quality)}</div>
+      <div>Valuation: ${valBadge(s.valuation_verdict)}</div>
+      <div><span class="badge badge-muted">Data confidence: ${s.data_confidence}</span></div>
+    </div>
+    <div class="insight-grid">
+      <div class="insight-card">
+        <div class="insight-head pos">Strengths</div>
+        <ul class="bullet-list green">${s.strengths.map(x=>`<li>${x}</li>`).join('')}</ul>
+      </div>
+      <div class="insight-card">
+        <div class="insight-head neg">Watch-points</div>
+        <ul class="bullet-list red">${s.risks.map(x=>`<li>${x}</li>`).join('')}</ul>
+      </div>
+    </div>
+    <div class="divider-line"></div>
+    <div style="font-size:12px;color:var(--amber)">Key metric to track: <span style="color:#f0f0f0;">${s.key_metric}</span></div>
+    <div style="font-size:12px;color:#666;margin-top:4px;">Management quality: ${s.mgmt_quality}</div>
+  </div>
+
+  <div class="disclaimer">
+    ⚠ This is a view of the fundamentals for educational purposes only. It is NOT investment advice and NOT a buy/sell/hold recommendation. Verify all figures independently at Screener.in, Tickertape, Moneycontrol, NSE, BSE. The final decision is yours. &nbsp;|&nbsp; Sources: Screener, Tickertape, Moneycontrol, NSE, Company Filings, Earnings Reports
+  </div>
+  <div class="watermark">ABTalks · Stock Fundamental Research · Powered by Claude AI</div>`;
+
+  makeChart('ch1', s.price_labels, s.price_data, '#f59e0b');
+  if (s.revenue_breakdown) makeDonut('dnt1', s.revenue_breakdown);
+  if (s.quarterly_eps) makeBarChart('epsChart', s.quarterly_eps.map(e=>e.q), s.quarterly_eps.map(e=>e.eps));
+}
+
+function resetToSetup() {
+  document.getElementById('poster').style.display = 'none';
+  document.getElementById('poster').innerHTML = '';
+  document.getElementById('setup').style.display = 'block';
+}
+</script>
+</body>
+</html>
