@@ -1,0 +1,402 @@
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,Segoe UI,sans-serif}
+body{background:#f5f7fb;padding:20px;color:#1f2937}
+.container{max-width:1400px;margin:auto}
+.header{background:#fff;padding:24px;border-radius:16px;box-shadow:0 4px 12px rgba(0,0,0,.08);margin-bottom:20px}
+h1{font-size:28px;margin-bottom:8px}
+.section{background:#fff;margin-bottom:20px;padding:20px;border-radius:16px;box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.section h2{margin-bottom:15px;color:#111827}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.card{background:#f9fafb;padding:16px;border-radius:12px;border-left:5px solid #3b82f6}
+.card h3{font-size:16px;margin-bottom:8px}
+.badge{display:inline-block;padding:6px 10px;border-radius:20px;font-size:12px;font-weight:600}
+.high{background:#fee2e2;color:#b91c1c}
+.medium{background:#fed7aa;color:#c2410c}
+.low{background:#dcfce7;color:#166534}
+.pending{background:#fef3c7;color:#92400e}
+.completed{background:#dcfce7;color:#166534}
+.conflict{background:#fde68a;color:#92400e}
+.question{background:#dbeafe;color:#1d4ed8}
+table{width:100%;border-collapse:collapse}
+th,td{padding:12px;border-bottom:1px solid #e5e7eb;text-align:left}
+th{background:#f3f4f6}
+details{margin-top:10px}
+summary{cursor:pointer;font-weight:600;padding:10px;background:#f3f4f6;border-radius:8px}
+.note{background:#f9fafb;padding:12px;border-radius:10px;margin-top:10px}
+.speaker-card{padding:15px;border-radius:12px;background:#f8fafc;border-left:4px solid #6366f1;margin-bottom:12px}
+@media(max-width:768px){
+table{display:block;overflow-x:auto}
+}
+</style>
+
+<div class="container">
+
+<div class="header">
+<h1>Quarterly Growth Strategy Meeting</h1>
+<p>Transcript Analysis Dashboard</p>
+</div>
+
+<div class="section">
+<h2>Summary</h2>
+<p>
+The leadership team reviewed Q2 performance, revenue forecasts, sales pipeline challenges,
+marketing conversion issues, engineering capacity constraints, customer support concerns,
+hiring plans, conference budgeting, and product release commitments. Revenue grew 12% but
+remained below the 18% target. Several strategic decisions were postponed pending additional
+reviews, forecasts, estimates, and milestone validation.
+</p>
+</div>
+
+<div class="section">
+<h2>Key Takeaways</h2>
+<div class="grid">
+
+<div class="card">
+<h3>Revenue Performance</h3>
+<p>Q2 revenue increased 12%, below the 18% annual target commitment.</p>
+</div>
+
+<div class="card">
+<h3>Enterprise Deal Delays</h3>
+<p>14 large contracts were expected to close, but only 9 were finalized.</p>
+</div>
+
+<div class="card">
+<h3>Marketing Growth</h3>
+<p>Website traffic increased 34%, but conversion rates remain below expectations.</p>
+</div>
+
+<div class="card">
+<h3>Engineering Capacity</h3>
+<p>Engineering is operating close to capacity while working on the analytics dashboard scheduled for August.</p>
+</div>
+
+<div class="card">
+<h3>Customer Retention</h3>
+<p>Retention remains strong at 94% despite increasing support ticket volume.</p>
+</div>
+
+<div class="card">
+<h3>Performance Concerns</h3>
+<p>Reporting performance and dashboard loading times are generating complaints from customers and prospects.</p>
+</div>
+
+</div>
+</div>
+
+<div class="section">
+<h2>Action Items</h2>
+
+<table>
+<thead>
+<tr>
+<th>Task</th>
+<th>Owner</th>
+<th>Deadline</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+
+<tr>
+<td>Provide architecture review and cost estimate for potential website work</td>
+<td>CTO</td>
+<td>Not specified</td>
+<td><span class="badge pending">⏳ Pending</span></td>
+</tr>
+
+<tr>
+<td>Investigate reporting performance and dashboard loading time issues</td>
+<td>Engineering Team</td>
+<td>Not specified</td>
+<td><span class="badge pending">⏳ Pending</span></td>
+</tr>
+
+<tr>
+<td>Finalize Q3 forecasts before making hiring decisions</td>
+<td>CEO / Leadership Team</td>
+<td>Not specified</td>
+<td><span class="badge pending">⏳ Pending</span></td>
+</tr>
+
+<tr>
+<td>Receive and review final vendor proposals for customer conference budget</td>
+<td>CFO</td>
+<td>Next month review</td>
+<td><span class="badge pending">⏳ Pending</span></td>
+</tr>
+
+<tr>
+<td>Complete engineering milestone review before public commitments on analytics dashboard</td>
+<td>Engineering Team</td>
+<td>Not specified</td>
+<td><span class="badge pending">⏳ Pending</span></td>
+</tr>
+
+<tr>
+<td>Follow up on open items during next week's leadership meeting</td>
+<td>Leadership Team</td>
+<td>Next week's leadership meeting</td>
+<td><span class="badge pending">⏳ Pending</span></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+<div class="section">
+<h2>Open Questions</h2>
+
+<div class="note">
+<span class="badge question">❓ Open Question</span>
+Will the remaining enterprise deals close as forecasted or move again?
+</div>
+
+<div class="note">
+<span class="badge question">❓ Open Question</span>
+What will the final cost estimate be for the website redesign and associated engineering work?
+</div>
+
+<div class="note">
+<span class="badge question">❓ Open Question</span>
+Should the new analytics dashboard be announced at the annual customer conference?
+</div>
+
+<div class="note">
+<span class="badge question">❓ Open Question</span>
+Can the August release date for the analytics dashboard be achieved?
+</div>
+
+<div class="note">
+<span class="badge question">❓ Open Question</span>
+What will the finalized Q3 forecasts indicate regarding hiring plans?
+</div>
+
+</div>
+
+<div class="section">
+<h2>Risks / Blockers</h2>
+
+<div class="grid">
+
+<div class="card">
+<h3>Revenue Forecast Risk</h3>
+<p>Delayed enterprise contracts may impact annual revenue targets.</p>
+<span class="badge high">🔴 High Priority</span>
+</div>
+
+<div class="card">
+<h3>Procurement Delays</h3>
+<p>Client procurement processes are delaying contract closures.</p>
+<span class="badge medium">🟠 Medium Priority</span>
+</div>
+
+<div class="card">
+<h3>Security Reviews</h3>
+<p>Additional client security reviews are slowing sales cycles.</p>
+<span class="badge medium">🟠 Medium Priority</span>
+</div>
+
+<div class="card">
+<h3>Engineering Capacity Constraints</h3>
+<p>Current team is operating close to capacity.</p>
+<span class="badge high">🔴 High Priority</span>
+</div>
+
+<div class="card">
+<h3>Reporting Performance Issues</h3>
+<p>Customer complaints and sales concerns indicate business impact.</p>
+<span class="badge high">🔴 High Priority</span>
+</div>
+
+<div class="card">
+<h3>Unapproved Budget Requests</h3>
+<p>Conference budget and contractor spending remain unapproved.</p>
+<span class="badge medium">🟠 Medium Priority</span>
+</div>
+
+</div>
+</div>
+
+<div class="section">
+<h2>Conflicts</h2>
+
+<div class="note">
+<span class="badge conflict">⚠️ Conflict</span>
+Marketing plans a website redesign while engineering is already focused on the analytics dashboard and operating near capacity.
+</div>
+
+<div class="note">
+<span class="badge conflict">⚠️ Conflict</span>
+Product Director suggested announcing the analytics dashboard at the conference, but the CTO cannot guarantee the August release date.
+</div>
+
+<div class="note">
+<span class="badge conflict">⚠️ Conflict</span>
+Department heads submitted different headcount requests, creating uncertainty around next year's hiring plan.
+</div>
+
+</div>
+
+<div class="section">
+<h2>Speaker Summary</h2>
+
+<div class="speaker-card">
+<h3>CEO</h3>
+<p>Led discussion, reviewed revenue performance, requested spending estimates before approval, prioritized reporting performance issues, postponed hiring decisions, and deferred conference budget approval.</p>
+</div>
+
+<div class="speaker-card">
+<h3>Head of Sales</h3>
+<p>Reported enterprise deal delays due to procurement and security reviews. Mentioned prospects raising concerns about reporting performance.</p>
+</div>
+
+<div class="speaker-card">
+<h3>CFO</h3>
+<p>Highlighted revenue forecast risks, requested cost estimates, raised hiring plan concerns, and required vendor proposals before approving conference budget.</p>
+</div>
+
+<div class="speaker-card">
+<h3>VP Marketing</h3>
+<p>Reported 34% website traffic growth, identified conversion challenges, proposed website redesign, and requested conference budget approval.</p>
+</div>
+
+<div class="speaker-card">
+<h3>Product Director</h3>
+<p>Warned about timeline constraints, emphasized importance of reporting performance improvements, and discussed conference announcement considerations.</p>
+</div>
+
+<div class="speaker-card">
+<h3>CTO</h3>
+<p>Reported engineering capacity limitations, indicated architecture review was incomplete, confirmed investigation of reporting issues, and could not guarantee the August release date.</p>
+</div>
+
+<div class="speaker-card">
+<h3>Customer Success Lead</h3>
+<p>Reported 94% customer retention and increased support tickets related to reporting performance and dashboard loading times.</p>
+</div>
+
+</div>
+
+<div class="section">
+<h2>Decisions by Speaker</h2>
+
+<table>
+<thead>
+<tr>
+<th>Speaker</th>
+<th>Decision / Position</th>
+</tr>
+</thead>
+<tbody>
+
+<tr>
+<td>CEO</td>
+<td>Obtain spending estimate before approving additional website work.</td>
+</tr>
+
+<tr>
+<td>CEO</td>
+<td>Postpone hiring decisions until Q3 forecasts are finalized.</td>
+</tr>
+
+<tr>
+<td>CEO</td>
+<td>Revisit conference budget next month after vendor proposals are received.</td>
+</tr>
+
+<tr>
+<td>CEO</td>
+<td>Avoid public commitments regarding analytics dashboard until milestone review is complete.</td>
+</tr>
+
+<tr>
+<td>Product Director</td>
+<td>Analytics dashboard should only be announced if August release confidence exists.</td>
+</tr>
+
+</tbody>
+</table>
+
+</div>
+
+<div class="section">
+<h2>Action Items by Speaker</h2>
+
+<table>
+<thead>
+<tr>
+<th>Speaker</th>
+<th>Action Item</th>
+</tr>
+</thead>
+<tbody>
+
+<tr>
+<td>CTO</td>
+<td>Provide architecture review and cost estimate.</td>
+</tr>
+
+<tr>
+<td>Engineering Team</td>
+<td>Investigate reporting performance and dashboard loading issues.</td>
+</tr>
+
+<tr>
+<td>CFO</td>
+<td>Review vendor proposals for conference budget approval.</td>
+</tr>
+
+<tr>
+<td>Leadership Team</td>
+<td>Follow up on open items during next week's meeting.</td>
+</tr>
+
+</tbody>
+</table>
+
+</div>
+
+<div class="section">
+<h2>Attribution Notes</h2>
+
+<div class="note">
+Some action items reference teams rather than individual owners (e.g., Engineering Team, Leadership Team). No further ownership details were specified in the transcript.
+</div>
+
+</div>
+
+<div class="section">
+<h2>Additional Notes</h2>
+
+<details>
+<summary>Revenue and Sales Context</summary>
+<div class="note">
+Q2 revenue grew 12% versus an 18% target. Enterprise deal delays were primarily caused by procurement processes and security reviews.
+</div>
+</details>
+
+<details>
+<summary>Marketing Context</summary>
+<div class="note">
+Website traffic increased 34%, but conversion performance remains below expectations. A redesign and simplified demo-request flow are being considered.
+</div>
+</details>
+
+<details>
+<summary>Customer Success Context</summary>
+<div class="note">
+Support ticket volume increased significantly. Most complaints involve reporting performance and dashboard loading times.
+</div>
+</details>
+
+<details>
+<summary>Product & Engineering Context</summary>
+<div class="note">
+The analytics dashboard is scheduled for August, but release confidence remains uncertain pending milestone review.
+</div>
+</details>
+
+</div>
+
+</div>
