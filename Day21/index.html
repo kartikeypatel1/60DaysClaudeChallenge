@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Digital Footprint Intelligence Report</title>
+  <style>
+    :root{
+      --bg:#07080d;
+      --bg-grid:#0b0d15;
+      --panel:#10121b;
+      --panel-2:#151827;
+      --border:#23263a;
+      --border-soft:#1a1d2c;
+      --text:#e9eaf3;
+      --muted:#8b8fa6;
+      --muted-2:#5e6178;
+      --amber:#f0a531;
+      --amber-soft:rgba(240,165,49,0.12);
+      --red:#ff5d72;
+      --red-soft:rgba(255,93,114,0.12);
+      --green:#36d399;
+      --green-soft:rgba(54,211,153,0.12);
+      --blue:#5b8cff;
+      --font-mono:'SF Mono','JetBrains Mono','IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+      --font-display:'Inter','Helvetica Neue',system-ui,-apple-system,sans-serif;
+      --radius:14px;
+    }
+
+    *{box-sizing:border-box;}
+    html,body{margin:0;padding:0;}
+
+    .dfr-root{
+    background:
+      radial-gradient(circle at 18% -10%, rgba(240,165,49,0.08), transparent 40%),
+      radial-gradient(circle at 100% 0%, rgba(91,140,255,0.06), transparent 45%),
+      repeating-linear-gradient(0deg, var(--bg-grid) 0px, var(--bg-grid) 1px, var(--bg) 1px, var(--bg) 28px),
+      repeating-linear-gradient(90deg, var(--bg-grid) 0px, var(--bg-grid) 1px, var(--bg) 1px, var(--bg) 28px),
+      var(--bg);
+    color:var(--text);
+    font-family:var(--font-display);
+    padding:28px 18px 60px;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .dfr-wrap{max-width:1180px;margin:0 auto;}
+  </style>
+</head>
+<body>
+
+  /* ---------- Header ---------- */
+  .dfr-header{
+    display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px;
+    border-bottom:1px solid var(--border);
+    padding-bottom:18px;margin-bottom:18px;
+  }
+  .dfr-header .eyebrow{
+    font-family:var(--font-mono);font-size:11px;letter-spacing:.18em;color:var(--amber);
+    text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:8px;
+  }
+  .dfr-header .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--amber);box-shadow:0 0 8px var(--amber);}
+  .dfr-header h1{font-size:26px;margin:0;font-weight:700;letter-spacing:-.01em;}
+  .dfr-header .sub{color:var(--muted);font-size:13px;margin-top:4px;}
+  .dfr-meta{font-family:var(--font-mono);font-size:11px;color:var(--muted-2);text-align:right;line-height:1.6;}
+
+  .dfr-banner{
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+    padding:14px 18px;margin-bottom:26px;display:flex;gap:14px;align-items:flex-start;
+  }
+  .dfr-banner .icon{font-size:16px;line-height:1;margin-top:1px;}
+  .dfr-banner p{margin:0;font-size:12.5px;color:var(--muted);line-height:1.55;}
+  .dfr-banner b{color:var(--text);}
+  .dfr-banner .tag-fact{color:var(--green);font-family:var(--font-mono);font-weight:600;}
+  .dfr-banner .tag-est{color:var(--amber);font-family:var(--font-mono);font-weight:600;}
+
+  /* ---------- Section shell ---------- */
+  .dfr-section{margin-bottom:34px;}
+  .dfr-section-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
+  .dfr-section-head h2{font-size:16px;margin:0;font-weight:700;}
+  .dfr-section-head .idx{font-family:var(--font-mono);color:var(--muted-2);font-size:12px;margin-right:8px;}
+  .dfr-section-head .badge{
+    font-family:var(--font-mono);font-size:10.5px;padding:3px 9px;border-radius:20px;
+    border:1px solid var(--border);color:var(--muted);text-transform:uppercase;letter-spacing:.06em;
+  }
+  .badge.facts{color:var(--green);border-color:rgba(54,211,153,0.3);background:var(--green-soft);}
+  .badge.estimates{color:var(--amber);border-color:rgba(240,165,49,0.3);background:var(--amber-soft);}
+
+  .panel{
+    background:linear-gradient(180deg,var(--panel),var(--panel-2));
+    border:1px solid var(--border);border-radius:var(--radius);padding:20px;
+  }
+
+  /* ---------- Score row ---------- */
+  .score-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;}
+  @media (max-width:980px){.score-grid{grid-template-columns:repeat(3,1fr);}}
+  @media (max-width:600px){.score-grid{grid-template-columns:repeat(2,1fr);}}
+
+  .score-card{
+    background:linear-gradient(180deg,var(--panel),var(--panel-2));
+    border:1px solid var(--border);border-radius:var(--radius);padding:16px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px;
+    min-height:148px;position:relative;overflow:hidden;
+  }
+  .score-card.gauge{grid-column:span 2;}
+  @media (max-width:980px){.score-card.gauge{grid-column:span 3;}}
+  @media (max-width:600px){.score-card.gauge{grid-column:span 2;}}
+
+  .score-card .label{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;}
+  .score-card .big{font-size:30px;font-weight:800;font-family:var(--font-mono);}
+  .score-card .tier{font-size:11px;font-family:var(--font-mono);padding:2px 9px;border-radius:20px;margin-top:2px;}
+  .score-card .stat-sub{font-size:11px;color:var(--muted-2);margin-top:2px;}
+
+  .gauge-wrap{position:relative;width:104px;height:104px;}
+  .gauge-wrap svg{transform:rotate(-90deg);}
+  .gauge-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .gauge-center .num{font-family:var(--font-mono);font-size:26px;font-weight:800;}
+  .gauge-center .of{font-family:var(--font-mono);font-size:9px;color:var(--muted-2);}
+
+  .tier-minimal{color:#36d399;background:rgba(54,211,153,.12);}
+  .tier-moderate{color:#e8d44d;background:rgba(232,212,77,.12);}
+  .tier-significant{color:#f0a531;background:rgba(240,165,49,.12);}
+  .tier-extensive{color:#ff5d72;background:rgba(255,93,114,.12);}
+  .tier-weak{color:#ff5d72;background:rgba(255,93,114,.12);}
+  .tier-fair{color:#f0a531;background:rgba(240,165,49,.12);}
+  .tier-good{color:#e8d44d;background:rgba(232,212,77,.12);}
+  .tier-strong{color:#36d399;background:rgba(54,211,153,.12);}
+
+  /* ---------- Heatmap ---------- */
+  .heatmap-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+  @media (max-width:760px){.heatmap-grid{grid-template-columns:repeat(2,1fr);}}
+  .heat-tile{
+    border-radius:12px;border:1px solid var(--border);padding:14px;position:relative;overflow:hidden;
+    min-height:96px;display:flex;flex-direction:column;justify-content:space-between;
+  }
+  .heat-tile .cat{font-size:12.5px;font-weight:700;}
+  .heat-tile .apps{font-size:10.5px;color:var(--muted);font-family:var(--font-mono);line-height:1.5;margin-top:6px;}
+  .heat-tile .score{align-self:flex-end;font-family:var(--font-mono);font-size:18px;font-weight:800;}
+
+  /* ---------- Company ranking ---------- */
+  .rank-row{display:grid;grid-template-columns:170px 1fr 90px;align-items:center;gap:14px;padding:9px 0;border-bottom:1px solid var(--border-soft);}
+  .rank-row:last-child{border-bottom:none;}
+  .rank-name{font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;}
+  .rank-name .n{font-family:var(--font-mono);color:var(--muted-2);font-size:11px;width:16px;}
+  .rank-bar-track{height:9px;border-radius:6px;background:var(--border-soft);overflow:hidden;}
+  .rank-bar-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--amber),var(--red));}
+  .rank-meta{font-family:var(--font-mono);font-size:11px;color:var(--muted);text-align:right;}
+
+  /* ---------- Matrix ---------- */
+  .matrix-scroll{overflow-x:auto;}
+  table.matrix{width:100%;border-collapse:collapse;min-width:760px;}
+  table.matrix th, table.matrix td{padding:9px 10px;font-size:11.5px;border-bottom:1px solid var(--border-soft);text-align:center;}
+  table.matrix th{font-family:var(--font-mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:600;}
+  table.matrix td:first-child, table.matrix th:first-child{text-align:left;font-weight:600;color:var(--text);}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:50%;}
+  .dot.on{background:var(--amber);box-shadow:0 0 6px rgba(240,165,49,.6);}
+  .dot.off{background:var(--border);}
+
+  /* ---------- Radar ---------- */
+  .radar-wrap{display:flex;gap:28px;align-items:center;flex-wrap:wrap;}
+  .radar-legend{display:flex;flex-direction:column;gap:8px;font-family:var(--font-mono);font-size:11.5px;color:var(--muted);min-width:220px;}
+  .radar-legend .row{display:flex;justify-content:space-between;border-bottom:1px solid var(--border-soft);padding-bottom:6px;}
+  .radar-legend .row b{color:var(--text);}
+
+  /* ---------- Digital twin ---------- */
+  .twin-grid{display:grid;grid-template-columns:220px 1fr;gap:22px;}
+  @media (max-width:760px){.twin-grid{grid-template-columns:1fr;}}
+  .twin-avatar{
+    border:1px solid var(--border);border-radius:var(--radius);background:var(--panel-2);
+    display:flex;align-items:center;justify-content:center;min-height:220px;position:relative;
+  }
+  .twin-avatar svg{width:90px;height:90px;opacity:.85;}
+  .twin-avatar .scan-ring{
+    position:absolute;width:160px;height:160px;border-radius:50%;border:1px dashed rgba(240,165,49,.35);
+  }
+  .twin-trait{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--border-soft);font-size:13px;}
+  .twin-trait:last-child{border-bottom:none;}
+  .twin-trait .val{color:var(--muted);text-align:right;max-width:60%;}
+  .est-pill{font-family:var(--font-mono);font-size:9px;color:var(--amber);border:1px solid rgba(240,165,49,.3);background:var(--amber-soft);padding:1px 6px;border-radius:10px;margin-left:6px;white-space:nowrap;}
+
+  /* ---------- WOW insights ---------- */
+  .wow-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  @media (max-width:860px){.wow-grid{grid-template-columns:1fr;}}
+  .wow-card{border:1px solid var(--border);border-radius:var(--radius);padding:16px;background:var(--panel);}
+  .wow-card .num{font-family:var(--font-mono);font-size:24px;font-weight:800;color:var(--amber);}
+  .wow-card .desc{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.5;}
+
+  /* ---------- Asset cards ---------- */
+  .asset-row{display:grid;grid-template-columns:34px 1fr 110px;align-items:center;gap:14px;padding:11px 0;border-bottom:1px solid var(--border-soft);}
+  .asset-row:last-child{border-bottom:none;}
+  .asset-rank{font-family:var(--font-mono);font-size:18px;font-weight:800;color:var(--muted-2);}
+  .asset-name{font-size:13.5px;font-weight:700;}
+  .asset-why{font-size:11.5px;color:var(--muted);margin-top:2px;}
+  .asset-value{font-family:var(--font-mono);font-size:11px;text-align:right;padding:4px 10px;border-radius:20px;border:1px solid var(--border);color:var(--muted);}
+  .asset-value.high{color:var(--red);border-color:rgba(255,93,114,.3);background:var(--red-soft);}
+  .asset-value.med{color:var(--amber);border-color:rgba(240,165,49,.3);background:var(--amber-soft);}
+
+  /* ---------- Improvement plan / simulator ---------- */
+  .sim-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;}
+  @media (max-width:860px){.sim-grid{grid-template-columns:1fr;}}
+  .plan-item{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--border-soft);font-size:13px;align-items:flex-start;}
+  .plan-item:last-child{border-bottom:none;}
+  .plan-item .chk{width:16px;height:16px;border-radius:4px;border:1px solid var(--border);flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--amber);}
+
+  .sim-panel{border:1px solid var(--border);border-radius:var(--radius);background:var(--panel-2);padding:16px;}
+  .sim-panel h3{font-size:13px;margin:0 0 4px;}
+  .sim-panel .hint{font-size:11.5px;color:var(--muted-2);margin-bottom:12px;}
+  .toggle-list{display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:230px;overflow-y:auto;padding-right:4px;margin-bottom:14px;}
+  .toggle-item{display:flex;align-items:center;gap:6px;font-size:11.5px;font-family:var(--font-mono);color:var(--muted);}
+  .toggle-item input{accent-color:var(--amber);}
+  .sim-results{display:flex;gap:10px;}
+  .sim-result-card{flex:1;border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;background:var(--panel);}
+  .sim-result-card .l{font-family:var(--font-mono);font-size:10px;color:var(--muted);text-transform:uppercase;}
+  .sim-result-card .v{font-family:var(--font-mono);font-size:20px;font-weight:800;margin-top:2px;}
+  .sim-reset{margin-top:10px;width:100%;background:transparent;border:1px solid var(--border);color:var(--muted);font-family:var(--font-mono);font-size:11px;padding:8px;border-radius:8px;cursor:pointer;}
+  .sim-reset:hover{border-color:var(--amber);color:var(--amber);}
+
+  /* ---------- Verdict ---------- */
+  .verdict-panel{
+    border:1px solid var(--border);border-radius:var(--radius);
+    background:linear-gradient(135deg, rgba(240,165,49,.08), rgba(255,93,114,.05));
+    padding:24px;
+  }
+  .verdict-panel h2{margin:0 0 10px;font-size:18px;}
+  .verdict-panel p{color:var(--muted);font-size:13.5px;line-height:1.7;margin:0 0 14px;}
+  .verdict-tags{display:flex;gap:10px;flex-wrap:wrap;}
+  .verdict-tag{font-family:var(--font-mono);font-size:11px;padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:var(--panel);}
+
+  .footer-note{text-align:center;color:var(--muted-2);font-size:10.5px;font-family:var(--font-mono);margin-top:30px;line-height:1.7;}
+</style>
+
+<div class="dfr-root">
+  <div class="dfr-wrap">
+
+    <div class="dfr-header">
+      <div>
+        <div class="eyebrow"><span class="dot"></span>ABTalks · Day 21 · Privacy Intelligence Build</div>
+        <h1>Digital Footprint Intelligence Report</h1>
+        <div class="sub">Generated from a self-reported list of 15 apps &amp; services — no account access, no private data sources.</div>
+      </div>
+      <div class="dfr-meta">
+        REPORT-ID: DFR-2026-0622<br/>
+        MODE: Self-reported dataset<br/>
+        ENGINE: Heuristic estimation, v1.0
+      </div>
+    </div>
+
+    <div class="dfr-banner">
+      <div class="icon">🛈</div>
+      <p>This report is built <b>only</b> from the services you listed. Anything describing <span class="tag-fact">what you use</span> is a <b>Fact</b>. Anything describing <span class="tag-est">who you might be</span> — habits, location signals, spending, lifestyle — is an <b>Estimate</b>: a plausible inference, never a certainty, and never sourced from a real database. Claude has no access to your accounts, devices, or any company's actual records.</p>
+    </div>
+
+    <!-- 1 & 2: SCORES -->
+    <div class="dfr-section" id="sec-scores">
+      <div class="dfr-section-head">
+        <h2><span class="idx">01</span>Footprint &amp; Privacy Scores</h2>
+        <span class="badge estimates">Estimate — illustrative scoring model</span>
+      </div>
+      <div class="score-grid" id="scoreGrid"></div>
+    </div>
+
+    <!-- 3: HEATMAP -->
+    <div class="dfr-section" id="sec-heatmap">
+      <div class="dfr-section-head">
+        <h2><span class="idx">02</span>Exposure Heatmap — by category</h2>
+        <span class="badge estimates">Estimate — exposure weighting</span>
+      </div>
+      <div class="panel"><div class="heatmap-grid" id="heatmapGrid"></div></div>
+    </div>
+
+    <!-- 4: COMPANY RANKING -->
+    <div class="dfr-section" id="sec-rank">
+      <div class="dfr-section-head">
+        <h2><span class="idx">03</span>Company Exposure Ranking</h2>
+        <span class="badge facts">Fact — service-to-company mapping</span>
+      </div>
+      <div class="panel" id="rankPanel"></div>
+    </div>
+
+    <!-- 5: MATRIX -->
+    <div class="dfr-section" id="sec-matrix">
+      <div class="dfr-section-head">
+        <h2><span class="idx">04</span>Data Collection Matrix</h2>
+        <span class="badge estimates">Estimate — data types are inferred, not confirmed</span>
+      </div>
+      <div class="panel matrix-scroll"><table class="matrix" id="matrixTable"></table></div>
+    </div>
+
+    <!-- 6: RADAR -->
+    <div class="dfr-section" id="sec-radar">
+      <div class="dfr-section-head">
+        <h2><span class="idx">05</span>Risk Radar</h2>
+        <span class="badge estimates">Estimate — relative risk, not a measured value</span>
+      </div>
+      <div class="panel radar-wrap">
+        <svg id="radarSvg" width="320" height="320" viewBox="0 0 320 320"></svg>
+        <div class="radar-legend" id="radarLegend"></div>
+      </div>
+    </div>
+
+    <!-- 7: DIGITAL TWIN -->
+    <div class="dfr-section" id="sec-twin">
+      <div class="dfr-section-head">
+        <h2><span class="idx">06</span>Digital Twin Profile</h2>
+        <span class="badge estimates">Estimate — a sketch, not a verified identity</span>
+      </div>
+      <div class="panel twin-grid">
+        <div class="twin-avatar">
+          <div class="scan-ring"></div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#f0a531" stroke-width="1"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+        </div>
+        <div id="twinList"></div>
+      </div>
+    </div>
+
+    <!-- 8: WOW INSIGHTS -->
+    <div class="dfr-section" id="sec-wow">
+      <div class="dfr-section-head">
+        <h2><span class="idx">07</span>WOW Insights</h2>
+        <span class="badge facts">Mixed — facts &amp; estimates labeled individually</span>
+      </div>
+      <div class="wow-grid" id="wowGrid"></div>
+    </div>
+
+    <!-- 9: VALUABLE ASSETS -->
+    <div class="dfr-section" id="sec-assets">
+      <div class="dfr-section-head">
+        <h2><span class="idx">08</span>Most Valuable Data Assets</h2>
+        <span class="badge estimates">Estimate — relative value to advertisers/platforms</span>
+      </div>
+      <div class="panel" id="assetsPanel"></div>
+    </div>
+
+    <!-- 10: IMPROVEMENT PLAN + SIMULATOR -->
+    <div class="dfr-section" id="sec-plan">
+      <div class="dfr-section-head">
+        <h2><span class="idx">09</span>Privacy Improvement Plan</h2>
+        <span class="badge estimates">Estimate — simulator recalculates with the same illustrative model</span>
+      </div>
+      <div class="sim-grid">
+        <div class="panel" id="planPanel"></div>
+        <div class="sim-panel">
+          <h3>Privacy Improvement Simulator</h3>
+          <div class="hint">Untick a service to see how removing it might shift your scores. Nothing here is sent anywhere — it's a local, illustrative recalculation.</div>
+          <div class="toggle-list" id="toggleList"></div>
+          <div class="sim-results">
+            <div class="sim-result-card"><div class="l">Footprint</div><div class="v" id="simFootprint">--</div></div>
+            <div class="sim-result-card"><div class="l">Privacy</div><div class="v" id="simPrivacy">--</div></div>
+          </div>
+          <button class="sim-reset" id="simReset">RESET SIMULATOR</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FINAL VERDICT -->
+    <div class="dfr-section" id="sec-verdict">
+      <div class="verdict-panel">
+        <h2>Final Verdict</h2>
+        <p id="verdictText"></p>
+        <div class="verdict-tags" id="verdictTags"></div>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      Built from a 15-service self-reported list · All behavioural, demographic, and lifestyle conclusions are Estimates · No private databases were accessed or queried · ABTalks #60DayChallenge
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function(){
+
+  var APPS = [
+    {name:'Instagram', company:'Meta', categories:['Social Media','Entertainment'], types:['Location','Behavioral/Usage Patterns','Social Graph','Photos/Media','Device/Technical Info']},
+    {name:'Snapchat', company:'Snap Inc.', categories:['Social Media','Messaging'], types:['Location','Behavioral/Usage Patterns','Social Graph','Photos/Media','Device/Technical Info']},
+    {name:'TikTok', company:'ByteDance', categories:['Social Media','Entertainment'], types:['Behavioral/Usage Patterns','Social Graph','Photos/Media','Device/Technical Info']},
+    {name:'YouTube', company:'Google (Alphabet)', categories:['Entertainment','Search'], types:['Behavioral/Usage Patterns','Search Intent','Device/Technical Info']},
+    {name:'Discord', company:'Discord Inc.', categories:['Messaging','Gaming'], types:['Communication Metadata','Social Graph','Device/Technical Info']},
+    {name:'WhatsApp', company:'Meta', categories:['Messaging'], types:['Contacts','Communication Metadata','Device/Technical Info']},
+    {name:'iMessage', company:'Apple', categories:['Messaging'], types:['Contacts','Communication Metadata','Device/Technical Info']},
+    {name:'Spotify', company:'Spotify AB', categories:['Entertainment'], types:['Behavioral/Usage Patterns','Device/Technical Info']},
+    {name:'Roblox', company:'Roblox Corp.', categories:['Gaming'], types:['Behavioral/Usage Patterns','Social Graph','Device/Technical Info','Payment/Financial']},
+    {name:'PUBG Mobile', company:'Krafton', categories:['Gaming'], types:['Behavioral/Usage Patterns','Location','Device/Technical Info','Payment/Financial']},
+    {name:'Amazon', company:'Amazon', categories:['Shopping'], types:['Purchase History','Payment/Financial','Identity Details','Behavioral/Usage Patterns']},
+    {name:'Meesho', company:'Meesho', categories:['Shopping'], types:['Purchase History','Payment/Financial','Identity Details','Behavioral/Usage Patterns']},
+    {name:'Google Search', company:'Google (Alphabet)', categories:['Search'], types:['Search Intent','Behavioral/Usage Patterns','Device/Technical Info','Location']},
+    {name:'Google Pay', company:'Google (Alphabet)', categories:['Finance'], types:['Payment/Financial','Identity Details','Location']},
+    {name:'Google Photos', company:'Google (Alphabet)', categories:['Cloud/Photos'], types:['Photos/Media','Biometric Signals','Location','Device/Technical Info']}
+  ];
+
+  var ALL_TYPES = ['Location','Contacts','Behavioral/Usage Patterns','Social Graph','Communication Metadata','Payment/Financial','Purchase History','Search Intent','Photos/Media','Biometric Signals','Device/Technical Info','Identity Details'];
+
+  function uniq(arr){ return arr.filter(function(v,i){return arr.indexOf(v)===i;}); }
+
+  function compute(activeApps){
+    var apps = APPS.filter(function(a){ return activeApps.indexOf(a.name) !== -1; });
+    var total = apps.length;
+    var companies = {};
+    apps.forEach(function(a){ companies[a.company] = (companies[a.company]||0)+1; });
+    var companyList = Object.keys(companies).map(function(c){ return {name:c, count:companies[c]}; });
+    companyList.sort(function(a,b){ return b.count - a.count; });
+    var parentCount = companyList.length;
+    var topShare = total>0 ? (companyList[0] ? companyList[0].count/total : 0) : 0;
+
+    var categories = {};
+    apps.forEach(function(a){ a.categories.forEach(function(c){ categories[c] = (categories[c]||0)+1; }); });
+    var catCount = Object.keys(categories).length;
+
+    var typeSet = {};
+    apps.forEach(function(a){ a.types.forEach(function(t){ typeSet[t]=true; }); });
+    var typeCount = Object.keys(typeSet).length;
+
+    // Footprint score: breadth of services + category spread + data-type breadth
+    var footprint = Math.round(
+      Math.min(40, (total/18)*40) +
+      Math.min(30, (catCount/8)*30) +
+      Math.min(30, (typeCount/12)*30)
+    );
+    footprint = Math.max(0, Math.min(100, footprint));
+
+    // Privacy score: penalize concentration + sensitive category coverage + footprint breadth
+    var sensitiveCats = ['Finance','Cloud/Photos','Messaging','Shopping'];
+    var sensitiveHit = sensitiveCats.filter(function(c){ return categories[c]; }).length;
+    var privacyPenalty = (footprint*0.45) + (topShare*100*0.25) + (sensitiveHit*6);
+    var privacy = Math.round(Math.max(0, Math.min(100, 100 - privacyPenalty)));
+
+    return {
+      apps:apps, total:total, companyList:companyList, parentCount:parentCount,
+      topShare:topShare, categories:categories, catCount:catCount,
+      typeSet:typeSet, typeCount:typeCount, footprint:footprint, privacy:privacy
+    };
+  }
+
+  function tierFootprint(score){
+    if(score<=30) return {label:'Minimal', cls:'tier-minimal', emoji:'🟢'};
+    if(score<=60) return {label:'Moderate', cls:'tier-moderate', emoji:'🟡'};
+    if(score<=80) return {label:'Significant', cls:'tier-significant', emoji:'🟠'};
+    return {label:'Extensive', cls:'tier-extensive', emoji:'🔴'};
+  }
+  function tierPrivacy(score){
+    if(score<=30) return {label:'Weak', cls:'tier-weak', emoji:'🔴'};
+    if(score<=60) return {label:'Fair', cls:'tier-fair', emoji:'🟠'};
+    if(score<=80) return {label:'Good', cls:'tier-good', emoji:'🟡'};
+    return {label:'Strong', cls:'tier-strong', emoji:'🟢'};
+  }
+
+  function gaugeSvg(score, color){
+    var r=46, c=2*Math.PI*r, off=c - (score/100)*c;
+    return '<svg width="104" height="104" viewBox="0 0 104 104">'+
+      '<circle cx="52" cy="52" r="'+r+'" fill="none" stroke="#1a1d2c" stroke-width="9"/>'+
+      '<circle cx="52" cy="52" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="9" stroke-linecap="round" '+
+        'stroke-dasharray="'+c+'" stroke-dashoffset="'+off+'" />'+
+      '</svg>';
+  }
+
+  var ALL_NAMES = APPS.map(function(a){return a.name;});
+  var STATE = ALL_NAMES.slice();
+
+  function render(){
+    var d = compute(STATE);
+    renderScores(d);
+    renderHeatmap(d);
+    renderRanking(d);
+    renderMatrix(d);
+    renderRadar(d);
+    renderTwin(d);
+    renderWow(d);
+    renderAssets(d);
+    renderPlan(d);
+    renderVerdict(d);
+    renderSimulator(d);
+  }
+
+  function renderScores(d){
+    var ft = tierFootprint(d.footprint), pt = tierPrivacy(d.privacy);
+    var fColor = d.footprint<=30?'#36d399':d.footprint<=60?'#e8d44d':d.footprint<=80?'#f0a531':'#ff5d72';
+    var pColor = d.privacy<=30?'#ff5d72':d.privacy<=60?'#f0a531':d.privacy<=80?'#e8d44d':'#36d399';
+
+    var html = '';
+    html += '<div class="score-card gauge">'+
+      '<div class="label">Digital Footprint</div>'+
+      '<div class="gauge-wrap">'+gaugeSvg(d.footprint, fColor)+
+        '<div class="gauge-center"><span class="num">'+d.footprint+'</span><span class="of">/ 100</span></div></div>'+
+      '<div class="tier '+ft.cls+'">'+ft.emoji+' '+ft.label+'</div>'+
+    '</div>';
+
+    html += '<div class="score-card gauge">'+
+      '<div class="label">Privacy Score</div>'+
+      '<div class="gauge-wrap">'+gaugeSvg(d.privacy, pColor)+
+        '<div class="gauge-center"><span class="num">'+d.privacy+'</span><span class="of">/ 100</span></div></div>'+
+      '<div class="tier '+pt.cls+'">'+pt.emoji+' '+pt.label+'</div>'+
+    '</div>';
+
+    html += statCard('Total Services Used', d.total, 'Fact');
+    html += statCard('Parent Companies', d.parentCount, 'Fact');
+    html += statCard('Ecosystem Concentration', Math.round(d.topShare*100)+'%', 'Estimate · '+(d.companyList[0]?d.companyList[0].name:'—')+' share');
+    html += statCard('Tracking Surface', d.typeCount+' / 12', 'Estimate · distinct data-type categories');
+
+    document.getElementById('scoreGrid').innerHTML = html;
+  }
+  function statCard(label, big, sub){
+    return '<div class="score-card"><div class="label">'+label+'</div><div class="big">'+big+'</div><div class="stat-sub">'+sub+'</div></div>';
+  }
+
+  var CAT_ICON = {'Social Media':'📱','Entertainment':'🎬','Messaging':'💬','Gaming':'🎮','Shopping':'🛍️','Search':'🔍','Finance':'💳','Cloud/Photos':'🖼️'};
+
+  function renderHeatmap(d){
+    var cats = Object.keys(d.categories);
+    var max = Math.max.apply(null, cats.map(function(c){return d.categories[c];}).concat([1]));
+    var html = cats.map(function(c){
+      var count = d.categories[c];
+      var intensity = count/max;
+      var bg = 'rgba(240,165,49,'+(0.06+intensity*0.28)+')';
+      var apps = d.apps.filter(function(a){return a.categories.indexOf(c)!==-1;}).map(function(a){return a.name;}).join(', ');
+      var score = Math.round(intensity*100);
+      return '<div class="heat-tile" style="background:'+bg+'">'+
+        '<div class="cat">'+(CAT_ICON[c]||'•')+' '+c+'</div>'+
+        '<div class="apps">'+apps+'</div>'+
+        '<div class="score" style="color:'+(intensity>0.66?'#ff5d72':intensity>0.33?'#f0a531':'#36d399')+'">'+score+'</div>'+
+      '</div>';
+    }).join('');
+    document.getElementById('heatmapGrid').innerHTML = html || '<div class="apps">Not enough information provided.</div>';
+  }
+
+  function renderRanking(d){
+    if(d.companyList.length===0){ document.getElementById('rankPanel').innerHTML = 'Not enough information provided.'; return; }
+    var max = d.companyList[0].count;
+    var html = d.companyList.map(function(c,i){
+      var pct = Math.round((c.count/Math.max(d.total,1))*100);
+      var width = Math.round((c.count/max)*100);
+      return '<div class="rank-row">'+
+        '<div class="rank-name"><span class="n">'+(i+1)+'</span>'+c.name+'</div>'+
+        '<div class="rank-bar-track"><div class="rank-bar-fill" style="width:'+width+'%"></div></div>'+
+        '<div class="rank-meta">'+c.count+' app'+(c.count>1?'s':'')+' · '+pct+'%</div>'+
+      '</div>';
+    }).join('');
+    document.getElementById('rankPanel').innerHTML = html;
+  }
+
+  function renderMatrix(d){
+    if(d.companyList.length===0){ document.getElementById('matrixTable').innerHTML=''; return; }
+    var head = '<tr><th>Company</th>'+ALL_TYPES.map(function(t){return '<th>'+t.split('/')[0]+'</th>';}).join('')+'</tr>';
+    var rows = d.companyList.map(function(c){
+      var companyApps = d.apps.filter(function(a){return a.company===c.name;});
+      var typesForCompany = {};
+      companyApps.forEach(function(a){ a.types.forEach(function(t){ typesForCompany[t]=true; }); });
+      var cells = ALL_TYPES.map(function(t){
+        return '<td><span class="dot '+(typesForCompany[t]?'on':'off')+'"></span></td>';
+      }).join('');
+      return '<tr><td>'+c.name+'</td>'+cells+'</tr>';
+    }).join('');
+    document.getElementById('matrixTable').innerHTML = head + rows;
+  }
+
+  var RADAR_AXES = [
+    {key:'Identity', label:'Identity Exposure', types:['Identity Details','Contacts']},
+    {key:'Financial', label:'Financial Exposure', types:['Payment/Financial','Purchase History']},
+    {key:'Social', label:'Social Graph Exposure', types:['Social Graph']},
+    {key:'Behavioral', label:'Behavioral Tracking', types:['Behavioral/Usage Patterns','Search Intent']},
+    {key:'Location', label:'Location Exposure', types:['Location']},
+    {key:'Comms', label:'Communication Exposure', types:['Communication Metadata']}
+  ];
+
+  function renderRadar(d){
+    var n = RADAR_AXES.length;
+    var cx=160, cy=160, R=110;
+    var values = RADAR_AXES.map(function(ax){
+      var hits = d.apps.filter(function(a){ return ax.types.some(function(t){ return a.types.indexOf(t)!==-1; }); }).length;
+      var val = d.total>0 ? Math.min(100, Math.round((hits/d.total)*130)) : 0;
+      return val;
+    });
+
+    var rings = [0.25,0.5,0.75,1].map(function(f){
+      var pts = [];
+      for(var i=0;i<n;i++){
+        var ang = (Math.PI*2*i/n) - Math.PI/2;
+        pts.push((cx+R*f*Math.cos(ang)).toFixed(1)+','+(cy+R*f*Math.sin(ang)).toFixed(1));
+      }
+      return '<polygon points="'+pts.join(' ')+'" fill="none" stroke="#1f2233" stroke-width="1"/>';
+    }).join('');
+
+    var axesLines = '';
+    var labels = '';
+    for(var i=0;i<n;i++){
+      var ang = (Math.PI*2*i/n) - Math.PI/2;
+      var x2 = cx+R*Math.cos(ang), y2 = cy+R*Math.sin(ang);
+      axesLines += '<line x1="'+cx+'" y1="'+cy+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+'" stroke="#1f2233" stroke-width="1"/>';
+      var lx = cx+(R+22)*Math.cos(ang), ly = cy+(R+22)*Math.sin(ang);
+      labels += '<text x="'+lx.toFixed(1)+'" y="'+ly.toFixed(1)+'" fill="#8b8fa6" font-size="9.5" font-family="monospace" text-anchor="middle" dominant-baseline="middle">'+RADAR_AXES[i].key+'</text>';
+    }
+
+    var dataPts = values.map(function(v,i){
+      var ang = (Math.PI*2*i/n) - Math.PI/2;
+      var f = v/100;
+      return (cx+R*f*Math.cos(ang)).toFixed(1)+','+(cy+R*f*Math.sin(ang)).toFixed(1);
+    });
+
+    var poly = '<polygon points="'+dataPts.join(' ')+'" fill="rgba(240,165,49,0.22)" stroke="#f0a531" stroke-width="2"/>';
+    var dots = values.map(function(v,i){
+      var ang = (Math.PI*2*i/n) - Math.PI/2;
+      var f = v/100;
+      var x=cx+R*f*Math.cos(ang), y=cy+R*f*Math.sin(ang);
+      return '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="3.5" fill="#f0a531"/>';
+    }).join('');
+
+    document.getElementById('radarSvg').innerHTML = rings+axesLines+poly+dots+labels;
+
+    var legend = RADAR_AXES.map(function(ax,i){
+      return '<div class="row"><span>'+ax.label+'</span><b>'+values[i]+'</b></div>';
+    }).join('');
+    document.getElementById('radarLegend').innerHTML = legend;
+  }
+
+  function renderTwin(d){
+    if(d.total===0){ document.getElementById('twinList').innerHTML = 'Not enough information provided.'; return; }
+    var cats = Object.keys(d.categories);
+    var topCat = cats.sort(function(a,b){return d.categories[b]-d.categories[a];})[0];
+    var hasGaming = !!d.categories['Gaming'];
+    var hasShopping = !!d.categories['Shopping'];
+    var hasFinance = !!d.categories['Finance'];
+    var hasSocial = !!d.categories['Social Media'];
+
+    var traits = [
+      ['Primary surface', topCat ? topCat+' (heaviest category by app count)' : '—'],
+      ['Likely device type', 'Mobile-first usage pattern', true],
+      ['Social engagement', hasSocial ? 'Active across short-form / visual platforms' : 'Lower social-media presence', true],
+      ['Commerce behaviour', hasShopping ? 'Engages with online marketplaces, value-conscious platforms present' : 'No strong shopping signal', true],
+      ['Financial digitization', hasFinance ? 'Comfortable with digital/UPI-style payments' : 'No direct payment-app signal', true],
+      ['Entertainment style', d.categories['Entertainment'] ? 'Streaming + short-video consumption likely' : '—', true],
+      ['Gaming involvement', hasGaming ? 'Casual-to-regular mobile/online gaming' : 'No gaming signal', true],
+      ['Possible region', 'Service mix (e.g. regionally popular apps) loosely suggests South/South-East Asia', true]
+    ];
+
+    var html = traits.map(function(t){
+      var pill = t[2] ? '<span class="est-pill">ESTIMATE</span>' : '';
+      return '<div class="twin-trait"><span>'+t[0]+pill+'</span><span class="val">'+t[1]+'</span></div>';
+    }).join('');
+    document.getElementById('twinList').innerHTML = html;
+  }
+
+  function renderWow(d){
+    if(d.total===0){ document.getElementById('wowGrid').innerHTML = 'Not enough information provided.'; return; }
+    var top = d.companyList[0];
+    var googleCount = (d.companyList.find(function(c){return c.name==='Google (Alphabet)';})||{count:0}).count;
+    var html = '';
+    html += wowCard(Math.round((top.count/d.total)*100)+'%', 'of your listed services funnel into <b>'+top.name+'</b> alone.', 'Fact (from the mapping)');
+    html += wowCard(d.typeCount+'/12', 'distinct data-type categories are estimated to be touched across your app set.', 'Estimate');
+    html += wowCard(googleCount, 'of your 15 services sit inside a single company\'s ecosystem (Alphabet) — search, video, payments and photos together.', 'Fact (from the mapping)');
+    document.getElementById('wowGrid').innerHTML = html;
+  }
+  function wowCard(num, desc, tag){
+    return '<div class="wow-card"><div class="num">'+num+'</div><div class="desc">'+desc+'</div><div class="desc" style="margin-top:8px;opacity:.6">'+tag+'</div></div>';
+  }
+
+  var ASSET_DEFS = [
+    {name:'Payment & Financial Signals', types:['Payment/Financial'], why:'Direct purchase intent and spending capacity — highest commercial value.'},
+    {name:'Social Graph', types:['Social Graph'], why:'Who you connect with, powers ad targeting and recommendation systems.'},
+    {name:'Location History', types:['Location'], why:'Movement patterns enable hyper-local targeting and habit inference.'},
+    {name:'Search & Behavioral Intent', types:['Search Intent','Behavioral/Usage Patterns'], why:'Reveals interests and near-term needs before you act on them.'},
+    {name:'Photos & Biometric Signals', types:['Photos/Media','Biometric Signals'], why:'Visual content can expose people, places and routines.'},
+    {name:'Contacts & Communication Metadata', types:['Contacts','Communication Metadata'], why:'Maps your real-world social network beyond the app itself.'}
+  ];
+
+  function renderAssets(d){
+    if(d.total===0){ document.getElementById('assetsPanel').innerHTML = 'Not enough information provided.'; return; }
+    var scored = ASSET_DEFS.map(function(a){
+      var hits = d.apps.filter(function(app){ return a.types.some(function(t){ return app.types.indexOf(t)!==-1; }); }).length;
+      return {name:a.name, why:a.why, hits:hits};
+    }).filter(function(a){ return a.hits>0; });
+    scored.sort(function(a,b){ return b.hits-a.hits; });
+    var max = scored.length?scored[0].hits:1;
+    var html = scored.map(function(a,i){
+      var ratio = a.hits/max;
+      var cls = ratio>0.7?'high':ratio>0.4?'med':'';
+      return '<div class="asset-row">'+
+        '<div class="asset-rank">'+(i+1)+'</div>'+
+        '<div><div class="asset-name">'+a.name+'</div><div class="asset-why">'+a.why+'</div></div>'+
+        '<div class="asset-value '+cls+'">'+a.hits+' / '+d.total+' apps</div>'+
+      '</div>';
+    }).join('');
+    document.getElementById('assetsPanel').innerHTML = html || 'Not enough information provided.';
+  }
+
+  function renderPlan(d){
+    var items = [
+      'Review and tighten privacy settings on the '+(d.companyList[0]?d.companyList[0].name:'top')+' ecosystem first — it accounts for the largest single concentration of your activity.',
+      'Turn off ad personalization / interest-based ads on Google and Meta account settings where applicable.',
+      'Regularly clear or pause location history on Google Search, Google Pay and Google Photos.',
+      'Use separate, non-primary emails for shopping apps like Amazon and Meesho to reduce identity linkage.',
+      'Disable contact-sync on messaging apps (WhatsApp, Discord) unless actively needed.',
+      'Periodically audit app permissions (camera, mic, contacts, location) on gaming apps such as Roblox and PUBG Mobile.',
+      'Consider a password manager and unique logins per service to reduce cross-platform correlation.'
+    ];
+    document.getElementById('planPanel').innerHTML = items.map(function(t){
+      return '<div class="plan-item"><span class="chk">✓</span><span>'+t+'</span></div>';
+    }).join('');
+  }
+
+  function renderVerdict(d){
+    var ft = tierFootprint(d.footprint), pt = tierPrivacy(d.privacy);
+    var text = 'Based purely on the '+d.total+' services you listed, spread across '+d.parentCount+' parent companies, your estimated digital footprint comes out as <b>'+ft.label+'</b> ('+d.footprint+'/100), while your estimated privacy posture is <b>'+pt.label+'</b> ('+d.privacy+'/100). The biggest concentration sits with '+(d.companyList[0]?d.companyList[0].name:'—')+', which alone touches an estimated '+Math.round(d.topShare*100)+'% of your reported activity. None of this reflects actual account data — it is a structured, transparent estimate built only from the service list provided.';
+    document.getElementById('verdictText').innerHTML = text;
+    document.getElementById('verdictTags').innerHTML =
+      '<span class="verdict-tag">'+ft.emoji+' Footprint: '+ft.label+'</span>'+
+      '<span class="verdict-tag">'+pt.emoji+' Privacy: '+pt.label+'</span>'+
+      '<span class="verdict-tag">🏢 '+d.parentCount+' parent companies</span>'+
+      '<span class="verdict-tag">📡 '+d.typeCount+'/12 tracking surface</span>';
+  }
+
+  function renderSimulator(d){
+    var list = document.getElementById('toggleList');
+    if(!list.dataset.built){
+      list.innerHTML = ALL_NAMES.map(function(n){
+        return '<label class="toggle-item"><input type="checkbox" value="'+n+'" checked/> '+n+'</label>';
+      }).join('');
+      list.dataset.built = '1';
+      list.addEventListener('change', function(){
+        var checked = Array.prototype.slice.call(list.querySelectorAll('input:checked')).map(function(i){return i.value;});
+        STATE = checked;
+        var nd = compute(STATE);
+        document.getElementById('simFootprint').textContent = nd.footprint;
+        document.getElementById('simPrivacy').textContent = nd.privacy;
+      });
+    }
+    document.getElementById('simFootprint').textContent = d.footprint;
+    document.getElementById('simPrivacy').textContent = d.privacy;
+  }
+
+  document.getElementById('simReset') && document.getElementById('simReset').addEventListener('click', function(){
+    STATE = ALL_NAMES.slice();
+    var list = document.getElementById('toggleList');
+    Array.prototype.slice.call(list.querySelectorAll('input')).forEach(function(i){ i.checked = true; });
+    render();
+  });
+
+  render();
+})();
+</script>
