@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Think Like a Marketing Strategist: Grow This Brand</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  :root{
+    --bg:#0a0a0a;
+    --bg-panel:#141311;
+    --bg-panel-2:#1b1a17;
+    --border:#2a2822;
+    --amber:#F2A627;
+    --amber-dim:#7a5a1f;
+    --amber-glow:rgba(242,166,39,0.25);
+    --text:#e9e6df;
+    --text-dim:#8f8b81;
+    --good:#6fcf7c;
+    --bad:#e0574c;
+    --mono: 'IBM Plex Mono','Courier New',monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background-color:var(--bg);
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(242,166,39,0.07) 1px, transparent 0);
+    background-size: 26px 26px;
+    color:var(--text);
+    font-family:var(--mono);
+    min-height:100vh;
+    line-height:1.5;
+  }
+  #root{min-height:100vh;}
+  .app-shell{
+    max-width:880px;
+    margin:0 auto;
+    padding:20px 18px 60px;
+  }
+  ::selection{ background:var(--amber-glow); color:var(--text); }
+
+  /* Terminal chrome */
+  .terminal-bar{
+    display:flex; align-items:center; justify-content:space-between;
+    border:1px solid var(--border);
+    border-radius:10px 10px 0 0;
+    background:var(--bg-panel-2);
+    padding:10px 16px;
+  }
+  .terminal-dots{ display:flex; gap:6px; }
+  .dot{ width:10px; height:10px; border-radius:50%; background:#3a3730; }
+  .dot.red{background:#e0574c66;}
+  .dot.yellow{background:#F2A62766;}
+  .dot.green{background:#6fcf7c66;}
+  .terminal-title{
+    color:var(--text-dim); font-size:12px; letter-spacing:0.12em; text-transform:uppercase;
+  }
+  .terminal-cursor{
+    display:inline-block; width:8px; height:14px; background:var(--amber);
+    margin-left:6px; vertical-align:-2px;
+    animation: blink 1.1s steps(1) infinite;
+  }
+  @keyframes blink{ 50%{ opacity:0; } }
+
+  .content-frame{
+    border:1px solid var(--border); border-top:none;
+    border-radius:0 0 10px 10px;
+    background:linear-gradient(180deg, rgba(20,19,17,0.4), rgba(10,10,10,0.2));
+    padding:26px 22px;
+  }
+  @media (max-width:560px){
+    .content-frame{padding:18px 14px;}
+  }
+
+  /* Progress steps */
+  .progress-wrap{ margin:18px 0 26px; }
+  .progress-steps{
+    display:flex; align-items:center; gap:4px; flex-wrap:wrap;
+  }
+  .step-node{
+    display:flex; align-items:center; gap:8px;
+  }
+  .step-circle{
+    width:24px; height:24px; border-radius:50%;
+    border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center;
+    font-size:11px; color:var(--text-dim);
+    background:var(--bg-panel);
+    flex-shrink:0;
+    transition:all .3s ease;
+  }
+  .step-circle.done{ background:var(--amber); border-color:var(--amber); color:#0a0a0a; }
+  .step-circle.active{ border-color:var(--amber); color:var(--amber); box-shadow:0 0 0 3px var(--amber-glow); }
+  .step-line{ width:16px; height:1px; background:var(--border); }
+  .step-line.done{ background:var(--amber-dim); }
+  .step-label{ font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.08em; display:none; }
+  @media (min-width:720px){ .step-label{ display:inline; } }
+
+  /* Screen transition */
+  .screen{ animation: fadeUp .45s ease; }
+  @keyframes fadeUp{
+    from{ opacity:0; transform:translateY(10px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+
+  h1,h2,h3{ font-family:var(--mono); font-weight:600; margin:0 0 8px; letter-spacing:-0.01em; }
+  h1{ font-size:28px; color:var(--text); }
+  h2{ font-size:20px; color:var(--text); }
+  h3{ font-size:15px; color:var(--amber); text-transform:uppercase; letter-spacing:.08em; }
+  p{ margin:0 0 12px; color:var(--text); }
+  .eyebrow{
+    color:var(--amber); font-size:12px; letter-spacing:.14em; text-transform:uppercase; margin-bottom:8px;
+    display:flex; align-items:center; gap:6px;
+  }
+  .eyebrow:before{ content:'>'; color:var(--amber-dim); }
+  .dim{ color:var(--text-dim); }
+  .small{ font-size:13px; }
+
+  /* Cards */
+  .card{
+    background:var(--bg-panel);
+    border:1px solid var(--border);
+    border-left:3px solid var(--amber-dim);
+    border-radius:8px;
+    padding:16px 18px;
+    margin-bottom:14px;
+    transition:border-color .2s ease, transform .15s ease, box-shadow .2s ease;
+  }
+  .card.explain{ border-left-color:var(--amber-dim); }
+  .card-title{ font-weight:600; margin-bottom:6px; color:var(--text); }
+
+  .why-block{
+    display:grid; grid-template-columns:1fr; gap:10px; margin:14px 0;
+  }
+  @media (min-width:640px){ .why-block{ grid-template-columns:1fr 1fr; } }
+  .why-box{
+    background:var(--bg-panel-2); border:1px solid var(--border); border-radius:8px; padding:12px 14px;
+  }
+  .why-box .label{ font-size:11px; color:var(--amber); text-transform:uppercase; letter-spacing:.1em; margin-bottom:6px; }
+
+  /* Choice grid */
+  .choice-grid{
+    display:grid; grid-template-columns:1fr; gap:12px; margin:16px 0;
+  }
+  @media (min-width:640px){ .choice-grid.cols-3{ grid-template-columns:repeat(3,1fr); } .choice-grid.cols-2{grid-template-columns:repeat(2,1fr);} }
+  .choice-card{
+    background:var(--bg-panel);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:16px;
+    cursor:pointer;
+    transition:all .18s ease;
+    text-align:left;
+  }
+  .choice-card:hover{ border-color:var(--amber-dim); transform:translateY(-2px); }
+  .choice-card.selected{ border-color:var(--amber); box-shadow:0 0 0 1px var(--amber), 0 0 22px var(--amber-glow); }
+  .choice-card .icon{ font-size:26px; margin-bottom:8px; display:block; }
+  .choice-card .title{ font-weight:600; margin-bottom:4px; }
+  .choice-card .desc{ font-size:12.5px; color:var(--text-dim); }
+  .fit-badge{
+    display:inline-block; font-size:10px; text-transform:uppercase; letter-spacing:.08em;
+    padding:2px 8px; border-radius:20px; margin-left:6px; border:1px solid transparent;
+  }
+  .fit-strong{ color:var(--good); border-color:var(--good); background:rgba(111,207,124,0.08); }
+  .fit-moderate{ color:var(--amber); border-color:var(--amber); background:rgba(242,166,39,0.08); }
+  .fit-weak{ color:var(--bad); border-color:var(--bad); background:rgba(224,87,76,0.08); }
+
+  /* Buttons */
+  .btn-row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:18px; }
+  button{ font-family:var(--mono); cursor:pointer; }
+  .btn-primary, .btn-secondary, .btn-ghost{
+    border-radius:8px; padding:11px 20px; font-size:13px; letter-spacing:.03em;
+    border:1px solid var(--amber); transition:all .15s ease;
+  }
+  .btn-primary{ background:var(--amber); color:#0a0a0a; font-weight:600; }
+  .btn-primary:hover{ background:#ffb646; }
+  .btn-primary:disabled{ opacity:.35; cursor:not-allowed; }
+  .btn-secondary{ background:transparent; color:var(--amber); }
+  .btn-secondary:hover{ background:var(--amber-glow); }
+  .btn-ghost{ border-color:var(--border); color:var(--text-dim); background:transparent; }
+  .btn-ghost:hover{ color:var(--text); border-color:var(--text-dim); }
+
+  /* Form */
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:12px; color:var(--text-dim); text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px; }
+  .field input, .field select, .field textarea{
+    width:100%; background:var(--bg-panel-2); border:1px solid var(--border); border-radius:6px;
+    padding:10px 12px; color:var(--text); font-family:var(--mono); font-size:14px;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{ outline:none; border-color:var(--amber); }
+  .field textarea{ resize:vertical; min-height:64px; }
+
+  /* Ask Claude card */
+  .ask-claude{
+    border:1px dashed var(--amber-dim);
+    border-radius:10px;
+    background:rgba(242,166,39,0.04);
+    padding:16px 18px;
+    margin-top:20px;
+  }
+  .ask-claude .head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; gap:10px; }
+  .ask-claude .head .tag{
+    font-size:11px; color:var(--amber); text-transform:uppercase; letter-spacing:.1em;
+    display:flex; align-items:center; gap:6px;
+  }
+  .ask-claude pre{
+    white-space:pre-wrap; word-break:break-word;
+    background:var(--bg); border:1px solid var(--border); border-radius:6px;
+    padding:12px 14px; font-size:12.5px; color:var(--text); margin:0;
+  }
+  .copy-btn{
+    background:transparent; border:1px solid var(--amber-dim); color:var(--amber);
+    border-radius:6px; padding:5px 10px; font-size:11px;
+  }
+  .copy-btn:hover{ background:var(--amber-glow); }
+
+  /* Progress bar (percentage) */
+  .bar-track{ height:6px; background:var(--bg-panel-2); border-radius:4px; overflow:hidden; border:1px solid var(--border); }
+  .bar-fill{ height:100%; background:linear-gradient(90deg,var(--amber-dim),var(--amber)); transition:width .5s ease; }
+
+  .divider{ height:1px; background:var(--border); margin:20px 0; }
+
+  ul.clean{ padding-left:18px; margin:0 0 12px; }
+  ul.clean li{ margin-bottom:6px; color:var(--text); }
+
+  .tag-row{ display:flex; flex-wrap:wrap; gap:8px; margin:10px 0; }
+  .pill{
+    font-size:12px; padding:5px 12px; border-radius:20px; border:1px solid var(--amber-dim); color:var(--amber);
+    background:rgba(242,166,39,0.06);
+  }
+
+  .stars{ color:var(--amber); letter-spacing:2px; font-size:15px; }
+
+  .quiz-options{ display:flex; flex-wrap:wrap; gap:10px; margin:12px 0; }
+  .quiz-btn{
+    background:var(--bg-panel-2); border:1px solid var(--border); border-radius:8px;
+    padding:10px 14px; font-size:13px; color:var(--text);
+  }
+  .quiz-btn:hover{ border-color:var(--amber-dim); }
+  .quiz-btn.chosen{ border-color:var(--amber); color:var(--amber); }
+
+  .callout{
+    border:1px solid var(--border); border-radius:8px; padding:12px 14px; margin-top:10px;
+    background:var(--bg-panel-2); font-size:13.5px;
+  }
+  .callout.good{ border-color:var(--good); }
+  .callout.bad{ border-color:var(--bad); }
+
+  .report-grid{ display:grid; grid-template-columns:1fr; gap:14px; }
+  @media (min-width:640px){ .report-grid{ grid-template-columns:1fr 1fr; } }
+
+  .logo-mark{ color:var(--amber); }
+  a{ color:var(--amber); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useMemo, useRef } = React;
+
+/* ---------------------------------------------------------
+   DATA
+--------------------------------------------------------- */
+
+const STEPS = ['mode','setup','audience','platforms','pillars','roadmap','event','report'];
+const STEP_LABELS = {
+  mode:'Mode', setup:'Brief', audience:'Audience', platforms:'Platforms',
+  pillars:'Pillars', roadmap:'Roadmap', event:'Curveball', report:'Report'
+};
+
+function randomFrom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+const RANDOM_CLIENTS = [
+  { name:'Brew & Co.', industry:'Specialty Coffee Shop', audience:'Urban professionals aged 25–40 who care about quality and sustainability', budget:'Modest ($500–2,000/month)', competitors:['Daily Grind Coffee','The Roast House'], challenge:'Heavy foot-traffic competition from big chains nearby' },
+  { name:'Pulse Fit', industry:'Fitness App', audience:'Busy adults 22–35 who want quick home workouts', budget:'Healthy ($2,000–10,000/month)', competitors:['FormTrack','QuickSweat'], challenge:'High customer acquisition cost and low app retention past week 2' },
+  { name:'Thread & Soil', industry:'Sustainable Fashion Brand', audience:'Eco-conscious shoppers aged 20–34', budget:'Shoestring (under $500/month)', competitors:['Reweave','EarthLoom'], challenge:'Customers love the mission but hesitate at the price point' },
+  { name:'Pawsitive Grooming', industry:'Pet Grooming Service', audience:'Local pet owners within a 10-mile radius', budget:'Shoestring (under $500/month)', competitors:['Fluffy Tails Spa','The Dog House'], challenge:'Low repeat booking rate after the first visit' },
+  { name:'SkillForge', industry:'Online Course Platform', audience:'Career-switchers aged 25–45 learning tech skills', budget:'Healthy ($2,000–10,000/month)', competitors:['LearnLeap','PathUp'], challenge:'Lots of free trial signups but very few paid conversions' },
+  { name:'Hopwell Brewing', industry:'Craft Brewery', audience:'Local beer enthusiasts aged 25–50', budget:'Modest ($500–2,000/month)', competitors:['Ironclad Ales','Fernbrook Brewery'], challenge:'Strong in-taproom loyalty but almost no online visibility' },
+  { name:'Lumen Skin', industry:'Skincare Brand', audience:'Women 24–40 dealing with sensitive skin', budget:'Modest ($500–2,000/month)', competitors:['GlowState','BareLab'], challenge:'Crowded market where every competitor claims to be "clean" and "gentle"' },
+  { name:'Rook & Roll', industry:'Board Game Café', audience:'Students and young professionals looking for social hangouts', budget:'Shoestring (under $500/month)', competitors:['Meeple House','Dice Dojo'], challenge:'Great reviews from visitors, but almost no one hears about it beforehand' },
+  { name:'Linguo', industry:'Language Learning App', audience:'Adult self-learners aged 18–34 preparing to travel or work abroad', budget:'Healthy ($2,000–10,000/month)', competitors:['TalkFluent','Voxa'], challenge:'Massive competition from free apps with huge marketing budgets' },
+  { name:'Millbrook Bakery', industry:'Local Bakery', audience:'Families and local regulars within walking distance', budget:'Shoestring (under $500/month)', competitors:['Sweet Row Bakery','Crust & Co.'], challenge:'Sales spike on weekends but are very quiet on weekdays' },
+  { name:'Ledgerly', industry:'B2B Accounting SaaS', audience:'Owners of small businesses with 5–50 employees', budget:'Healthy ($2,000–10,000/month)', competitors:['QuickBooks Lite','NumberNest'], challenge:'Long sales cycle and low brand trust versus established players' },
+  { name:'Nestwork', industry:'B2B Coworking & Office Consulting', audience:'Operations leads at growing startups', budget:'Modest ($500–2,000/month)', competitors:['DeskFlow','OfficeCraft Consulting'], challenge:'Prospects don\u2019t realize they need the service until it\u2019s too late' },
+];
+
+function isB2B(profile){
+  return /saas|b2b|software|consulting|agency/i.test(profile.industry || '');
+}
+
+const PLATFORM_LIST = ['Instagram','TikTok','LinkedIn','X (Twitter)','YouTube','Facebook','Pinterest','Newsletter / Email'];
+
+const PLATFORM_META = {
+  'Instagram': { icon:'📸', format:'Photos, short Reels, and Stories — visual, aesthetic, lifestyle-driven.' },
+  'TikTok': { icon:'🎵', format:'Short-form video with sound and trends — fast, casual, discovery-first.' },
+  'LinkedIn': { icon:'💼', format:'Professional posts and articles — credibility, networking, B2B reach.' },
+  'X (Twitter)': { icon:'💬', format:'Real-time text takes and threads — opinions, news, niche conversation.' },
+  'YouTube': { icon:'▶️', format:'Long-form and short video — deep trust-building, but production-heavy.' },
+  'Facebook': { icon:'👥', format:'Groups, events, community — reaches an older, local audience well.' },
+  'Pinterest': { icon:'📌', format:'Visual discovery and search — strong for inspiration-driven categories.' },
+  'Newsletter / Email': { icon:'✉️', format:'Owned audience, direct inbox access — not at the mercy of an algorithm.' },
+};
+
+function getPlatformFit(name, mode, profile){
+  const b2b = isB2B(profile);
+  const visualNiche = /fashion|home|decor|food|bak|beauty|skincare|wedding|craft|garden/i.test(profile.industry || '');
+  if (mode === 'personal') {
+    const table = {
+      'Instagram': { level:'Moderate', reason:`Good for showing the human side of ${profile.name}\u2019s work and story, but it won\u2019t carry your expertise on its own.` },
+      'TikTok': { level:'Moderate', reason:`Can spread your ideas about ${profile.industry} fast to new people, but the tone has to stay casual and quick.` },
+      'LinkedIn': { level:'Strong', reason:`This is where people evaluate expertise. Perfect home base for ${profile.name} to build authority in ${profile.industry}.` },
+      'X (Twitter)': { level:'Strong', reason:`Ideal for sharing quick opinions and joining conversations happening in the ${profile.industry} space in real time.` },
+      'YouTube': { level:'Strong', reason:`Long-form video builds the deepest trust — but it takes more time per piece of content to produce well.` },
+      'Facebook': { level:'Weak', reason:`Mostly friends-and-family use now; not where people go to discover new experts.` },
+      'Pinterest': { level:'Weak', reason:`Built for visual product discovery, not personal authority — skip unless your niche is highly visual.` },
+      'Newsletter / Email': { level:'Strong', reason:`This is the one channel no algorithm can take away from ${profile.name}. Best for turning followers into a real audience.` },
+    };
+    return table[name];
+  }
+  const table = {
+    'Instagram': b2b
+      ? { level:'Weak', reason:`${profile.name}\u2019s buyers are researching solutions, not scrolling for lifestyle content — low priority for a ${profile.industry.toLowerCase()}.` }
+      : { level:'Strong', reason:`Visual storytelling suits a ${profile.industry.toLowerCase()} well and reaches ${profile.audience.split(' ').slice(0,4).join(' ')}... where they already scroll.` },
+    'TikTok': b2b
+      ? { level:'Weak', reason:`Decision-makers for a ${profile.industry.toLowerCase()} aren\u2019t buying based on short-form entertainment.` }
+      : { level:'Strong', reason:`Great discovery engine for a ${profile.industry.toLowerCase()} — algorithm rewards new accounts with real reach.` },
+    'LinkedIn': b2b
+      ? { level:'Strong', reason:`This is exactly where B2B buyers for ${profile.name} research vendors and follow industry voices.` }
+      : { level:'Weak', reason:`This audience isn\u2019t buying a ${profile.industry.toLowerCase()} through a professional network — low return here.` },
+    'X (Twitter)': b2b
+      ? { level:'Strong', reason:`Good for building thought leadership and getting in front of the operators and founders who buy ${profile.industry.toLowerCase()} tools.` }
+      : { level:'Moderate', reason:`Useful for customer service and niche conversation, but not a primary discovery channel for this audience.` },
+    'YouTube': { level:'Moderate', reason:`Strong if ${profile.name} can show the product or process in action — but it demands more time per post than other channels.` },
+    'Facebook': b2b
+      ? { level:'Weak', reason:`Organic reach here has dropped and it under-indexes for B2B buyers.` }
+      : { level:'Moderate', reason:`Good for local community building and reaching an older segment of ${profile.audience.split(' ').slice(0,3).join(' ')}...` },
+    'Pinterest': visualNiche
+      ? { level:'Strong', reason:`${profile.industry} is a highly visual, inspiration-driven category — exactly what Pinterest search rewards.` }
+      : { level:'Weak', reason:`This category isn\u2019t typically searched for on Pinterest — low priority.` },
+    'Newsletter / Email': { level:'Strong', reason:`Regardless of industry, an owned list is the most reliable channel ${profile.name} can build for repeat business.` },
+  };
+  return table[name];
+}
+
+const PILLARS_BUSINESS = [
+  { name:'Product Education', goal:'Trust & Consideration', description:'Show how the product works and why it\u2019s made the way it is.' },
+  { name:'Customer Stories & Testimonials', goal:'Trust & Conversion', description:'Let real customers do the convincing for you.' },
+  { name:'Behind the Scenes', goal:'Relatability', description:'Show the people and process behind the brand.' },
+  { name:'Promotions & Offers', goal:'Conversion', description:'Give people a clear, timely reason to buy now.' },
+  { name:'Industry Trends & Insights', goal:'Authority', description:'Comment on what\u2019s changing in your space so you look ahead of it.' },
+  { name:'Community Engagement', goal:'Loyalty & Retention', description:'Involve your audience directly — polls, features, replies.' },
+  { name:'Founder Story', goal:'Trust & Differentiation', description:'Explain the "why" behind starting the business.' },
+  { name:'User Generated Content', goal:'Social Proof & Reach', description:'Repost and celebrate what your customers create or share.' },
+];
+
+const PILLARS_PERSONAL = [
+  { name:'Thought Leadership', goal:'Authority', description:'Share a strong, specific point of view on your field.' },
+  { name:'Personal Story', goal:'Relatability & Trust', description:'Share the journey — including the messy parts.' },
+  { name:'Behind the Scenes', goal:'Relatability', description:'Show how you actually work, day to day.' },
+  { name:'Audience Education', goal:'Trust & Value', description:'Teach something useful for free, no strings attached.' },
+  { name:'Career Lessons & Mistakes', goal:'Authority & Relatability', description:'Show what you learned the hard way.' },
+  { name:'Q&A / Myth-Busting', goal:'Engagement & Trust', description:'Answer the questions your audience is actually asking.' },
+  { name:'Community Highlights', goal:'Loyalty', description:'Spotlight people you admire or who engage with you.' },
+  { name:'Wins & Milestones', goal:'Social Proof', description:'Share progress — it gives others permission to follow along.' },
+];
+
+function buildRoadmap(mode, profile, platforms, pillars){
+  const platformStr = platforms.join(' + ');
+  const p1 = pillars[0], p2 = pillars[1], p3 = pillars[2];
+  if (mode === 'personal') {
+    return [
+      { week:1, title:'Foundation & POV', goal:'Define your point of view and optimize your bio/profile.', focus:`Rewrite your bio on ${platformStr} so a stranger understands who you help and how — in under 5 seconds. Write down the one belief about ${profile.industry} you want to be known for.` },
+      { week:2, title:'Establish Presence', goal:`Publish consistently using "${p1 ? p1.name : 'your first pillar'}."`, focus:`Post 3–4 times this week focused on that pillar. The goal is visibility, not virality — get comfortable showing up.` },
+      { week:3, title:'Build Real Engagement', goal:`Lean into "${p2 ? p2.name : 'your second pillar'}" and start conversations.`, focus:`Reply to every comment, message 5 people in your space, and engage with people you admire. Relationships compound faster than reach.` },
+      { week:4, title:'Compound & Reach Out', goal:`Use "${p3 ? p3.name : 'your third pillar'}" plus one direct pitch.`, focus:`Pitch yourself for one collab, podcast, or guest post, using your best content as proof. Review what worked and double down next month.` },
+    ];
+  }
+  return [
+    { week:1, title:'Foundation & Brand Voice', goal:'Set a consistent brand voice and audit your presence.', focus:`Audit your profiles on ${platformStr}. Write 3 sentences describing your brand\u2019s tone so every post sounds like the same business.` },
+    { week:2, title:'Awareness Push', goal:`Use "${p1 ? p1.name : 'your first pillar'}" to build visibility.`, focus:`Publish 3–4 times this week using that pillar. Goal: get seen by new people within ${profile.audience}.` },
+    { week:3, title:'Engagement & Community', goal:`Lean into "${p2 ? p2.name : 'your second pillar'}."`, focus:`Reply to every comment and DM, engage with your audience\u2019s other favorite accounts, and spotlight a real customer if you can.` },
+    { week:4, title:'Conversion Push', goal:`Use "${p3 ? p3.name : 'your third pillar'}" plus a clear offer.`, focus:`Test one specific call-to-action (sign up, buy, book). Track which content pairs best with action, not just likes.` },
+  ];
+}
+
+const BUSINESS_EVENTS = [
+  { id:'viral', title:'One of your posts unexpectedly goes viral', description:'A post you almost didn\u2019t publish just crossed 500K views overnight. Comments and DMs are flooding in.',
+    options:[
+      { label:'Drop everything and post follow-up content while attention is hot', consequence:'You ride the wave — a real spike in followers and sales — but the team is stretched thin and quality dips on the rushed follow-up.', good:true },
+      { label:'Stick to the original content calendar', consequence:'You stay consistent and calm, but you miss the narrow window when new eyes were most likely to convert.', good:false },
+      { label:'Put ad budget behind the winning post to extend its reach', consequence:'Smart move — you\u2019re amplifying proof that already works instead of gambling on something new.', good:true },
+    ]},
+  { id:'review', title:'A negative review starts spreading in local groups', description:'One bad experience is getting shared and re-shared in a community Facebook group.',
+    options:[
+      { label:'Respond publicly, calmly, and offer to make it right', consequence:'Other readers see you handle criticism with maturity — this often builds more trust than if nothing had happened.', good:true },
+      { label:'Ignore it and hope it blows over', consequence:'Silence gets read as guilt. The story keeps spreading without your side of it.', good:false },
+      { label:'Ask happy customers to leave counter-reviews immediately', consequence:'It looks reactive and can backfire if it feels coordinated — better to fix the root issue first.', good:false },
+    ]},
+  { id:'undercut', title:'A direct competitor undercuts your price by 30%', description:'A rival business just launched a much cheaper alternative targeting your exact audience.',
+    options:[
+      { label:'Match their price immediately', consequence:'You protect short-term sales but train your audience to shop on price, and margins shrink fast.', good:false },
+      { label:'Double down on the value/quality story instead of price', consequence:'You reinforce why customers who value quality should stay — a stronger long-term position.', good:true },
+      { label:'Do nothing and hope loyalty holds', consequence:'Some loyal customers stay, but you leave price-sensitive ones with no reason not to switch.', good:false },
+    ]},
+  { id:'influencer', title:'A micro-influencer mentions your brand for free', description:'Someone with 40K engaged followers just posted about you, unprompted.',
+    options:[
+      { label:'Reach out immediately to say thanks and explore a real partnership', consequence:'You turn a lucky break into a repeatable channel — the best possible response.', good:true },
+      { label:'Repost it once and move on', consequence:'A nice boost, but you leave a much bigger opportunity on the table.', good:false },
+    ]},
+  { id:'algo', title:'Your best platform changes its algorithm overnight', description:'Reach on your primary channel drops 60% in a week with no warning.',
+    options:[
+      { label:'Diversify — start showing up more on a second platform and build your email list', consequence:'Smart. You reduce future risk by not depending on one algorithm you don\u2019t control.', good:true },
+      { label:'Post more frequently on the same platform to compensate', consequence:'You may recover some reach, but you\u2019re still fully exposed to the next algorithm change.', good:false },
+    ]},
+  { id:'supply', title:'A delivery delay threatens a promise made in an active ad', description:'Your ad promises "delivered in 3 days" but a supplier issue means it\u2019s now 10.',
+    options:[
+      { label:'Pause the ad and update customers proactively', consequence:'Costs you short-term traffic, but protects trust — the far more valuable asset.', good:true },
+      { label:'Leave the ad running and deal with complaints as they come', consequence:'You keep short-term volume but risk refunds, reviews, and lasting damage to trust.', good:false },
+    ]},
+];
+
+const PERSONAL_EVENTS = [
+  { id:'viral', title:'One of your posts unexpectedly goes viral', description:'A post you weren\u2019t sure about just crossed 200K views. New followers are pouring in.',
+    options:[
+      { label:'Post a clear follow-up while attention is high', consequence:'You capture people while they\u2019re curious about you — most will forget by next week if you don\u2019t follow up now.', good:true },
+      { label:'Wait and stick to your normal schedule', consequence:'You stay consistent, but a big share of new attention fades before you speak to it again.', good:false },
+    ]},
+  { id:'podcast', title:'You get invited onto a well-known podcast in your niche', description:'A respected show in your space wants you as a guest next week.',
+    options:[
+      { label:'Say yes and prepare a few sharp, specific stories to tell', consequence:'Great instinct — specific stories are what make guest appearances memorable and shareable.', good:true },
+      { label:'Say yes but wing it without much prep', consequence:'You get the exposure, but generic answers make it forgettable — a missed opportunity for real authority.', good:false },
+    ]},
+  { id:'disagreement', title:'You get into a public disagreement with someone in your space', description:'A well-known voice in your niche publicly pushed back on something you posted.',
+    options:[
+      { label:'Respond thoughtfully and stand by your point with respect', consequence:'This usually earns more credibility — people notice who argues in good faith.', good:true },
+      { label:'Fire back defensively', consequence:'Might feel satisfying, but it tends to damage trust more than it builds it.', good:false },
+      { label:'Delete the post and avoid the topic', consequence:'You avoid short-term conflict, but you also look like you can\u2019t stand behind your own opinions.', good:false },
+    ]},
+  { id:'copy', title:'Someone starts closely copying your content', description:'A newer account is repeating your ideas and formats almost word-for-word.',
+    options:[
+      { label:'Keep publishing and go deeper/faster than they can copy', consequence:'The strongest response — originality compounds, and copies rarely keep up long-term.', good:true },
+      { label:'Call them out publicly', consequence:'Might feel justified, but it often reads as insecure and distracts from your own work.', good:false },
+    ]},
+  { id:'spike', title:'You get a sudden, unexplained follower spike', description:'Your following jumped overnight for no obvious reason — no viral post, no press.',
+    options:[
+      { label:'Look into where it came from before reacting', consequence:'Smart — understanding the source (a share, a screenshot, a list) tells you what to repeat.', good:true },
+      { label:'Assume it\u2019s permanent and increase posting frequency immediately', consequence:'You might be reacting to a one-off spike rather than a real trend — measure first.', good:false },
+    ]},
+];
+
+const LESSONS_BUSINESS = [
+  'Know your audience before you pick a platform — the channel should follow the customer, not the other way around.',
+  'Consistency beats a single viral hit. One good week doesn\u2019t build a brand; four steady weeks does.',
+  'Test small offers before scaling spend. Data from a small test protects you from an expensive mistake.',
+  'Trust is the real asset in a crisis — protecting it is almost always worth more than short-term sales.',
+  'A platform algorithm can change overnight; an email list or community you own cannot be taken from you.',
+];
+
+const LESSONS_PERSONAL = [
+  'Niche clarity beats broad appeal — being known for one specific thing travels further than being generically interesting.',
+  'Consistency compounds. Showing up on a schedule builds more trust than one great, isolated post.',
+  'Authenticity is a strategy, not just a value — audiences can tell the difference between a real story and a performance.',
+  'Relationships scale slower than reach, but they last longer — replies and DMs matter as much as posts.',
+  'Your point of view is your product. What you believe is more differentiating than what platform you\u2019re on.',
+];
+
+/* ---------------------------------------------------------
+   SMALL REUSABLE COMPONENTS
+--------------------------------------------------------- */
+
+function ProgressSteps({ screen }){
+  if (screen === 'welcome') return null;
+  const idx = STEPS.indexOf(screen);
+  return (
+    <div className="progress-wrap">
+      <div className="progress-steps">
+        {STEPS.map((s,i)=>(
+          <React.Fragment key={s}>
+            <div className="step-node">
+              <div className={`step-circle ${i<idx?'done':''} ${i===idx?'active':''}`}>{i<idx?'✓':i+1}</div>
+              <span className="step-label">{STEP_LABELS[s]}</span>
+            </div>
+            {i<STEPS.length-1 && <div className={`step-line ${i<idx?'done':''}`}></div>}
+          </React.Fragment>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AskClaudeCard({ prompt }){
+  const [copied, setCopied] = useState(false);
+  const copy = () => {
+    const doCopy = () => { setCopied(true); setTimeout(()=>setCopied(false), 1600); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(prompt).then(doCopy).catch(()=>{
+        fallbackCopy(prompt); doCopy();
+      });
+    } else {
+      fallbackCopy(prompt); doCopy();
+    }
+  };
+  const fallbackCopy = (text) => {
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); }catch(e){}
+    document.body.removeChild(ta);
+  };
+  return (
+    <div className="ask-claude">
+      <div className="head">
+        <span className="tag">🤖 How to ask Claude</span>
+        <button className="copy-btn" onClick={copy}>{copied ? 'Copied ✓' : 'Copy prompt'}</button>
+      </div>
+      <pre>{prompt}</pre>
+    </div>
+  );
+}
+
+function Frame({ children }){
+  return (
+    <div>
+      <div className="terminal-bar">
+        <div className="terminal-dots">
+          <span className="dot red"></span><span className="dot yellow"></span><span className="dot green"></span>
+        </div>
+        <div className="terminal-title">strategist<span className="logo-mark">.exe</span></div>
+        <div style={{width:'40px'}}></div>
+      </div>
+      <div className="content-frame">{children}</div>
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------
+   SCREENS
+--------------------------------------------------------- */
+
+function Welcome({ onStart }){
+  return (
+    <div className="screen">
+      <Frame>
+        <div className="eyebrow">Marketing strategy trainer</div>
+        <h1>Think Like a Marketing Strategist<span className="terminal-cursor"></span></h1>
+        <p className="dim">Grow This Brand — a hands-on simulator that teaches you how strategists actually think, not just how to generate marketing content.</p>
+        <div className="divider"></div>
+        <div className="why-block">
+          <div className="why-box">
+            <div className="label">What is this?</div>
+            <p style={{margin:0}} className="small">A short, interactive simulation. You\u2019ll take on a real (or invented) brand, make the same decisions a strategist makes, and see the consequences play out.</p>
+          </div>
+          <div className="why-box">
+            <div className="label">Why does it matter?</div>
+            <p style={{margin:0}} className="small">Anyone can ask an AI to "write a caption." Strategists ask a different question first: <em>who is this for, and why would they care?</em> That\u2019s the skill this trains.</p>
+          </div>
+        </div>
+        <div className="btn-row">
+          <button className="btn-primary" onClick={onStart}>Start the simulation →</button>
+        </div>
+      </Frame>
+    </div>
+  );
+}
+
+function ModeSelect({ onSelect }){
+  const modes = [
+    { id:'business', icon:'🏢', title:'Use My Own Business', desc:'Bring in your real business details and get a real strategy.' },
+    { id:'personal', icon:'🙋', title:'Build My Personal Brand', desc:'No business? Use your name, expertise, and story as the brand.' },
+    { id:'random', icon:'🎲', title:'A New Client Has Arrived', desc:'A randomized client shows up — industry, audience, budget, and a challenge included.' },
+  ];
+  return (
+    <div className="screen">
+      <Frame>
+        <div className="eyebrow">Step 1 — Choose your scenario</div>
+        <h2>Who are we building a strategy for?</h2>
+        <p className="dim small">Every strategist starts with a brief. Pick how you want yours.</p>
+        <div className="choice-grid cols-3">
+          {modes.map(m=>(
+            <div key={m.id} className="choice-card" onClick={()=>onSelect(m.id)}>
+              <span className="icon">{m.icon}</span>
+              <div className="title">{m.title}</div>
+              <div className="desc">{m.desc}</div>
+            </div>
+          ))}
+        </div>
+      </Frame>
+    </div>
+  );
+}
+
+function SetupBusiness({ onComplete }){
+  const [form, setForm] = useState({ name:'', industry:'', audience:'', budget:'Modest ($500\u20132,000/month)', competitors:'', challenge:'' });
+  const update = (k,v)=> setForm(f=>({...f,[k]:v}));
+  const valid = form.name && form.industry && form.audience && form.challenge;
+  const submit = () => {
+    onComplete({
+      name: form.name, industry: form.industry, audience: form.audience,
+      budget: form.budget, competitors: form.competitors.split(',').map(s=>s.trim()).filter(Boolean),
+      challenge: form.challenge,
+    });
+  };
+  return (
+    <div className="screen">
+      <Frame>
+        <div className="eyebrow">Step 2 — The brief</div>
+        <h2>Tell me about your business</h2>
+        <div className="field"><label>Business name</label><input value={form.name} onChange={e=>update('name', e.target.value)} placeholder="e.g. Millbrook Bakery" /></div>
+        <div className="field"><label>Industry</label><input value={form.industry} onChange={e=>update('industry', e.target.value)} placeholder="e.g. Local Bakery" /></div>
+        <div className="field"><label>Target audience</label><input value={form.audience} onChange={e=>update('audience', e.target.value)} placeholder="e.g. Families within walking distance who value fresh, local food" /></div>
+        <div className="field">
+          <label>Monthly marketing budget</label>
+          <select value={form.budget} onChange={e=>update('budget', e.target.value)}>
+            <option>Shoestring (under $500/month)</option>
+            <option>Modest ($500\u20132,000/month)</option>
+            <option>Healthy ($2,000\u201310,000/month)</option>
+          </select>
+        </div>
+        <div className="field"><label>Main competitors (comma separated)</label><input value={form.competitors} onChange={e=>update('competitors', e.target.value)} placeholder="e.g. Sweet Row Bakery, Crust & Co." /></div>
+        <div className="field"><label>Biggest marketing challenge right now</label><textarea value={form.challenge} onChange={e=>update('challenge', e.target.value)} placeholder="e.g. Weekday sales are quiet compared to weekends" /></div>
+        <div className="btn-row">
+          <button className="btn-primary" disabled={!valid} onClick={submit}>Continue →</button>
+        </div>
+      </Frame>
+    </div>
+  );
+}
+
+function SetupPersonal({ onComplete }){
+  const [form, setForm] = useState({ name:'', industry:'', story:'', audience:'', competitors:'', challenge:'' });
+  const update = (k,v)=> setForm(f=>({...f,[k]:v}));
+  const valid = form.name && form.industry && form.story && form.audience;
+  const submit = () => {
+    onComplete({
+      name: form.name, industry: form.industry, audience: form.audience,
+      budget: 'Bootstrapped (mostly time, not ad spend)',
+      competitors: form.competitors.split(',').map(s=>s.trim()).filter(Boolean),
+      challenge: form.challenge || 'Getting known for one clear thing instead of many',
+      story: form.story,
+    });
+  };
+  return (
+    <div className="screen">
+      <Frame>
+        <div className="eyebrow">Step 2 — The brief</div>
+        <h2>Tell me about you</h2>
+        <p className="dim small">No business? No problem — you are the brand. Your expertise and story are the product.</p>
+        <div className="field"><label>Your name</label><input value={form.name} onChange={e=>update('name', e.target.value)} placeholder="e.g. Kartikey Patel" /></div>
+        <div className="field"><label>Your niche / expertise</label><input value={form.industry} onChange={e=>update('industry', e.target.value)} placeholder="e.g. AI-powered web development for beginners" /></div>
+        <div className="field"><label>Your story, in one or two lines</label><textarea value={form.story} onChange={e=>update('story', e.target.value)} placeholder="e.g. Self-taught developer documenting a 60-day AI build challenge in public" /></div>
+        <div className="field"><label>Who do you want to reach?</label><input value={form.audience} onChange={e=>update('audience', e.target.value)} placeholder="e.g. Student developers who want to build real projects with AI" /></div>
+        <div className="field"><label>People in your space you admire (optional, comma separated)</label><input value={form.competitors} onChange={e=>update('competitors', e.target.value)} placeholder="e.g. Names of creators or professionals you look up to" /></div>
+        <div className="field"><label>Biggest challenge right now (optional)</label><textarea value={form.challenge} onChange={e=>update('challenge', e.target.value)} placeholder="e.g. Not sure what makes my perspective different from everyone else's" /></div>
+        <div className="btn-row">
+          <button className="btn-primary" disabled={!valid} onClick={submit}>Continue →</button>
+        </div>
+      </Frame>
+    </div>
+  );
+}
+
+function SetupRandom({ onComplete }){
+  const [client, setClient] = useState(()=>randomFrom(RANDOM_CLIENTS));
+  const reroll = () => setClient(randomFrom(RANDOM_CLIENTS));
+  return (
+    <div className="screen">
+      <Frame>
+        <div className="eyebrow">Step 2 — Incoming brief</div>
+        <h2>A new client has arrived</h2>
+        <div className="card">
+          <div className="card-title">{client.name} — {client.industry}</div>
+          <p className="small dim" style={{marginBottom:8}}><strong>Audience:</strong> {client.audience}</p>
+          <p className="small dim" style={{marginBottom:8}}><strong>Budget:</strong> {client.budget}</p>
+          <p className="small dim" style={{marginBottom:8}}><strong>Competitors:</strong> {client.competitors.join(', ')}</p>
+          <p className="small dim" style={{marginBottom:0}}><strong>Challenge:</strong> {client.challenge}</p>
+        </div>
+        <div className="btn-row">
+          <button className="btn-secondary" onClick={reroll}>🎲 Get a different client</button>
+          <button className="btn-primary" onClick={()=>onComplete(client)}>Accept this client →</button>
+        </div>
+      </Frame>
+    </div>
+  );
+}
+
+function AudienceUnderstanding({ mode, profile, onNext }){
+  const [pick, setPick] = useState(null);
+  const isPersonal = mode === 'personal';
+  const drivers = ['Fear of missing out','Desire for status / recognition','Need for convenience','Trust & safety'];
+  const label = isPersonal ? profile.name : profile.name;
+  const promptText = isPersonal
+    ? `Act as a personal branding strategist. My name is ${profile.name} and my expertise is in ${profile.industry}. My story: ${profile.story || '(add your story here)'}. Help me define my target audience persona — their pain points, what makes them follow someone, and how I should talk to them.`
+    : `Act as a marketing strategist. My business is a ${profile.industry} called ${profile.name} targeting ${profile.audience}. My budget is ${profile.budget}. Help me build a detailed customer persona including their pain points, buying triggers, and objections to buying from me.`;
+  return (
+    <div className="screen">
+      <Frame>
+        <div className="eyebrow">Step 3 — Understand the {isPersonal ? 'brand (you)' : 'business'}</div>
+        <h2>Know who you\u2019re talking to</h2>
+        <div className="why-block">
+          <div className="why-box">
+            <div className="label">What is this?</div>
+            <p style={{margin:0}} className="small">Before you write a single post, a strategist maps out exactly who they\u2019re speaking to and what that {isPersonal ? "audience" : "product"} is about.</p>
+          </div>
+          <div className="why-box">
+            <div className="label">Why does it matter?</div>
+            <p style={{margin:0}} className="small">Content made for "everyone" tends to reach no one. The more specific the audience picture, the sharper — and more effective — the content becomes.</p>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-title">{isPersonal ? `${label} — ${profile.industry}` : `${profile.name} — ${profile.industry}`}</div>
+          {isPersonal && <p className="small dim"><strong>Story:</strong> {profile.story}</p>}
+          <p className="small dim"><strong>Audience:</strong> {profile.audience}</p>
+          <p className="small dim"><strong>{isPersonal ? 'Effort investment' : 'Budget'}:</strong> {profile.budget}</p>
+          {profile.competitors && profile.competitors.length > 0 && (
+            <p className="small dim"><strong>{isPersonal ? 'People in your space you admire' : 'Competitors'}:</strong> {profile.competitors.join(', ')}</p>
+          )}
+          <p className="small dim" style={{marginBottom:0}}><strong>Challenge:</strong> {profile.challenge}</p>
+        </div>
+
+        <h3 style={{marginTop:20}}>Quick check</h3>
+        <p className="small dim">What\u2019s the strongest emotional driver behind why this audience would pay attention?</p>
+        <div className="quiz-options">
+          {drivers.map(d=>(
+            <button key={d} className={`quiz-btn ${pick===d?'chosen':''}`} onClick={()=>setPick(d)}>{d}</button>
+          ))}
+        </div>
+        {pick && (
+          <div className="callout">
+            There\u2019s no single right answer here — but naming a driver like <strong>"{pick}"</strong> gives every future decision (platform, pillar, and even how you respond to a curveball) a filter to run through: <em>does this speak to that driver?</em>
+          </div>
+        )}
+
+        <AskClaudeCard prompt={promptText} />
+
+        <div className="btn-row">
+          <button className="btn-primary" onClick={onNext}>Continue to platforms →</button>
+        </div>
+      </Frame>
+    </div>
+  );
+}
+
+function PlatformSelect({ mode, profile, onNext }){
+  const [selected, setSelected] = useState([]);
+  const toggle = (p) => {
+    setSelected(s => s.includes(p) ? s.filter(x=>x!==p) : (s.length<4 ? [...s,p] : s));
+  };
+  const valid = selected.length >= 2 && selected.length <= 4;
+  const promptText = mode === 'personal'
+    ? `I'm building a personal brand around ${profile.industry} as ${profile.name}. Recommend the best 2\u20133 platforms for me to focus on right now, and explain the content style that works on each.`
+    : `I run a ${profile.industry} business called ${profile.name} with a ${profile.budget.toLowerCase()} marketing budget. My audience is ${profile.audience}. Which 2\u20133 social platforms should I focus on first, and why? Be specific about content formats for each.`;
+  return (
+    <div className="screen">
+      <Frame>
+        <div className="eyebrow">Step 4 — Where to show up</div>
+        <h2>Choose your platforms</h2>
+        <p className="small dim">Pick 2\u20134 platforms. A strategist never picks "all of them" — every platform costs time and attention.</p>
+        <div className="choice-grid cols-2">
+          {PLATFORM_LIST.map(p=>{
+            const fit = getPlatformFit(p, mode, profile);
+            const meta = PLATFORM_META[p];
+            const isSel = selected.includes(p);
+            return (
+              <div key={p} className={`choice-card ${isSel?'selected':''}`} onClick={()=>toggle(p)}>
+                <span className="icon">{meta.icon}</span>
+                <div className="title">{p} <span className={`fit-badge fit-${fit.level.toLowerCase()}`}>{fit.level} fit</span></div>
+                <div className="desc" style={{marginBottom:6}}>{meta.format}</div>
+                <div className="desc">{fit.reason}</div>
+              </div>
+            );
+          })}
+        </div>
+        {selected.length > 0 && (
+          <div className="tag-row">
+            {selected.map(s=> <span key={s} className="pill">{s}</span>)}
+          </div>
+        )}
+        {!valid && <p className="small dim">Select between 2 and 4 platforms to continue.</p>}
+
+        <AskClaudeCard prompt={promptText} />
+
+        <div className="btn-row">
+          <button className="btn-primary" disabled={!valid} onClick={()=>onNext(selected)}>Continue to content pillars →</button>
+        </div>
+      </Frame>
+    </div>
+  );
+}
+
+function PillarSelect({ mode, profile, onNext }){
+  const options = mode === 'personal' ? PILLARS_PERSONAL : PILLARS_BUSINESS;
+  const [selected, setSelected] = useState([]);
+  const toggle = (name) => {
+    setSelected(s => {
+      if (s.includes(name)) return s.filter(x=>x!==name);
+      if (s.length >= 3) return s;
+      return [...s, name];
+    });
+  };
+  const valid = selected.length === 3;
+  const promptText = mode === 'personal'
+    ? `Suggest 5\u20136 content pillars for my personal brand. My name is ${profile.name}, my niche is ${profile.industry}, and I want to reach ${profile.audience}. For each pillar, explain what marketing goal it supports (authority, trust, reach, or community).`
+    : `Suggest 5\u20136 content pillars for my ${profile.industry} business, ${profile.name}, targeting ${profile.audience}. For each pillar, explain what marketing goal it supports (trust, conversion, authority, or reach).`;
+  return (
+    <div className="screen">
+      <Frame>
+        <div className="eyebrow">Step 5 — What to talk about</div>
+        <h2>Choose exactly 3 content pillars</h2>
+        <p className="small dim">Pillars are recurring themes, not individual posts. Three is enough to stay focused and varied at the same time.</p>
+        <div className="choice-grid cols-2">
+          {options.map(o=>{
+            const isSel = selected.includes(o.name);
+            return (
+              <div key={o.name} className={`choice-card ${isSel?'selected':''}`} onClick={()=>toggle(o.name)}>
+                <div className="title">{o.name}</div>
+                <div className="desc" style={{marginBottom:6}}>{o.description}</div>
+                <span className="pill" style={{fontSize:'11px'}}>Supports: {o.goal}</span>
+              </div>
+            );
+          })}
+        </div>
+        <p className="small dim">{selected.length}/3 selected</p>
+
+        <AskClaudeCard prompt={promptText} />
+
+        <div className="btn-row">
+          <button className="btn-primary" disabled={!valid} onClick={()=>onNext(selected.map(n=>options.find(o=>o.name===n)))}>Build my 30-day roadmap →</button>
+        </div>
+      </Frame>
+    </div>
+  );
+}
+
+function Roadmap({ mode, profile, platforms, pillars, onNext }){
+  const weeks = useMemo(()=>buildRoadmap(mode, profile, platforms, pillars), [mode, profile, platforms, pillars]);
+  const promptText = mode === 'personal'
+    ? `Create a 30-day content roadmap (weekly goals and strategy, not individual daily posts) for my personal brand. I'm ${profile.name}, niche is ${profile.industry}, platforms are ${platforms.join(', ')}, and my content pillars are ${pillars.map(p=>p.name).join(', ')}.`
+    : `Create a 30-day content roadmap (weekly goals and strategy, not individual daily posts) for my ${profile.industry} business ${profile.name}. Platforms: ${platforms.join(', ')}. Content pillars: ${pillars.map(p=>p.name).join(', ')}.`;
+  return (
+    <div className="screen">
+      <Frame>
+        <div className="eyebrow">Step 6 — The plan</div>
+        <h2>Your 30-day roadmap</h2>
+        <p className="small dim">Strategy is about weekly direction, not a rigid list of daily posts. Here\u2019s the shape of the month.</p>
+        {weeks.map(w=>(
+          <div className="card" key={w.week}>
+            <div className="card-title">Week {w.week}: {w.title}</div>
+            <p className="small dim" style={{marginBottom:6}}><strong>Goal:</strong> {w.goal}</p>
+            <p className="small" style={{marginBottom:0}}>{w.focus}</p>
+          </div>
+        ))}
+
+        <AskClaudeCard prompt={promptText} />
+
+        <div className="btn-row">
+          <button className="btn-primary" onClick={()=>onNext(weeks)}>Continue to curveball →</button>
+        </div>
+      </Frame>
+    </div>
+  );
+}
+
+function EventScreen({ mode, profile, onNext }){
+  const pool = mode === 'personal' ? PERSONAL_EVENTS : BUSINESS_EVENTS;
+  const [event] = useState(()=>randomFrom(pool));
+  const [choice, setChoice] = useState(null);
+  const promptText = mode === 'personal'
+    ? `My personal brand (${profile.name}, niche: ${profile.industry}) just experienced this: "${event.title}." As a marketing strategist, help me think through 2\u20133 possible responses and the pros and cons of each.`
+    : `My business ${profile.name} (${profile.industry}) just experienced this: "${event.title}." As a marketing strategist, help me think through 2\u20133 possible responses and the pros and cons of each.`;
+  return (
+    <div className="screen">
+      <Frame>
+        <div className="eyebrow">Step 7 — Something unexpected</div>
+        <h2>{event.title}</h2>
+        <p className="small dim">{event.description}</p>
+        <h3 style={{marginTop:16}}>How do you respond?</h3>
+        <div className="choice-grid cols-2">
+          {event.options.map((o,i)=>(
+            <div key={i} className={`choice-card ${choice===o?'selected':''}`} onClick={()=>setChoice(o)}>
+              <div className="title">{o.label}</div>
+            </div>
+          ))}
+        </div>
+        {choice && (
+          <div className={`callout ${choice.good?'good':'bad'}`}>
+            <strong>What happens:</strong> {choice.consequence}
+          </div>
+        )}
+
+        <AskClaudeCard prompt={promptText} />
+
+        <div className="btn-row">
+          <button className="btn-primary" disabled={!choice} onClick={()=>onNext(event, choice)}>See my growth report →</button>
+        </div>
+      </Frame>
+    </div>
+  );
+}
+
+function GrowthReport({ mode, profile, platforms, pillars, event, eventChoice, onRestart }){
+  const isPersonal = mode === 'personal';
+  const strongCount = platforms.filter(p=>getPlatformFit(p, mode, profile).level==='Strong').length;
+  const weakOnes = platforms.filter(p=>getPlatformFit(p, mode, profile).level==='Weak');
+  const goodEvent = eventChoice && eventChoice.good;
+
+  let growthLevel = 'Building';
+  let stars = '★★☆☆☆';
+  if (strongCount >= 2 && goodEvent) { growthLevel = 'High'; stars = '★★★★★'; }
+  else if (strongCount >= 1 || goodEvent) { growthLevel = 'Moderate'; stars = '★★★☆☆'; }
+
+  let bestDecision;
+  if (goodEvent) {
+    bestDecision = `Choosing to "${eventChoice.label.toLowerCase()}" when the curveball hit — that response protected or grew trust instead of chasing a short-term win.`;
+  } else {
+    const strongPlatform = platforms.find(p=>getPlatformFit(p, mode, profile).level==='Strong');
+    bestDecision = strongPlatform
+      ? `Choosing ${strongPlatform} as a core platform — it\u2019s a genuinely strong fit for this ${isPersonal ? 'niche' : 'audience'}.`
+      : `Choosing three focused content pillars instead of trying to cover everything — focus beats breadth.`;
+  }
+
+  let biggestMistake;
+  if (weakOnes.length > 0) {
+    biggestMistake = `Including ${weakOnes.join(', ')} in the platform mix — it scored as a weak fit, meaning time spent there likely won\u2019t return much.`;
+  } else if (!goodEvent) {
+    biggestMistake = `The response to the curveball ("${eventChoice.label}") carried more risk than the alternative — worth revisiting that instinct next time.`;
+  } else {
+    biggestMistake = `No major misstep here — the real risk now is complacency. Even a strong plan needs to keep testing.`;
+  }
+
+  const lessons = isPersonal ? LESSONS_PERSONAL : LESSONS_BUSINESS;
+  const pickedLessons = [lessons[0], lessons[1], isPersonal ? lessons[2] : lessons[3]];
+
+  const promptText = isPersonal
+    ? `Review my personal brand plan: I'm ${profile.name}, niche is ${profile.industry}, platforms are ${platforms.join(', ')}, content pillars are ${pillars.map(p=>p.name).join(', ')}. Give me a growth report covering audience understanding, platform strategy, content strategy, growth potential, best decision, biggest mistake, and 3 key personal branding lessons.`
+    : `Review my marketing plan for ${profile.name} (${profile.industry}): platforms are ${platforms.join(', ')}, content pillars are ${pillars.map(p=>p.name).join(', ')}. Give me a growth report covering audience understanding, platform strategy, content strategy, growth potential, best decision, biggest mistake, and 3 key marketing lessons.`;
+
+  return (
+    <div className="screen">
+      <Frame>
+        <div className="eyebrow">Final report</div>
+        <h2>Growth Report — {profile.name}</h2>
+        <p className="small dim">Here\u2019s how this simulation played out, and what it teaches about strategic thinking.</p>
+
+        <div className="report-grid">
+          <div className="card">
+            <h3>Audience Understanding</h3>
+            <p className="small" style={{marginBottom:0}}>{profile.name} speaks to {profile.audience}. Every decision above worked because it was filtered through that specific audience — not a generic one.</p>
+          </div>
+          <div className="card">
+            <h3>Platform Strategy</h3>
+            <p className="small" style={{marginBottom:0}}>Focused on {platforms.join(', ')}. {strongCount} of {platforms.length} chosen platform(s) were a strong fit for this {isPersonal?'niche':'audience'}.</p>
+          </div>
+          <div className="card">
+            <h3>Content Strategy</h3>
+            <p className="small" style={{marginBottom:0}}>Built around: {pillars.map(p=>p.name).join(', ')} — covering {[...new Set(pillars.map(p=>p.goal))].join(' / ')}.</p>
+          </div>
+          <div className="card">
+            <h3>Growth Potential</h3>
+            <p className="stars" style={{marginBottom:4}}>{stars}</p>
+            <p className="small" style={{marginBottom:0}}>{growthLevel} — based on platform fit and how the curveball was handled.</p>
+          </div>
+          <div className="card">
+            <h3>Best Decision</h3>
+            <p className="small" style={{marginBottom:0}}>{bestDecision}</p>
+          </div>
+          <div className="card">
+            <h3>Biggest Mistake</h3>
+            <p className="small" style={{marginBottom:0}}>{biggestMistake}</p>
+          </div>
+        </div>
+
+        <h3 style={{marginTop:10}}>Three Marketing Lessons</h3>
+        <ul className="clean">
+          {pickedLessons.map((l,i)=><li key={i}>{l}</li>)}
+        </ul>
+
+        <AskClaudeCard prompt={promptText} />
+
+        <div className="btn-row">
+          <button className="btn-primary" onClick={onRestart}>🔁 Run a new simulation</button>
+        </div>
+      </Frame>
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------
+   APP
+--------------------------------------------------------- */
+
+function App(){
+  const [screen, setScreen] = useState('welcome');
+  const [mode, setMode] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [platforms, setPlatforms] = useState([]);
+  const [pillars, setPillars] = useState([]);
+  const [roadmapWeeks, setRoadmapWeeks] = useState([]);
+  const [event, setEvent] = useState(null);
+  const [eventChoice, setEventChoice] = useState(null);
+
+  const restart = () => {
+    setScreen('mode'); setMode(null); setProfile(null); setPlatforms([]);
+    setPillars([]); setRoadmapWeeks([]); setEvent(null); setEventChoice(null);
+  };
+
+  return (
+    <div className="app-shell">
+      <ProgressSteps screen={screen} />
+      {screen === 'welcome' && <Welcome onStart={()=>setScreen('mode')} />}
+      {screen === 'mode' && <ModeSelect onSelect={(m)=>{ setMode(m); setScreen('setup'); }} />}
+      {screen === 'setup' && mode === 'business' && <SetupBusiness onComplete={(p)=>{ setProfile(p); setScreen('audience'); }} />}
+      {screen === 'setup' && mode === 'personal' && <SetupPersonal onComplete={(p)=>{ setProfile(p); setScreen('audience'); }} />}
+      {screen === 'setup' && mode === 'random' && <SetupRandom onComplete={(p)=>{ setProfile(p); setScreen('audience'); }} />}
+      {screen === 'audience' && profile && <AudienceUnderstanding mode={mode} profile={profile} onNext={()=>setScreen('platforms')} />}
+      {screen === 'platforms' && profile && <PlatformSelect mode={mode} profile={profile} onNext={(sel)=>{ setPlatforms(sel); setScreen('pillars'); }} />}
+      {screen === 'pillars' && profile && <PillarSelect mode={mode} profile={profile} onNext={(sel)=>{ setPillars(sel); setScreen('roadmap'); }} />}
+      {screen === 'roadmap' && profile && <Roadmap mode={mode} profile={profile} platforms={platforms} pillars={pillars} onNext={(weeks)=>{ setRoadmapWeeks(weeks); setScreen('event'); }} />}
+      {screen === 'event' && profile && <EventScreen mode={mode} profile={profile} onNext={(ev,ch)=>{ setEvent(ev); setEventChoice(ch); setScreen('report'); }} />}
+      {screen === 'report' && profile && (
+        <GrowthReport mode={mode} profile={profile} platforms={platforms} pillars={pillars} event={event} eventChoice={eventChoice} onRestart={restart} />
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
