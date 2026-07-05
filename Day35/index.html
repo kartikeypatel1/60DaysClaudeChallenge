@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧩 Prompt Puzzle — Master AI Prompting Through Play</title>
+<style>
+  :root{
+    --bg:#0a0a0a;
+    --bg-raised:#141414;
+    --bg-card:#111214;
+    --line:#242424;
+    --amber:#f2a627;
+    --amber-dim:#7a5a1c;
+    --text:#e9e6df;
+    --text-dim:#8b8b87;
+    --danger:#e2543f;
+    --ok:#5ec98f;
+    --mono:'IBM Plex Mono','SFMono-Regular','Consolas','Liberation Mono',monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background-color:var(--bg);
+    background-image:
+      linear-gradient(rgba(242,166,39,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(242,166,39,0.035) 1px, transparent 1px);
+    background-size:34px 34px;
+    color:var(--text);
+    font-family:var(--mono);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--amber);color:#111;}
+  #app{max-width:980px;margin:0 auto;padding:28px 20px 80px;}
+
+  .eyebrow{
+    text-transform:uppercase;letter-spacing:.18em;font-size:11px;color:var(--amber);
+    display:flex;align-items:center;gap:8px;margin-bottom:6px;
+  }
+  .eyebrow::before{content:'';width:6px;height:6px;background:var(--amber);border-radius:1px;display:inline-block;}
+
+  h1,h2,h3{font-family:var(--mono);margin:0;font-weight:600;}
+  h1{font-size:26px;letter-spacing:-.01em;}
+  h2{font-size:19px;color:var(--text);}
+  h3{font-size:14px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;}
+  p{line-height:1.55;color:var(--text-dim);}
+  a{color:var(--amber);}
+
+  .card{
+    background:var(--bg-card);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:22px;
+    position:relative;
+  }
+  .card + .card{margin-top:16px;}
+
+  .btn{
+    font-family:var(--mono);
+    background:transparent;
+    color:var(--text);
+    border:1px solid var(--line);
+    padding:10px 18px;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:13px;
+    letter-spacing:.03em;
+    transition:all .15s ease;
+  }
+  .btn:hover{border-color:var(--amber);color:var(--amber);transform:translateY(-1px);}
+  .btn:active{transform:translateY(0px) scale(.98);}
+  .btn:disabled{opacity:.35;cursor:not-allowed;transform:none;}
+  .btn-primary{background:var(--amber);color:#171208;border-color:var(--amber);font-weight:600;}
+  .btn-primary:hover{background:#ffb845;color:#171208;box-shadow:0 0 0 3px rgba(242,166,39,.15);}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;}
+
+  .pill{
+    display:inline-block;padding:3px 10px;border:1px solid var(--line);border-radius:100px;
+    font-size:11px;color:var(--text-dim);letter-spacing:.04em;
+  }
+
+  /* ---------- top bar ---------- */
+  #topbar{
+    position:sticky;top:0;z-index:40;
+    background:rgba(10,10,10,.92);backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line);
+    margin:-28px -20px 26px;padding:14px 20px;
+  }
+  #topbar-inner{max-width:980px;margin:0 auto;}
+  #topbar-title{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;}
+  #topbar-title .name{font-size:14px;font-weight:600;}
+  #topbar-title .name .pin{color:var(--amber);}
+  #stat-strip{display:flex;gap:18px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--text-dim);}
+  #stat-strip b{color:var(--text);font-weight:600;}
+  #stat-strip .stat.flash{animation:flashStat .4s ease;}
+  @keyframes flashStat{0%{color:var(--amber);}100%{color:var(--text-dim);}}
+
+  .progress-track{height:5px;background:var(--bg-raised);border-radius:4px;overflow:hidden;margin-top:12px;border:1px solid var(--line);}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--amber-dim),var(--amber));width:0%;transition:width .5s cubic-bezier(.65,0,.35,1);}
+
+  /* ---------- welcome ---------- */
+  .brief-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0;}
+  @media (max-width:640px){.brief-grid{grid-template-columns:1fr;}}
+  .brief-box{border:1px solid var(--line);border-radius:8px;padding:14px;background:var(--bg-raised);}
+  .brief-box .k{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--text-dim);}
+  .brief-box .v{font-size:16px;color:var(--amber);margin-top:4px;font-weight:600;}
+
+  .type-legend{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px;}
+  @media (max-width:640px){.type-legend{grid-template-columns:1fr;}}
+  .type-legend .item{border:1px solid var(--line);border-radius:8px;padding:12px;background:var(--bg-raised);}
+  .type-legend .item .t{color:var(--amber);font-size:12px;font-weight:600;margin-bottom:4px;}
+  .type-legend .item .d{font-size:11.5px;color:var(--text-dim);line-height:1.5;}
+
+  /* ---------- scenario shell ---------- */
+  .scenario-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;}
+  .type-tag{
+    font-size:10px;text-transform:uppercase;letter-spacing:.1em;padding:4px 9px;border-radius:5px;
+    border:1px solid var(--amber-dim);color:var(--amber);white-space:nowrap;
+  }
+  .desired-output{
+    background:var(--bg-raised);border:1px dashed var(--line);border-radius:8px;
+    padding:14px;margin-top:14px;font-size:13px;color:var(--text);
+  }
+  .desired-output .k{color:var(--text-dim);font-size:10px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;}
+
+  /* ---------- build challenge ---------- */
+  #slots{display:flex;flex-direction:column;gap:10px;margin-top:16px;}
+  .slot{
+    min-height:56px;border:1.5px dashed var(--line);border-radius:8px;
+    display:flex;align-items:center;padding:0 14px;gap:10px;
+    background:var(--bg-raised);transition:all .18s ease;
+  }
+  .slot .slot-num{color:var(--amber-dim);font-size:12px;width:16px;flex-shrink:0;}
+  .slot.dragover{border-color:var(--amber);background:rgba(242,166,39,.06);}
+  .slot.filled{border-style:solid;border-color:var(--line);}
+  .slot .slot-content{font-size:13px;color:var(--text);flex:1;}
+  .slot .slot-content.empty{color:var(--text-dim);font-style:italic;}
+  .slot.correct{border-color:var(--ok);background:rgba(94,201,143,.06);}
+  .slot.wrong{border-color:var(--danger);background:rgba(226,84,63,.08);animation:shake .35s ease;}
+  .slot .remove-x{cursor:pointer;color:var(--text-dim);font-size:14px;padding:2px 6px;}
+  .slot .remove-x:hover{color:var(--danger);}
+  @keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+
+  #tray{display:flex;flex-wrap:wrap;gap:9px;margin-top:18px;padding-top:16px;border-top:1px solid var(--line);}
+  .chip{
+    border:1px solid var(--line);background:var(--bg-raised);border-radius:7px;
+    padding:9px 13px;font-size:12.5px;cursor:grab;color:var(--text);
+    transition:all .15s ease;user-select:none;
+  }
+  .chip:hover{border-color:var(--amber);color:var(--amber);transform:translateY(-2px);}
+  .chip.dragging{opacity:.35;}
+  .chip.used{display:none;}
+
+  /* ---------- clean challenge ---------- */
+  .clean-list{display:flex;flex-direction:column;gap:8px;margin-top:16px;}
+  .clean-item{
+    border:1px solid var(--line);border-radius:8px;padding:12px 14px;
+    background:var(--bg-raised);cursor:pointer;font-size:13px;
+    display:flex;align-items:center;gap:12px;transition:all .15s ease;
+  }
+  .clean-item:hover{border-color:var(--amber-dim);}
+  .clean-item .mark{
+    width:20px;height:20px;border-radius:5px;border:1.5px solid var(--line);flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;
+    transition:all .15s ease;
+  }
+  .clean-item.keep .mark{background:var(--ok);border-color:var(--ok);color:#0a0a0a;content:'';}
+  .clean-item.remove .mark{background:var(--danger);border-color:var(--danger);color:#0a0a0a;}
+  .clean-item.keep{border-color:var(--ok);}
+  .clean-item.remove{opacity:.55;text-decoration:line-through;border-color:var(--danger);}
+  .clean-item .txt{flex:1;}
+
+  /* ---------- choose challenge ---------- */
+  .choose-grid{display:flex;flex-direction:column;gap:12px;margin-top:16px;}
+  .choose-card{
+    border:1.5px solid var(--line);border-radius:9px;padding:16px;background:var(--bg-raised);
+    cursor:pointer;transition:all .15s ease;
+  }
+  .choose-card:hover{border-color:var(--amber-dim);transform:translateY(-1px);}
+  .choose-card.selected{border-color:var(--amber);background:rgba(242,166,39,.06);}
+  .choose-card .label{font-size:11px;color:var(--amber);letter-spacing:.08em;margin-bottom:8px;}
+  .choose-card .body{font-size:13px;color:var(--text);white-space:pre-wrap;line-height:1.5;}
+
+  /* ---------- feedback ---------- */
+  .feedback-grade{
+    display:flex;align-items:center;gap:14px;margin-bottom:6px;
+  }
+  .feedback-grade .badge{
+    font-size:26px;font-weight:700;color:var(--amber);
+    border:1.5px solid var(--amber);border-radius:8px;width:56px;height:56px;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px;}
+  @media (max-width:640px){.compare-grid{grid-template-columns:1fr;}}
+  .compare-box{border:1px solid var(--line);border-radius:8px;padding:13px;background:var(--bg-raised);}
+  .compare-box.weak{border-left:3px solid var(--danger);}
+  .compare-box.optimized{border-left:3px solid var(--ok);}
+  .compare-box .k{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);margin-bottom:6px;}
+  .compare-box .txt{font-size:12.5px;color:var(--text);line-height:1.5;white-space:pre-wrap;}
+  .principle-box{
+    margin-top:14px;border:1px solid var(--amber-dim);border-radius:8px;
+    padding:14px;background:rgba(242,166,39,.05);
+  }
+  .principle-box .k{color:var(--amber);font-size:11px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;}
+  .principle-box .txt{font-size:13px;color:var(--text);line-height:1.6;}
+
+  /* ---------- toasts ---------- */
+  #toast-container{position:fixed;bottom:22px;right:22px;display:flex;flex-direction:column;gap:8px;z-index:99;max-width:300px;}
+  .toast{
+    background:var(--bg-card);border:1px solid var(--line);border-left:3px solid var(--amber);
+    border-radius:7px;padding:11px 14px;font-size:12.5px;color:var(--text);
+    box-shadow:0 8px 24px rgba(0,0,0,.4);
+    animation:toastIn .25s ease, toastOut .3s ease 2.4s forwards;
+  }
+  .toast.bad{border-left-color:var(--danger);}
+  .toast.good{border-left-color:var(--ok);}
+  @keyframes toastIn{from{opacity:0;transform:translateX(24px);}to{opacity:1;transform:translateX(0);}}
+  @keyframes toastOut{to{opacity:0;transform:translateX(24px);}}
+
+  /* ---------- report ---------- */
+  .report-hero{text-align:center;padding:8px 0 4px;}
+  .report-score{font-size:58px;font-weight:700;color:var(--amber);letter-spacing:-.02em;}
+  .report-score .of{font-size:20px;color:var(--text-dim);}
+  .report-rating{font-size:15px;color:var(--text);margin-top:2px;}
+  .report-rank{margin-top:6px;}
+
+  .dna-wrap{display:flex;flex-direction:column;align-items:center;margin-top:6px;}
+  .dna-legend{display:grid;grid-template-columns:1fr 1fr;gap:6px 20px;margin-top:14px;width:100%;max-width:360px;font-size:11.5px;}
+  .dna-legend .row{display:flex;justify-content:space-between;color:var(--text-dim);}
+  .dna-legend .row b{color:var(--text);}
+
+  .metrics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px;}
+  @media (max-width:640px){.metrics-grid{grid-template-columns:repeat(2,1fr);}}
+  .metric{border:1px solid var(--line);border-radius:8px;padding:12px;text-align:center;background:var(--bg-raised);}
+  .metric .n{font-size:20px;color:var(--amber);font-weight:700;}
+  .metric .l{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;margin-top:3px;}
+
+  .step-dots{display:flex;gap:6px;margin-top:14px;}
+  .step-dots .dot{width:8px;height:8px;border-radius:50%;background:var(--line);}
+  .step-dots .dot.done{background:var(--amber);}
+  .step-dots .dot.active{background:var(--text);}
+
+  .fade-in{animation:fadeIn .35s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+  code.inline{background:var(--bg-raised);border:1px solid var(--line);padding:1px 6px;border-radius:4px;color:var(--amber);}
+</style>
+</head>
+<body>
+<div id="toast-container"></div>
+<div id="app"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   SCENARIO DATA — Domain: Software Engineering · Difficulty: Intermediate
+   Each scenario object is reusable and fully self-contained.
+   ============================================================ */
+var SCENARIOS = [
+  {
+    id: "refactor",
+    title: "Refactor a Legacy Function",
+    desiredOutput: "A modernized version of a legacy ES5 JavaScript function — same behavior, cleaner syntax, with error handling and short rationale for each change.",
+    correctBlocks: [
+      "You are a senior JavaScript engineer specializing in code modernization and refactoring.",
+      "Here is a legacy ES5 function that calculates shipping cost from weight and destination zone.",
+      "Refactor it to modern ES6+ syntax (arrow functions, destructuring, template literals) without changing external behavior.",
+      "Preserve the function name and parameters exactly, and add basic input validation with JSDoc comments.",
+      "Return the refactored code in one code block, followed by a short bullet list explaining each change."
+    ],
+    distractorBlocks: [
+      "Rewrite this in Python instead of JavaScript.",
+      "Make it as short as possible, even if it becomes unreadable.",
+      "Ignore edge cases and error handling entirely.",
+      "Add flashy console.log animations for fun."
+    ],
+    weakPrompt: "make this code better",
+    optimizedPrompt: "You are a senior JavaScript engineer specializing in code modernization. Here is a legacy ES5 function that calculates shipping cost from weight and destination zone. Refactor it to modern ES6+ syntax without changing external behavior. Preserve the function name and parameters, and add input validation with JSDoc comments. Return the code in one block, followed by a bullet list of the changes.",
+    overEngineeredPrompt: "You are the single greatest JavaScript engineer to ever live, a 10x rockstar ninja ninja-guru with 40 years of experience across every language ever invented. Rewrite, restructure, redesign and completely reimagine this function from first principles. Also rewrite it a second time in TypeScript, a third time in Python, and a fourth time as a diagram. Explain the entire history of ECMAScript since 1997. Add unnecessary abstraction layers, a plugin system, and a changelog. Make it perfect in every conceivable way and never make a single mistake.",
+    weakOutput: "Sure! Here's a cleaner version:\nfunction calc(w,d){return w*d*1.2}\n(Behavior changed — original discount logic was dropped, no validation added, no explanation given.)",
+    optimizedOutput: "```js\n/**\n * Calculates shipping cost.\n * @param {number} weight\n * @param {string} zone\n */\nconst calculateShippingCost = (weight, zone) => {\n  if (typeof weight !== 'number' || weight <= 0) throw new Error('Invalid weight');\n  const rate = ZONE_RATES[zone] ?? ZONE_RATES.default;\n  return weight * rate;\n};\n```\n- Converted to an arrow function and const\n- Added input validation\n- Replaced nested if/else with a rate lookup\n- Behavior unchanged for all valid inputs",
+    principle: "Specificity plus constraints prevent unintended changes. Naming the exact scope ('same behavior', 'keep the signature') stops the model from silently rewriting logic it wasn't asked to touch."
+  },
+  {
+    id: "unit-tests",
+    title: "Write a Unit Test Suite",
+    desiredOutput: "A Jest test suite for an isValidEmail(email) function, covering typical and edge cases.",
+    correctBlocks: [
+      "You are a QA-focused engineer experienced with Jest testing in JavaScript.",
+      "Here is a function isValidEmail(email) that returns true or false using a regex check.",
+      "Write a Jest test suite covering valid emails, invalid emails, empty strings, and edge cases like subdomains or plus-addressing.",
+      "Use describe/it blocks, group related cases together, and include at least 8 distinct test cases.",
+      "Return only the test file code in a single JavaScript code block."
+    ],
+    distractorBlocks: [
+      "Also explain the full history of unit testing in software engineering.",
+      "Make sure the tests pass even if the function itself is broken.",
+      "Rewrite the original function's logic while you're at it.",
+      "Use Python's unittest framework instead of Jest."
+    ],
+    weakPrompt: "write tests for this function",
+    optimizedPrompt: "You are a QA-focused engineer experienced with Jest. Here is isValidEmail(email), which returns true/false via a regex check. Write a Jest suite covering valid emails, invalid emails, empty strings, and edge cases like subdomains or plus-addressing. Use describe/it blocks and include at least 8 distinct cases. Return only the test file code in one block.",
+    overEngineeredPrompt: "You are the world's foremost testing philosopher. Before writing any tests, write a 1500-word essay on the epistemology of software correctness. Then write tests in Jest, Mocha, Jasmine, and Python's unittest simultaneously. Cover every email address that has ever existed. Also refactor the original function's internal regex to be 'more elegant.' Include a poem about edge cases.",
+    weakOutput: "test('email works', () => {\n  expect(isValidEmail('a@b.com')).toBe(true);\n});\n(Only one shallow case — no edge cases, no invalid examples, no structure.)",
+    optimizedOutput: "```js\ndescribe('isValidEmail', () => {\n  it('accepts a standard email', () => { expect(isValidEmail('a@b.com')).toBe(true); });\n  it('accepts subdomains', () => { expect(isValidEmail('a@mail.b.com')).toBe(true); });\n  it('accepts plus-addressing', () => { expect(isValidEmail('a+tag@b.com')).toBe(true); });\n  it('rejects missing @', () => { expect(isValidEmail('ab.com')).toBe(false); });\n  it('rejects empty string', () => { expect(isValidEmail('')).toBe(false); });\n  // ...8+ total cases, grouped and readable\n});\n```",
+    principle: "Clarity of scope matters as much as content. A clean prompt includes only instructions relevant to the deliverable — contradictory asks (like 'pass even if broken') confuse the model's actual objective."
+  },
+  {
+    id: "race-condition",
+    title: "Debug a Race Condition",
+    desiredOutput: "A precise diagnosis of a race condition in a Node.js async function, plus a corrected code sample.",
+    correctBlocks: [
+      "You are a Node.js concurrency expert.",
+      "Here is an async function that updates a shared counter across parallel requests.",
+      "Identify the race condition causing incorrect counter values and explain why it happens.",
+      "Provide a corrected version using proper locking or atomic operations.",
+      "Return the answer as: 1) root cause, 2) corrected code, 3) a one-sentence prevention tip."
+    ],
+    distractorBlocks: [
+      "Also list every concurrency bug that could theoretically exist in any language.",
+      "Rewrite the whole service in a different framework.",
+      "Add a caching layer while you're in there.",
+      "Explain the entire history of mutexes since 1965."
+    ],
+    weakPrompt: "why is my code buggy async issue",
+    optimizedPrompt: "You are a Node.js concurrency expert. Here is an async function that updates a shared counter across parallel requests. Identify the race condition causing incorrect values and explain why it happens. Provide a corrected version using proper locking or atomic operations. Return: 1) root cause, 2) corrected code, 3) a one-sentence prevention tip.",
+    overEngineeredPrompt: "You are the greatest 10x concurrency wizard in the world with 30 years of experience across every runtime ever built. Explain, in extreme detail, every race condition theoretically possible in any programming language throughout computing history. Provide five alternative fixes ranked by philosophical elegance. Write a 2000-word essay on the history of mutexes since 1965 before touching the actual bug.",
+    weakOutput: "Hmm, async code can be tricky. Try adding some console.logs and check your logic — could be a lot of things. Let me know if you find anything!",
+    optimizedOutput: "**Root cause:** Two requests read the counter before either writes it back (a check-then-act race).\n```js\nconst { Mutex } = require('async-mutex');\nconst lock = new Mutex();\nasync function increment() {\n  const release = await lock.acquire();\n  try { counter += 1; } finally { release(); }\n}\n```\n**Prevention tip:** Any shared mutable state touched by concurrent async calls needs a lock or an atomic operation, never a plain read-modify-write.",
+    principle: "Right-sized prompts win. More instructions isn't always better — over-engineering buries the real task in noise and produces a bloated, unfocused answer instead of a precise fix.",
+    optimizedIsIndex: 0
+  },
+  {
+    id: "api-design",
+    title: "Design a REST API Endpoint",
+    desiredOutput: "A well-specified POST /users endpoint: request schema, response schema, error handling, and example code.",
+    correctBlocks: [
+      "You are a backend API architect experienced with RESTful design and Express.",
+      "We're building a user service with Express and PostgreSQL. Users have name, email, and password fields.",
+      "Design a POST /users endpoint that creates a new user account.",
+      "Include input validation, correct HTTP status codes (201, 400, 409), and password hashing before storage.",
+      "Present the answer as: request schema, response schema, an error-cases table, and an example Express route handler."
+    ],
+    distractorBlocks: [
+      "Also design a full React signup form to go with it.",
+      "Store passwords in plain text for simplicity.",
+      "Add OAuth, SSO, and biometric login to this same endpoint.",
+      "Skip validation — we'll add it later."
+    ],
+    weakPrompt: "make an api for signup",
+    optimizedPrompt: "You are a backend API architect experienced with Express. We're building a user service with Express and PostgreSQL; users have name, email, and password. Design a POST /users endpoint. Include input validation, correct HTTP status codes (201, 400, 409), and password hashing before storage. Present: request schema, response schema, an error-cases table, and an example route handler.",
+    overEngineeredPrompt: "You are the chief architect of a trillion-dollar company. Design POST /users but also design OAuth, SSO, biometric login, a full frontend, a mobile SDK, and a GraphQL gateway all in the same response. Repeat every requirement three times for emphasis. Write a 3000-word essay on REST theory since Roy Fielding's dissertation before showing any code. Storing passwords is optional if it saves time.",
+    weakOutput: "app.post('/users', (req, res) => {\n  db.save(req.body);\n  res.send('ok');\n});\n(No validation, no status codes, no hashing, no schema.)",
+    optimizedOutput: "**Request:** `{ name, email, password }` → 201 Created\n**Errors:** 400 (invalid fields), 409 (email exists)\n```js\napp.post('/users', validateUser, async (req, res) => {\n  const hash = await bcrypt.hash(req.body.password, 12);\n  const user = await User.create({ ...req.body, password: hash });\n  res.status(201).json({ id: user.id, email: user.email });\n});\n```",
+    principle: "Bounded scope produces production-ready specs. Naming exact fields, status codes, and security requirements stops the model from improvising unsafe defaults, like storing passwords in plain text."
+  },
+  {
+    id: "sql-optimize",
+    title: "Optimize a Slow SQL Query",
+    desiredOutput: "A rewritten, faster SQL query with the same result set, plus an explanation of the optimization.",
+    correctBlocks: [
+      "You are a database performance engineer specializing in PostgreSQL query optimization.",
+      "Here is a slow query joining orders and customers, currently taking 4+ seconds on 2 million rows.",
+      "Rewrite this query to reduce execution time and suggest any indexes that would help.",
+      "Preserve the exact same result set — identical columns and filtering logic.",
+      "Return the optimized SQL in a code block, followed by a short explanation of what changed and why."
+    ],
+    distractorBlocks: [
+      "Also migrate this database to MongoDB while you're at it.",
+      "Add three new unrelated tables for a shopping-cart feature.",
+      "It's fine if the results are slightly different, just make it fast.",
+      "Explain the entire history of relational databases first."
+    ],
+    weakPrompt: "make this query faster",
+    optimizedPrompt: "You are a database performance engineer specializing in PostgreSQL. Here is a slow query joining orders and customers, taking 4+ seconds on 2M rows. Rewrite it to reduce execution time and suggest helpful indexes. Preserve the exact same result set. Return the optimized SQL in a code block, followed by a short explanation of what changed.",
+    overEngineeredPrompt: "You are the greatest database engineer alive. Migrate this to MongoDB, then also to a graph database, then explain the entire history of relational algebra since Codd's 1970 paper. Add unrelated tables for a shopping cart. It's fine if the output changes slightly, as long as it's 'more elegant.' Write 2000 words before any SQL.",
+    weakOutput: "Try adding some indexes and maybe use fewer joins? That should help speed things up in general.",
+    optimizedOutput: "```sql\nSELECT o.id, o.total, c.name\nFROM orders o\nJOIN customers c ON c.id = o.customer_id\nWHERE o.created_at > NOW() - INTERVAL '30 days';\n\nCREATE INDEX idx_orders_customer_created ON orders(customer_id, created_at);\n```\nThe original query scanned the full table; the composite index lets Postgres use an index-only scan on the filtered date range, cutting runtime from ~4s to ~80ms with an identical result set.",
+    principle: "Preserving intent while optimizing is critical. Specifying 'same result set' stops the model from quietly changing behavior in pursuit of speed — precision constraints protect correctness."
+  },
+  {
+    id: "code-review",
+    title: "Get Code Review Feedback",
+    desiredOutput: "Constructive, specific review comments on a pull request that improve quality without being harsh or vague.",
+    correctBlocks: [
+      "You are a senior engineer conducting a code review.",
+      "Here is a pull request diff to review.",
+      "Review it for correctness, readability, and our style guide: camelCase, no magic numbers, functions under 40 lines.",
+      "For each issue, give the line reference, why it matters, and a suggested fix — keep the tone constructive and specific.",
+      "Limit your response to the 5 most important issues."
+    ],
+    distractorBlocks: [
+      "Rate the developer's competence out of 10.",
+      "Compare this code to how a huge tech company would supposedly write it.",
+      "Include a motivational quote at the end.",
+      "Find every possible issue, including pure personal style preferences, with no limit."
+    ],
+    weakPrompt: "review this code",
+    optimizedPrompt: "You are a senior engineer conducting a code review. Here is a pull request diff. Review it for correctness, readability, and our style guide (camelCase, no magic numbers, functions under 40 lines). For each issue give the line reference, why it matters, and a suggested fix, in a constructive tone. Limit your response to the 5 most important issues.",
+    overEngineeredPrompt: "You are the harshest, most nitpicky senior engineer in the industry with zero tolerance for imperfection. Find every single possible issue, no matter how minor, including subjective style opinions and paradigm debates. Write at least 3000 words. Rate the developer's competence out of 10. Compare this code to how a famous tech giant would write it. End with a motivational quote.",
+    weakOutput: "Looks good overall! Maybe clean it up a bit. Nice work!\n(No specifics, nothing actionable.)",
+    optimizedOutput: "1. **Line 14** — magic number `86400`: extract to `SECONDS_IN_DAY` for readability.\n2. **Line 27** — function is 61 lines: split the validation branch into a helper.\n3. **Line 33** — variable `temp_val` breaks camelCase: rename to `tempValue`.\n4. **Line 40** — missing null check before `.map()`: add an early return.\n5. **Line 52** — duplicated logic from line 19: extract into a shared function.\nOverall: solid structure, these five changes will meaningfully improve maintainability.",
+    principle: "Tone and scope constraints shape quality. Bounding the review to 'top 5 issues' with a constructive-tone requirement produces actionable feedback instead of an overwhelming, demoralizing wall of nitpicks."
+  }
+];
+
+var CHALLENGE_TYPES = ["build", "clean", "choose"];
+var CHALLENGE_META = {
+  build:  { label: "Build the Prompt",  desc: "Drag the correct prompt blocks into the right order. Ignore the decoys." },
+  clean:  { label: "Clean the Prompt",  desc: "This prompt is cluttered. Keep only the lines that actually belong." },
+  choose: { label: "Choose the Best Prompt", desc: "Three versions, one task. Pick the one that will get the best result." }
+};
+
+/* ============================================================
+   STATE
+   ============================================================ */
+var state = null;
+
+function freshState(){
+  var order = shuffle(SCENARIOS.slice());
+  var types = shuffle([0,1,2,0,1,2]); // two of each across 6 scenarios
+  var runs = order.map(function(sc, i){
+    return {
+      scenario: sc,
+      type: CHALLENGE_TYPES[types[i % types.length]],
+      accuracy: 0,
+      moves: 0,
+      wrong: 0,
+      hints: 0,
+      timeSec: 0,
+      bonus: 0,
+      done: false
+    };
+  });
+  return {
+    runs: runs,
+    index: 0,
+    startedAt: null,
+    scenarioStart: null,
+    timerId: null,
+    elapsed: 0,
+    totalScore: 0
+  };
+}
+
+function shuffle(arr){
+  for (var i = arr.length - 1; i > 0; i--){
+    var j = Math.floor(Math.random() * (i+1));
+    var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+  }
+  return arr;
+}
+
+/* ============================================================
+   TOASTS
+   ============================================================ */
+function toast(msg, kind){
+  var c = document.getElementById("toast-container");
+  var el = document.createElement("div");
+  el.className = "toast" + (kind ? " " + kind : "");
+  el.textContent = msg;
+  c.appendChild(el);
+  setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 2800);
+}
+
+/* ============================================================
+   RENDER: SHELL
+   ============================================================ */
+function el(html){
+  var d = document.createElement("div");
+  d.innerHTML = html;
+  return d.firstElementChild;
+}
+
+function fmtTime(sec){
+  var m = Math.floor(sec/60), s = sec % 60;
+  return (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
+}
+
+function renderTopbar(showStats){
+  var total = state ? state.runs.length : 0;
+  var idx = state ? state.index : 0;
+  var pct = total ? Math.min(100, (idx/total)*100) : 0;
+  var score = state ? Math.round(state.totalScore) : 0;
+  var statsHtml = "";
+  if (showStats && state){
+    statsHtml =
+      '<div id="stat-strip">' +
+        '<div class="stat">Scenario <b>' + Math.min(idx+1,total) + '/' + total + '</b></div>' +
+        '<div class="stat">Score <b id="live-score">' + score + '</b></div>' +
+        '<div class="stat">Time <b id="live-time">' + fmtTime(state.elapsed) + '</b></div>' +
+      '</div>' +
+      '<div class="progress-track"><div class="progress-fill" style="width:' + pct + '%"></div></div>';
+  }
+  return (
+    '<div id="topbar"><div id="topbar-inner">' +
+      '<div id="topbar-title">' +
+        '<div class="name">🧩 Prompt Puzzle <span class="pin">·</span> Master AI Prompting Through Play</div>' +
+        '<span class="pill">Software Engineering / Intermediate</span>' +
+      '</div>' +
+      statsHtml +
+    '</div></div>'
+  );
+}
+
+function tickTimer(){
+  if (!state) return;
+  state.elapsed += 1;
+  var t = document.getElementById("live-time");
+  if (t) t.textContent = fmtTime(state.elapsed);
+}
+
+function startTimer(){
+  stopTimer();
+  state.timerId = setInterval(tickTimer, 1000);
+}
+function stopTimer(){
+  if (state && state.timerId){ clearInterval(state.timerId); state.timerId = null; }
+}
+
+/* ============================================================
+   SCREEN: WELCOME
+   ============================================================ */
+function renderWelcome(){
+  stopTimer();
+  var app = document.getElementById("app");
+  app.innerHTML =
+    renderTopbar(false) +
+    '<div class="fade-in">' +
+    '<div class="eyebrow">Briefing</div>' +
+    '<h1>Train your prompting instincts, one puzzle at a time.</h1>' +
+    '<p style="margin-top:8px;">Six scenarios, three challenge types, one goal: learn to write prompts an engineer would actually ship.</p>' +
+    '<div class="brief-grid">' +
+      '<div class="brief-box"><div class="k">Domain</div><div class="v">Software Engineering</div></div>' +
+      '<div class="brief-box"><div class="k">Difficulty</div><div class="v">Intermediate</div></div>' +
+    '</div>' +
+    '<div class="card">' +
+      '<h3>Challenge types you\'ll face</h3>' +
+      '<div class="type-legend">' +
+        '<div class="item"><div class="t">01 · Build the Prompt</div><div class="d">Drag the right blocks into the right order. Decoy blocks are mixed in.</div></div>' +
+        '<div class="item"><div class="t">02 · Clean the Prompt</div><div class="d">A prompt is cluttered with noise. Keep only what belongs.</div></div>' +
+        '<div class="item"><div class="t">03 · Choose the Best Prompt</div><div class="d">Weak, optimized, or over-engineered — pick the one that ships.</div></div>' +
+      '</div>' +
+      '<h3 style="margin-top:20px;">How you\'re scored</h3>' +
+      '<p style="margin-top:4px;">Accuracy, time, moves, wrong placements, hints used, and an optimization bonus for clean, hint-free runs all roll up into your final Prompt Score.</p>' +
+      '<div class="btn-row"><button class="btn btn-primary" id="start-btn">Start the Challenge →</button></div>' +
+    '</div></div>';
+  document.getElementById("start-btn").addEventListener("click", startGame);
+}
+
+/* ============================================================
+   GAME FLOW
+   ============================================================ */
+function startGame(){
+  state = freshState();
+  startTimer();
+  renderScenario();
+}
+
+function currentRun(){ return state.runs[state.index]; }
+
+function renderScenario(){
+  var run = currentRun();
+  if (!run){ finishGame(); return; }
+  run.moves = 0; run.wrong = 0; run.hints = 0;
+  state.scenarioStart = state.elapsed;
+
+  var app = document.getElementById("app");
+  var meta = CHALLENGE_META[run.type];
+  var dots = state.runs.map(function(r, i){
+    var cls = i < state.index ? "done" : (i === state.index ? "active" : "");
+    return '<div class="dot ' + cls + '"></div>';
+  }).join("");
+
+  var head =
+    '<div class="fade-in card">' +
+    '<div class="scenario-head">' +
+      '<div><div class="eyebrow">' + meta.label + '</div><h2>' + run.scenario.title + '</h2></div>' +
+      '<span class="type-tag">' + meta.label + '</span>' +
+    '</div>' +
+    '<p style="margin-top:4px;font-size:12.5px;">' + meta.desc + '</p>' +
+    '<div class="step-dots">' + dots + '</div>' +
+    '<div class="desired-output"><div class="k">Desired Output</div>' + run.scenario.desiredOutput + '</div>' +
+    '<div id="challenge-zone"></div>' +
+    '<div class="btn-row">' +
+      '<button class="btn" id="hint-btn">💡 Hint</button>' +
+      '<button class="btn btn-primary" id="check-btn" disabled>Check Prompt</button>' +
+    '</div>' +
+    '</div>';
+
+  app.innerHTML = renderTopbar(true) + head;
+
+  if (run.type === "build") renderBuild(run);
+  else if (run.type === "clean") renderClean(run);
+  else renderChoose(run);
+
+  document.getElementById("hint-btn").addEventListener("click", function(){ giveHint(run); });
+  document.getElementById("check-btn").addEventListener("click", function(){ checkAnswer(run); });
+}
+
+/* ---------------- BUILD ---------------- */
+function renderBuild(run){
+  var sc = run.scenario;
+  var zone = document.getElementById("challenge-zone");
+  var slotCount = sc.correctBlocks.length;
+  var allBlocks = sc.correctBlocks.map(function(t,i){ return {id:"c"+i, text:t, correct:true}; })
+    .concat(sc.distractorBlocks.map(function(t,i){ return {id:"d"+i, text:t, correct:false}; }));
+  allBlocks = shuffle(allBlocks);
+
+  run._slots = new Array(slotCount).fill(null);
+  run._blocks = allBlocks;
+
+  var slotsHtml = "";
+  for (var i = 0; i < slotCount; i++){
+    slotsHtml += '<div class="slot" data-slot="' + i + '"><span class="slot-num">' + (i+1) + '</span>' +
+      '<span class="slot-content empty">Drop the right block here…</span></div>';
+  }
+  var trayHtml = allBlocks.map(function(b){
+    return '<div class="chip" draggable="true" data-id="' + b.id + '">' + b.text + '</div>';
+  }).join("");
+
+  zone.innerHTML =
+    '<h3 style="margin-top:18px;">Ordered Prompt Slots</h3>' +
+    '<div id="slots">' + slotsHtml + '</div>' +
+    '<h3 style="margin-top:4px;">Block Tray <span class="pill">drag into slots</span></h3>' +
+    '<div id="tray">' + trayHtml + '</div>';
+
+  var chips = zone.querySelectorAll(".chip");
+  chips.forEach(function(chip){
+    chip.addEventListener("dragstart", function(e){
+      chip.classList.add("dragging");
+      e.dataTransfer.setData("text/plain", chip.getAttribute("data-id"));
+    });
+    chip.addEventListener("dragend", function(){ chip.classList.remove("dragging"); });
+  });
+
+  var slots = zone.querySelectorAll(".slot");
+  slots.forEach(function(slot){
+    slot.addEventListener("dragover", function(e){ e.preventDefault(); slot.classList.add("dragover"); });
+    slot.addEventListener("dragleave", function(){ slot.classList.remove("dragover"); });
+    slot.addEventListener("drop", function(e){
+      e.preventDefault();
+      slot.classList.remove("dragover");
+      var id = e.dataTransfer.getData("text/plain");
+      placeBlockInSlot(run, id, parseInt(slot.getAttribute("data-slot"), 10));
+    });
+  });
+
+  updateCheckButton(run);
+}
+
+function placeBlockInSlot(run, blockId, slotIndex){
+  if (run._slots[slotIndex]) return; // already filled
+  var block = run._blocks.filter(function(b){ return b.id === blockId; })[0];
+  if (!block) return;
+  run.moves += 1;
+  run._slots[slotIndex] = block;
+
+  var slotEl = document.querySelector('.slot[data-slot="' + slotIndex + '"]');
+  var isCorrect = block.correct && run.scenario.correctBlocks[slotIndex] === block.text;
+
+  slotEl.classList.add("filled");
+  slotEl.innerHTML = '<span class="slot-num">' + (slotIndex+1) + '</span>' +
+    '<span class="slot-content">' + block.text + '</span>' +
+    '<span class="remove-x" data-slot="' + slotIndex + '">✕</span>';
+
+  if (isCorrect){
+    slotEl.classList.add("correct");
+    toast("Nice — that block fits.", "good");
+  } else {
+    slotEl.classList.add("wrong");
+    run.wrong += 1;
+    toast("Not quite the right fit for this slot.", "bad");
+  }
+
+  var chipEl = document.querySelector('.chip[data-id="' + blockId + '"]');
+  if (chipEl) chipEl.classList.add("used");
+
+  slotEl.querySelector(".remove-x").addEventListener("click", function(){
+    run._slots[slotIndex] = null;
+    slotEl.className = "slot";
+    slotEl.setAttribute("data-slot", slotIndex);
+    slotEl.innerHTML = '<span class="slot-num">' + (slotIndex+1) + '</span><span class="slot-content empty">Drop the right block here…</span>';
+    slotEl.addEventListener("dragover", function(e){ e.preventDefault(); slotEl.classList.add("dragover"); });
+    slotEl.addEventListener("dragleave", function(){ slotEl.classList.remove("dragover"); });
+    slotEl.addEventListener("drop", function(e){
+      e.preventDefault(); slotEl.classList.remove("dragover");
+      var id = e.dataTransfer.getData("text/plain");
+      placeBlockInSlot(run, id, slotIndex);
+    });
+    if (chipEl) chipEl.classList.remove("used");
+    updateCheckButton(run);
+  });
+
+  updateCheckButton(run);
+}
+
+function updateCheckButton(run){
+  var btn = document.getElementById("check-btn");
+  if (!btn) return;
+  var filled = run._slots.filter(function(s){ return s; }).length;
+  btn.disabled = filled < run._slots.length;
+}
+
+/* ---------------- CLEAN ---------------- */
+function renderClean(run){
+  var sc = run.scenario;
+  var zone = document.getElementById("challenge-zone");
+  var items = sc.correctBlocks.map(function(t){ return {text:t, correct:true}; })
+    .concat(sc.distractorBlocks.map(function(t){ return {text:t, correct:false}; }));
+  items = shuffle(items).map(function(it, i){ it.id = "i"+i; it.state = "keep"; return it; });
+  run._items = items;
+
+  var html = items.map(function(it){
+    return '<div class="clean-item keep" data-id="' + it.id + '"><span class="mark">✓</span><span class="txt">' + it.text + '</span></div>';
+  }).join("");
+
+  zone.innerHTML =
+    '<h3 style="margin-top:18px;">Given Prompt <span class="pill">click a line to mark it for removal</span></h3>' +
+    '<div class="clean-list">' + html + '</div>';
+
+  zone.querySelectorAll(".clean-item").forEach(function(node){
+    node.addEventListener("click", function(){
+      var id = node.getAttribute("data-id");
+      var it = items.filter(function(x){ return x.id === id; })[0];
+      run.moves += 1;
+      if (it.state === "keep"){
+        it.state = "remove";
+        node.classList.remove("keep"); node.classList.add("remove");
+        node.querySelector(".mark").textContent = "✕";
+      } else {
+        it.state = "keep";
+        node.classList.remove("remove"); node.classList.add("keep");
+        node.querySelector(".mark").textContent = "✓";
+      }
+    });
+  });
+
+  updateCheckButtonAlwaysOn();
+}
+function updateCheckButtonAlwaysOn(){
+  var btn = document.getElementById("check-btn");
+  if (btn) btn.disabled = false;
+}
+
+/* ---------------- CHOOSE ---------------- */
+function renderChoose(run){
+  var sc = run.scenario;
+  var zone = document.getElementById("challenge-zone");
+  var options = [
+    {key:"weak", text: sc.weakPrompt},
+    {key:"optimized", text: sc.optimizedPrompt},
+    {key:"overEngineered", text: sc.overEngineeredPrompt}
+  ];
+  options = shuffle(options);
+  run._options = options;
+  run._selected = null;
+
+  var labels = ["A", "B", "C"];
+  var html = options.map(function(opt, i){
+    return '<div class="choose-card" data-key="' + opt.key + '">' +
+      '<div class="label">OPTION ' + labels[i] + '</div>' +
+      '<div class="body">' + opt.text + '</div></div>';
+  }).join("");
+
+  zone.innerHTML = '<h3 style="margin-top:18px;">Which prompt should you send?</h3><div class="choose-grid">' + html + '</div>';
+
+  zone.querySelectorAll(".choose-card").forEach(function(node){
+    node.addEventListener("click", function(){
+      zone.querySelectorAll(".choose-card").forEach(function(n){ n.classList.remove("selected"); });
+      node.classList.add("selected");
+      run._selected = node.getAttribute("data-key");
+      run.moves += 1;
+      document.getElementById("check-btn").disabled = false;
+    });
+  });
+}
+
+/* ============================================================
+   HINTS
+   ============================================================ */
+function giveHint(run){
+  run.hints += 1;
+  if (run.type === "build"){
+    for (var i = 0; i < run._slots.length; i++){
+      if (!run._slots[i]){
+        var text = run.scenario.correctBlocks[i];
+        var chip = Array.prototype.filter.call(document.querySelectorAll(".chip"), function(c){
+          return c.textContent === text && !c.classList.contains("used");
+        })[0];
+        if (chip){ chip.style.borderColor = "#f2a627"; chip.style.color = "#f2a627"; }
+        toast("Hint: slot " + (i+1) + " needs the highlighted block.", "good");
+        break;
+      }
+    }
+  } else if (run.type === "clean"){
+    var distractor = run._items.filter(function(it){ return !it.correct && it.state === "keep"; })[0];
+    if (distractor){
+      var node = document.querySelector('.clean-item[data-id="' + distractor.id + '"]');
+      if (node){ node.style.borderColor = "#e2543f"; }
+      toast("Hint: one of the highlighted lines doesn't belong.", "bad");
+    } else {
+      toast("Hint: everything currently kept looks legitimate.", "good");
+    }
+  } else {
+    toast("Hint: the best prompt is specific but never repeats itself or over-explains.", "good");
+  }
+}
+
+/* ============================================================
+   CHECK / SCORE PER SCENARIO
+   ============================================================ */
+function checkAnswer(run){
+  var accuracy = 0;
+  if (run.type === "build"){
+    var correctCount = 0;
+    for (var i = 0; i < run._slots.length; i++){
+      if (run._slots[i] && run._slots[i].text === run.scenario.correctBlocks[i]) correctCount++;
+    }
+    accuracy = Math.round((correctCount / run._slots.length) * 100);
+  } else if (run.type === "clean"){
+    var total = run._items.length, right = 0;
+    run._items.forEach(function(it){
+      var wantKeep = it.correct;
+      var isKept = it.state === "keep";
+      if (wantKeep === isKept) right++;
+      else run.wrong += 1;
+    });
+    accuracy = Math.round((right / total) * 100);
+  } else {
+    accuracy = run._selected === "optimized" ? 100 : (run._selected === "overEngineered" ? 45 : 0);
+    if (run._selected !== "optimized") run.wrong += 1;
+  }
+
+  run.accuracy = accuracy;
+  run.timeSec = state.elapsed - state.scenarioStart;
+  run.bonus = (accuracy === 100 && run.hints === 0) ? 40 : 0;
+  run.done = true;
+
+  var scenarioPoints = Math.round(accuracy * 1.2 - run.wrong * 6 - run.hints * 8 + run.bonus);
+  state.totalScore = Math.max(0, state.totalScore + Math.max(0, scenarioPoints));
+
+  renderFeedback(run);
+}
+
+/* ============================================================
+   FEEDBACK SCREEN
+   ============================================================ */
+function renderFeedback(run){
+  stopTimer();
+  var sc = run.scenario;
+  var app = document.getElementById("app");
+  var grade = run.accuracy >= 90 ? "A" : run.accuracy >= 75 ? "B" : run.accuracy >= 55 ? "C" : "D";
+
+  app.innerHTML = renderTopbar(true) +
+    '<div class="card fade-in">' +
+    '<div class="feedback-grade"><div class="badge">' + grade + '</div>' +
+      '<div><h2>' + sc.title + ' — ' + run.accuracy + '% accurate</h2>' +
+      '<p style="margin-top:2px;">Moves: ' + run.moves + ' · Wrong placements: ' + run.wrong + ' · Hints used: ' + run.hints + (run.bonus ? ' · +' + run.bonus + ' optimization bonus' : '') + '</p></div>' +
+    '</div>' +
+    '<div class="compare-grid">' +
+      '<div class="compare-box weak"><div class="k">Weak Prompt → Weak Output</div>' +
+        '<div class="txt"><b>Prompt:</b> ' + sc.weakPrompt + '</div>' +
+        '<div class="txt" style="margin-top:8px;"><b>Output:</b> ' + sc.weakOutput + '</div></div>' +
+      '<div class="compare-box optimized"><div class="k">Optimized Prompt → Optimized Output</div>' +
+        '<div class="txt"><b>Prompt:</b> ' + sc.optimizedPrompt + '</div>' +
+        '<div class="txt" style="margin-top:8px;"><b>Output:</b> ' + sc.optimizedOutput + '</div></div>' +
+    '</div>' +
+    '<div class="principle-box"><div class="k">Prompt Principle</div><div class="txt">' + sc.principle + '</div></div>' +
+    '<div class="btn-row"><button class="btn btn-primary" id="next-btn">' +
+      (state.index + 1 < state.runs.length ? "Next Scenario →" : "See Your Report →") +
+    '</button></div>' +
+    '</div>';
+
+  document.getElementById("next-btn").addEventListener("click", function(){
+    state.index += 1;
+    startTimer();
+    renderScenario();
+  });
+}
+
+/* ============================================================
+   FINAL REPORT
+   ============================================================ */
+function finishGame(){
+  stopTimer();
+  var runs = state.runs;
+  var n = runs.length;
+
+  var avg = function(list){ return list.length ? list.reduce(function(a,b){return a+b;},0)/list.length : 0; };
+  var byType = function(t){ return runs.filter(function(r){ return r.type === t; }).map(function(r){ return r.accuracy; }); };
+
+  var totalWrong = runs.reduce(function(a,r){ return a+r.wrong; }, 0);
+  var totalHints = runs.reduce(function(a,r){ return a+r.hints; }, 0);
+  var totalMoves = runs.reduce(function(a,r){ return a+r.moves; }, 0);
+  var totalTime = runs.reduce(function(a,r){ return a+r.timeSec; }, 0);
+  var totalBonus = runs.reduce(function(a,r){ return a+r.bonus; }, 0);
+  var avgAccuracy = Math.round(avg(runs.map(function(r){ return r.accuracy; })));
+
+  var dna = {
+    Structure: Math.round(avg(byType("build")) || 60),
+    Clarity: Math.round(avg(byType("clean")) || 60),
+    Judgment: Math.round(avg(byType("choose")) || 60),
+    Constraints: Math.max(0, Math.round(100 - totalWrong * 8)),
+    Efficiency: Math.max(0, Math.round(100 - totalHints * 12)),
+    Context: avgAccuracy
+  };
+
+  var parTime = n * 75;
+  var timeBonus = Math.max(-80, Math.min(120, Math.round((parTime - totalTime) * 0.6)));
+  var promptScore = Math.max(0, Math.min(1000, Math.round(
+    avgAccuracy * 6 - totalWrong * 5 - totalHints * 8 + totalBonus + timeBonus
+  )));
+
+  var rating, rank;
+  if (promptScore >= 900){ rating = "Prompt Grandmaster"; rank = "S — Top Tier"; }
+  else if (promptScore >= 750){ rating = "Prompt Strategist"; rank = "A — Strong Command"; }
+  else if (promptScore >= 600){ rating = "Prompt Practitioner"; rank = "B — Solid Foundation"; }
+  else if (promptScore >= 420){ rating = "Prompt Apprentice"; rank = "C — Building the Habit"; }
+  else { rating = "Prompt Rookie"; rank = "D — Just Getting Started"; }
+
+  var axes = ["Structure","Clarity","Judgment","Constraints","Efficiency","Context"];
+  var weakest = axes.reduce(function(a,b){ return dna[a] <= dna[b] ? a : b; });
+  var strongest = axes.reduce(function(a,b){ return dna[a] >= dna[b] ? a : b; });
+
+  var feedbackByAxis = {
+    Structure: "Practice sequencing prompt blocks in order — role, then context, then task, then constraints, then format. Order affects how the model weighs instructions.",
+    Clarity: "Watch for unrelated or contradictory sentences sneaking into your prompts. If a line doesn't serve the deliverable, cut it.",
+    Judgment: "When comparing prompt options, favor the one that's specific but not bloated — over-engineered prompts waste tokens and focus.",
+    Constraints: "Add explicit boundaries (what NOT to change, exact formats, exact status codes) so the model can't improvise unsafe defaults.",
+    Efficiency: "Try a scenario without using hints — building the instinct to spot the right block yourself is the real skill.",
+    Context: "Give the model just enough situational detail (what exists, what's involved) before stating the task — not more, not less."
+  };
+
+  var milestoneByAxis = {
+    Structure: "Complete a Build challenge with zero wrong placements.",
+    Clarity: "Complete a Clean challenge with 100% accuracy in under 30 seconds.",
+    Judgment: "Pick the optimized prompt correctly in every Choose challenge.",
+    Constraints: "Finish a full run with fewer than 2 wrong placements total.",
+    Efficiency: "Finish a full run using zero hints.",
+    Context: "Score above 90% average accuracy across all six scenarios."
+  };
+
+  var bestRun = runs.reduce(function(a,b){ return b.accuracy > a.accuracy ? b : a; }, runs[0]);
+
+  var app = document.getElementById("app");
+  app.innerHTML = renderTopbar(false) +
+    '<div class="card fade-in">' +
+      '<div class="eyebrow">Prompt Performance Report</div>' +
+      '<div class="report-hero">' +
+        '<div class="report-score">' + promptScore + ' <span class="of">/ 1000</span></div>' +
+        '<div class="report-rating">' + rating + '</div>' +
+        '<div class="report-rank pill">' + rank + '</div>' +
+      '</div>' +
+
+      '<div class="dna-wrap">' +
+        '<h3 style="margin-top:22px;">Prompt DNA</h3>' +
+        '<div id="dna-chart"></div>' +
+        '<div class="dna-legend">' +
+          axes.map(function(a){ return '<div class="row"><span>' + a + '</span><b>' + dna[a] + '</b></div>'; }).join("") +
+        '</div>' +
+      '</div>' +
+
+      '<div class="metrics-grid">' +
+        '<div class="metric"><div class="n">' + avgAccuracy + '%</div><div class="l">Avg Accuracy</div></div>' +
+        '<div class="metric"><div class="n">' + fmtTime(totalTime) + '</div><div class="l">Total Time</div></div>' +
+        '<div class="metric"><div class="n">' + totalMoves + '</div><div class="l">Total Moves</div></div>' +
+        '<div class="metric"><div class="n">' + totalWrong + '</div><div class="l">Wrong Placements</div></div>' +
+        '<div class="metric"><div class="n">' + totalHints + '</div><div class="l">Hints Used</div></div>' +
+        '<div class="metric"><div class="n">+' + totalBonus + '</div><div class="l">Optimization Bonus</div></div>' +
+      '</div>' +
+
+      '<div class="principle-box" style="margin-top:20px;">' +
+        '<div class="k">Personalized Feedback</div>' +
+        '<div class="txt">Your strongest axis is <b style="color:var(--ok)">' + strongest + '</b> (' + dna[strongest] + '). ' +
+        'Your growth edge is <b style="color:var(--amber)">' + weakest + '</b> (' + dna[weakest] + '). ' + feedbackByAxis[weakest] + '</div>' +
+      '</div>' +
+
+      '<div class="principle-box">' +
+        '<div class="k">Next Milestone</div>' +
+        '<div class="txt">' + milestoneByAxis[weakest] + '</div>' +
+      '</div>' +
+
+      '<div class="compare-box optimized" style="margin-top:14px;">' +
+        '<div class="k">Your Best Optimized Prompt (' + bestRun.scenario.title + ')</div>' +
+        '<div class="txt">' + bestRun.scenario.optimizedPrompt + '</div>' +
+      '</div>' +
+
+      '<div class="btn-row">' +
+        '<button class="btn btn-primary" id="replay-btn">↻ Play Again — New Scenarios</button>' +
+      '</div>' +
+    '</div>';
+
+  drawDNA(dna, axes);
+  document.getElementById("replay-btn").addEventListener("click", startGame);
+}
+
+/* ============================================================
+   DNA RADAR CHART (SVG, no dependencies)
+   ============================================================ */
+function drawDNA(dna, axes){
+  var host = document.getElementById("dna-chart");
+  var size = 260, cx = size/2, cy = size/2, r = 95;
+  var n = axes.length;
+  var pts = function(scaleFn){
+    return axes.map(function(a, i){
+      var angle = (Math.PI * 2 * i / n) - Math.PI/2;
+      var val = scaleFn(a);
+      var x = cx + Math.cos(angle) * r * val;
+      var y = cy + Math.sin(angle) * r * val;
+      return x + "," + y;
+    }).join(" ");
+  };
+  var gridLevels = [0.25, 0.5, 0.75, 1];
+  var gridPolys = gridLevels.map(function(lv){
+    return '<polygon points="' + pts(function(){ return lv; }) + '" fill="none" stroke="#242424" stroke-width="1"/>';
+  }).join("");
+  var axisLines = axes.map(function(a, i){
+    var angle = (Math.PI * 2 * i / n) - Math.PI/2;
+    var x = cx + Math.cos(angle) * r, y = cy + Math.sin(angle) * r;
+    return '<line x1="' + cx + '" y1="' + cy + '" x2="' + x + '" y2="' + y + '" stroke="#242424" stroke-width="1"/>';
+  }).join("");
+  var labels = axes.map(function(a, i){
+    var angle = (Math.PI * 2 * i / n) - Math.PI/2;
+    var x = cx + Math.cos(angle) * (r+22), y = cy + Math.sin(angle) * (r+22);
+    return '<text x="' + x + '" y="' + y + '" fill="#8b8b87" font-size="10" font-family="monospace" text-anchor="middle" dominant-baseline="middle">' + a + '</text>';
+  }).join("");
+  var dataPoly = pts(function(a){ return Math.max(0.06, dna[a]/100); });
+
+  host.innerHTML =
+    '<svg width="' + size + '" height="' + (size+10) + '" viewBox="0 0 ' + size + ' ' + (size+10) + '">' +
+      gridPolys + axisLines +
+      '<polygon points="' + dataPoly + '" fill="rgba(242,166,39,0.22)" stroke="#f2a627" stroke-width="2"/>' +
+      labels +
+    '</svg>';
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+renderWelcome();
+
+})();
+</script>
+</body>
+</html>
