@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GapFinder — Technical Mock Interview Coach</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0a0a;
+    --bg-raised:#131313;
+    --bg-card:#161616;
+    --border:#2a2a2a;
+    --border-soft:#1e1e1e;
+    --amber:#F2A627;
+    --amber-dim:#8a611c;
+    --text:#ededed;
+    --text-dim:#9a9a9a;
+    --text-faint:#5f5f5f;
+    --green:#4ade80;
+    --yellow:#facc15;
+    --red:#f87171;
+    --mono:'IBM Plex Mono', monospace;
+    --sans:'IBM Plex Sans', sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background-color:var(--bg);
+    background-image:
+      linear-gradient(rgba(242,166,39,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(242,166,39,0.035) 1px, transparent 1px);
+    background-size:34px 34px;
+    color:var(--text);
+    font-family:var(--sans);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:32px 16px 80px;
+  }
+  .wrap{width:100%; max-width:720px;}
+  header.app-header{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:28px;
+  }
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand .dot{width:9px; height:9px; border-radius:50%; background:var(--amber); box-shadow:0 0 10px var(--amber);}
+  .brand h1{font-family:var(--mono); font-size:16px; font-weight:600; letter-spacing:0.02em;}
+  .brand span{color:var(--amber);}
+  .tag{font-family:var(--mono); font-size:11px; color:var(--text-faint); border:1px solid var(--border); padding:4px 10px; border-radius:20px;}
+
+  .card{
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:28px;
+    margin-bottom:20px;
+    animation:fadeSlideIn 0.45s ease;
+  }
+  @keyframes fadeSlideIn{
+    from{opacity:0; transform:translateY(10px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+
+  .label{
+    font-family:var(--mono); font-size:11px; text-transform:uppercase;
+    letter-spacing:0.08em; color:var(--amber); margin-bottom:8px; display:block;
+  }
+  .hint{font-size:12.5px; color:var(--text-faint); margin-top:6px; line-height:1.5;}
+
+  textarea, input[type="text"], input[type="password"]{
+    width:100%;
+    background:var(--bg-raised);
+    border:1px solid var(--border);
+    color:var(--text);
+    border-radius:10px;
+    padding:13px 14px;
+    font-family:var(--sans);
+    font-size:14px;
+    resize:vertical;
+    transition:border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  textarea:focus, input:focus{
+    outline:none;
+    border-color:var(--amber-dim);
+    box-shadow:0 0 0 3px rgba(242,166,39,0.12);
+  }
+  .field{margin-bottom:20px;}
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+
+  .chip-select{display:flex; gap:10px; flex-wrap:wrap;}
+  .chip-select button{
+    font-family:var(--mono); font-size:13px;
+    background:var(--bg-raised); border:1px solid var(--border);
+    color:var(--text-dim); padding:9px 16px; border-radius:8px; cursor:pointer;
+    transition:all 0.18s ease;
+  }
+  .chip-select button:hover{border-color:var(--amber-dim); color:var(--text);}
+  .chip-select button.active{
+    background:rgba(242,166,39,0.12); border-color:var(--amber); color:var(--amber);
+  }
+
+  button.primary{
+    font-family:var(--mono); font-weight:600; font-size:14px;
+    background:var(--amber); color:#171000; border:none;
+    padding:13px 22px; border-radius:10px; cursor:pointer;
+    transition:transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    width:100%;
+  }
+  button.primary:hover{transform:translateY(-1px); box-shadow:0 6px 22px rgba(242,166,39,0.25);}
+  button.primary:active{transform:translateY(0px);}
+  button.primary:disabled{opacity:0.45; cursor:not-allowed; transform:none; box-shadow:none;}
+
+  button.secondary{
+    font-family:var(--mono); font-size:13px; font-weight:500;
+    background:transparent; color:var(--text-dim); border:1px solid var(--border);
+    padding:11px 18px; border-radius:10px; cursor:pointer;
+    transition:all 0.18s ease;
+  }
+  button.secondary:hover{border-color:var(--amber-dim); color:var(--amber);}
+
+  .error-box{
+    background:rgba(248,113,113,0.08); border:1px solid rgba(248,113,113,0.3);
+    color:#fca5a5; font-size:13px; padding:12px 14px; border-radius:10px; margin-bottom:16px;
+    font-family:var(--mono);
+  }
+
+  /* Setup screen specifics */
+  #setup-screen h2{font-family:var(--mono); font-size:19px; margin-bottom:6px;}
+  #setup-screen p.sub{color:var(--text-dim); font-size:13.5px; margin-bottom:26px; line-height:1.6;}
+
+  /* Progress bar */
+  .progress-wrap{margin-bottom:22px;}
+  .progress-top{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;}
+  .progress-top span{font-family:var(--mono); font-size:12px; color:var(--text-dim);}
+  .progress-track{height:5px; background:var(--bg-raised); border-radius:6px; overflow:hidden; border:1px solid var(--border-soft);}
+  .progress-fill{height:100%; background:linear-gradient(90deg, var(--amber-dim), var(--amber)); border-radius:6px; transition:width 0.5s ease;}
+
+  .topic-chip{
+    display:inline-block; font-family:var(--mono); font-size:11px; color:var(--amber);
+    background:rgba(242,166,39,0.1); border:1px solid rgba(242,166,39,0.25);
+    padding:4px 10px; border-radius:20px; margin-bottom:14px;
+  }
+  .question-text{font-size:16.5px; line-height:1.6; font-weight:500; margin-bottom:20px;}
+
+  /* Loading dots */
+  .loading-row{display:flex; align-items:center; gap:10px; color:var(--text-dim); font-family:var(--mono); font-size:13px; padding:6px 0;}
+  .dots{display:flex; gap:4px;}
+  .dots span{width:6px; height:6px; border-radius:50%; background:var(--amber); animation:bounce 1.1s infinite ease-in-out;}
+  .dots span:nth-child(2){animation-delay:0.15s;}
+  .dots span:nth-child(3){animation-delay:0.3s;}
+  @keyframes bounce{0%,80%,100%{transform:scale(0.6); opacity:0.4;} 40%{transform:scale(1); opacity:1;}}
+
+  /* Report card */
+  .report-card{
+    background:var(--bg-raised); border:1px solid var(--border); border-radius:12px;
+    padding:22px; margin-top:6px; animation:fadeSlideIn 0.4s ease;
+  }
+  .score-row{display:flex; align-items:center; gap:16px; margin-bottom:16px;}
+  .score-circle{
+    width:58px; height:58px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:var(--mono); font-weight:700; font-size:18px; border:2px solid var(--border); flex-shrink:0;
+  }
+  .score-circle.good{border-color:var(--green); color:var(--green);}
+  .score-circle.mid{border-color:var(--yellow); color:var(--yellow);}
+  .score-circle.low{border-color:var(--red); color:var(--red);}
+  .score-meta{font-family:var(--mono); font-size:12px; color:var(--text-faint);}
+  .feedback-text{font-size:14px; line-height:1.65; color:var(--text); margin-bottom:16px;}
+
+  .gap-tags{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;}
+  .gap-tag{
+    font-family:var(--mono); font-size:11px; background:rgba(248,113,113,0.08);
+    border:1px solid rgba(248,113,113,0.25); color:#fca5a5; padding:4px 10px; border-radius:20px;
+  }
+
+  details.model-answer{border-top:1px solid var(--border-soft); padding-top:14px;}
+  details.model-answer summary{
+    cursor:pointer; font-family:var(--mono); font-size:12.5px; color:var(--amber);
+    list-style:none; display:flex; align-items:center; gap:6px;
+  }
+  details.model-answer summary::-webkit-details-marker{display:none;}
+  details.model-answer summary::before{content:"▸"; transition:transform 0.2s ease;}
+  details.model-answer[open] summary::before{transform:rotate(90deg);}
+  .model-answer-body{font-size:13.5px; line-height:1.65; color:var(--text-dim); margin-top:10px; padding-left:2px;}
+
+  .btn-row{display:flex; gap:12px; margin-top:22px;}
+  .btn-row button{flex:1;}
+
+  /* Summary screen */
+  .summary-hero{text-align:center; padding:12px 0 24px;}
+  .summary-hero .big-score{font-family:var(--mono); font-size:52px; font-weight:700; color:var(--amber); line-height:1;}
+  .summary-hero .big-score-label{font-family:var(--mono); font-size:12px; color:var(--text-faint); margin-top:6px; text-transform:uppercase; letter-spacing:0.08em;}
+  .summary-hero p.msg{margin-top:16px; font-size:14.5px; color:var(--text-dim); line-height:1.6; max-width:480px; margin-left:auto; margin-right:auto;}
+
+  .breakdown-item{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:14px 0; border-bottom:1px solid var(--border-soft);
+  }
+  .breakdown-item:last-child{border-bottom:none;}
+  .breakdown-item .q-topic{font-family:var(--mono); font-size:13px; color:var(--text);}
+  .breakdown-item .q-num{font-size:11px; color:var(--text-faint); font-family:var(--mono);}
+  .mini-score{font-family:var(--mono); font-weight:700; font-size:14px; padding:4px 11px; border-radius:8px;}
+  .mini-score.good{background:rgba(74,222,128,0.1); color:var(--green);}
+  .mini-score.mid{background:rgba(250,204,21,0.1); color:var(--yellow);}
+  .mini-score.low{background:rgba(248,113,113,0.1); color:var(--red);}
+
+  .focus-list{display:flex; flex-wrap:wrap; gap:8px; margin-top:14px;}
+
+  /* How this was built */
+  .build-panel{margin-top:30px;}
+  .build-toggle{
+    width:100%; display:flex; align-items:center; justify-content:space-between;
+    background:var(--bg-card); border:1px solid var(--border); border-radius:12px;
+    padding:16px 20px; cursor:pointer; font-family:var(--mono); font-size:13px; color:var(--text-dim);
+    transition:border-color 0.2s ease;
+  }
+  .build-toggle:hover{border-color:var(--amber-dim);}
+  .build-toggle .arrow{transition:transform 0.25s ease; color:var(--amber);}
+  .build-toggle.open .arrow{transform:rotate(180deg);}
+  .build-content{
+    max-height:0; overflow:hidden; transition:max-height 0.4s ease;
+    background:var(--bg-card); border:1px solid var(--border); border-top:none;
+    border-radius:0 0 12px 12px; margin-top:-1px;
+  }
+  .build-content.open{max-height:2400px;}
+  .build-inner{padding:24px;}
+  .build-inner h3{font-family:var(--mono); font-size:13px; color:var(--amber); margin:20px 0 10px; text-transform:uppercase; letter-spacing:0.05em;}
+  .build-inner h3:first-child{margin-top:0;}
+  .build-inner p, .build-inner li{font-size:13px; line-height:1.7; color:var(--text-dim);}
+  .build-inner ul{padding-left:18px; margin-top:6px;}
+  .build-inner code{font-family:var(--mono); background:var(--bg-raised); padding:2px 6px; border-radius:4px; font-size:12px; color:var(--amber);}
+
+  .screen{display:none;}
+  .screen.active{display:block;}
+
+  footer.foot{
+    margin-top:40px; text-align:center; font-family:var(--mono); font-size:11px; color:var(--text-faint);
+  }
+
+  @media (max-width:520px){
+    .row2{grid-template-columns:1fr;}
+    .card{padding:20px;}
+    .summary-hero .big-score{font-size:42px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="app-header">
+    <div class="brand">
+      <div class="dot"></div>
+      <h1>Gap<span>Finder</span></h1>
+    </div>
+    <div class="tag" id="header-tag">mock interview coach</div>
+  </header>
+
+  <!-- SETUP SCREEN -->
+  <section id="setup-screen" class="screen active">
+    <div class="card">
+      <h2>Let's find your gaps before the interviewer does.</h2>
+      <p class="sub">Paste the role you're targeting and your resume. GapFinder will run a realistic technical mock interview tailored to both, and score every answer honestly — so you leave knowing exactly what to fix.</p>
+
+      <div id="setup-error"></div>
+
+      <div class="field">
+        <label class="label">Your Anthropic API Key</label>
+        <input type="password" id="api-key" placeholder="sk-ant-..." autocomplete="off">
+        <p class="hint">Used only in your browser to call the Claude API directly. Never stored or sent anywhere else.</p>
+      </div>
+
+      <div class="field">
+        <label class="label">Target Role / Job Description</label>
+        <textarea id="jd-input" rows="4" placeholder="e.g. SDE Intern — MERN stack, React, Node.js, MongoDB, REST APIs, basic DSA..."></textarea>
+      </div>
+
+      <div class="field">
+        <label class="label">Your Resume</label>
+        <textarea id="resume-input" rows="6" placeholder="Paste your resume text here — skills, projects, experience..."></textarea>
+      </div>
+
+      <div class="field">
+        <label class="label">Number of Questions</label>
+        <div class="chip-select" id="q-count-select">
+          <button data-val="4">4 — Quick</button>
+          <button data-val="6" class="active">6 — Standard</button>
+          <button data-val="8">8 — Deep dive</button>
+        </div>
+      </div>
+
+      <button class="primary" id="start-btn">Start Mock Interview →</button>
+    </div>
+  </section>
+
+  <!-- INTERVIEW SCREEN -->
+  <section id="interview-screen" class="screen">
+    <div class="progress-wrap">
+      <div class="progress-top">
+        <span id="progress-label">Question 1 of 6</span>
+        <span id="progress-score">Avg score: —</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%;"></div></div>
+    </div>
+
+    <div class="card" id="question-card">
+      <div class="topic-chip" id="topic-chip">Loading...</div>
+      <div class="question-text" id="question-text"></div>
+
+      <div id="answer-area">
+        <textarea id="answer-input" rows="5" placeholder="Type your answer here..."></textarea>
+        <div id="interview-error"></div>
+        <button class="primary" id="submit-answer-btn" style="margin-top:16px;">Submit Answer</button>
+      </div>
+
+      <div id="interview-loading" class="loading-row" style="display:none;">
+        <div class="dots"><span></span><span></span><span></span></div>
+        <span id="loading-text">Thinking of your first question...</span>
+      </div>
+    </div>
+
+    <div id="report-slot"></div>
+  </section>
+
+  <!-- SUMMARY SCREEN -->
+  <section id="summary-screen" class="screen">
+    <div class="card">
+      <div class="summary-hero">
+        <div class="big-score" id="summary-score">0.0</div>
+        <div class="big-score-label">Average Score / 10</div>
+        <p class="msg" id="summary-message"></p>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="label">Question Breakdown</span>
+      <div id="summary-breakdown"></div>
+    </div>
+
+    <div class="card">
+      <span class="label">Top Areas To Focus On</span>
+      <div class="focus-list" id="summary-focus"></div>
+    </div>
+
+    <button class="secondary" id="restart-btn" style="width:100%;">Start a New Mock Interview</button>
+  </section>
+
+  <!-- HOW THIS WAS BUILT -->
+  <div class="build-panel">
+    <button class="build-toggle" id="build-toggle">
+      <span>◆ How this was built</span>
+      <span class="arrow">▾</span>
+    </button>
+    <div class="build-content" id="build-content">
+      <div class="build-inner">
+        <h3>System Prompt Design</h3>
+        <p>GapFinder's "brain" is a single system prompt that forces every model turn to return <code>strict JSON</code> matching one fixed schema: <code>score, feedback, model_answer, gap_tags, topic, next_question, interview_complete</code>. This turns a naturally freeform conversational task into something the UI can render deterministically — no fragile text-parsing, no regex-scraping a chat transcript.</p>
+        <p>Scope is intentionally narrow: technical questions only, tailored to the resume and JD, no reused proprietary questions, no behavioral questions unless asked. The prompt encodes a scoring rubric (1–3 major gaps, 4–6 partial, 7–8 solid, 9–10 interview-ready) so scores stay consistent across a whole session instead of drifting.</p>
+        <p>Edge cases are handled explicitly in-prompt rather than in app code: empty/off-topic answers still get scored conservatively and the interview continues; a gibberish resume still produces a sensible fresher-level question instead of a refusal; meta-questions from the candidate are treated as their answer rather than breaking the JSON contract.</p>
+
+        <h3>Conversation Architecture</h3>
+        <p>The app is stateless between page loads and sends the <em>full</em> message history on every API call (resume + JD + every Q&A pair so far), since the Claude API itself holds no memory. Each assistant turn's raw JSON reply is stored back into the message array, so the model can see its own prior questions and avoid repeating topics.</p>
+        <p>Question count is controlled conversationally — the app tells the model "this is question N of TOTAL" each turn, and the model sets <code>interview_complete: true</code> once done, rather than the client trying to cut off the model mid-flow.</p>
+
+        <h3>UI Decisions</h3>
+        <ul>
+          <li>Score circles are color-coded (red / yellow / green) for instant scanability without reading numbers.</li>
+          <li>The model answer is collapsed by default so candidates try to self-assess against their own answer first before peeking.</li>
+          <li>A running average-score readout in the progress bar gives a live sense of trajectory, not just a single end score.</li>
+          <li>Dark near-black theme with amber accents and monospace type keeps the "technical interview" feeling closer to a terminal than a form.</li>
+        </ul>
+
+        <h3>Ideas For Future Extensions</h3>
+        <ul>
+          <li><strong>Tools:</strong> a code-execution sandbox tool so DSA answers can be run against test cases instead of just judged as text; a resume-parsing tool to accept PDF/DOCX uploads directly.</li>
+          <li><strong>Memory:</strong> persist gap tags across sessions (with user consent) so a returning candidate gets questions targeted at their previously weak areas first.</li>
+          <li><strong>Multi-step workflows:</strong> an adaptive difficulty engine that branches into a full system-design round after strong DSA performance; a "second pass" mode that re-asks only the questions scored below 6.</li>
+          <li><strong>Voice mode:</strong> spoken answers with latency-aware transcription, to simulate real interview pressure more closely than typing.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <footer class="foot">GapFinder — runs entirely in your browser, calls the Claude API directly.</footer>
+</div>
+
+<script>
+(function(){
+  const SYSTEM_PROMPT = `You are "GapFinder", an expert technical mock-interview coach for engineering students and freshers preparing for coding/technical interviews (SDE, full-stack, cloud/DevOps, data, etc.).
+
+ROLE & GOAL
+Your job in one session is to run a realistic, role-relevant mock technical interview based on the candidate's resume and target job description/role, and leave them with a precise, prioritized list of gaps to fix. You are warm, encouraging, and genuinely rooting for the candidate — but your feedback is always specific and honest. Encouragement never means inflating a score or hiding a weakness.
+
+SCOPE
+- Only conduct TECHNICAL interviews: data structures and algorithms, system design fundamentals, language/framework specifics, project deep-dives drawn from the candidate's resume, and role-specific technical concepts implied by the JD.
+- Do not ask HR or behavioral questions ("tell me about a time...") unless the candidate explicitly asks for one.
+- Tailor question difficulty and topics to the candidate's resume (stated skills, projects, experience level) and the target JD or role.
+- Never reuse a real company's proprietary interview question verbatim; always generate original questions inspired by the role and tech stack.
+
+CONVERSATION CONTRACT
+You will receive the full conversation so far: the candidate's resume, the target JD/role, and a running transcript of questions and answers. On every turn you must respond with STRICT JSON ONLY, no markdown fences, no prose outside the JSON object, matching exactly this schema:
+
+{
+  "score": number or null,
+  "feedback": string or null,
+  "model_answer": string or null,
+  "gap_tags": array of strings,
+  "topic": string,
+  "next_question": string,
+  "interview_complete": boolean
+}
+
+Field meanings:
+- score: 1 to 10 evaluating the PREVIOUS answer. null only on the very first turn, since there is no answer yet to evaluate.
+- feedback: 2 to 4 sentences on what was strong and what was missing or wrong, specific and concrete. null on the first turn.
+- model_answer: a concise strong-candidate answer to the PREVIOUS question, for comparison. null on the first turn.
+- gap_tags: short tags naming the specific gap or gaps revealed, for example time complexity, edge cases, SQL joins. Empty array on the first turn.
+- topic: the technical topic of the NEXT question, for example Arrays and Hashing.
+- next_question: the next interview question to ask. If interview_complete is true, this should be an empty string.
+- interview_complete: true once the target number of questions has been asked and evaluated.
+
+RULES
+- Ask exactly one question per turn. Wait for the candidate's answer before evaluating.
+- Vary topics across the session; do not ask two nearly identical questions in a row.
+- Difficulty should ramp gradually based on how the candidate is performing: ease up slightly after a weak answer, push a bit harder after a strong one.
+- Score honestly on a 1 to 10 scale: 1-3 means major gaps or incorrect, 4-6 means partial or incomplete, 7-8 means solid with minor gaps, 9-10 means excellent and interview-ready.
+- Keep feedback and model answers concise, this is a chat interface, not a textbook.
+- If the candidate's answer is empty, off-topic, asks for a hint, or asks to skip: still score conservatively based on what was actually given, note in feedback that they can ask for a hint next time, and continue the interview rather than stalling.
+- If the candidate asks a meta question mid-answer (for example "why did you ask that"), treat their message as their answer content and respond within the JSON contract; do not break format or refuse.
+- If the resume or JD content looks empty, gibberish, or clearly not a resume or JD, ask a sensible generic fresher-level technical question anyway rather than refusing.
+- Never include any text outside the JSON object. Never wrap the JSON in code fences.
+- After the configured total number of questions has been asked and evaluated, set interview_complete to true and leave next_question as an empty string.`;
+
+  // ---------- State ----------
+  let apiKey = "";
+  let numQuestions = 6;
+  let messages = [];
+  let transcript = []; // {question, topic, answer, score, feedback, model_answer, gap_tags}
+  let currentQuestionIndex = 0; // 1-based count of question currently being answered
+  let pendingQuestion = null; // {question, topic}
+
+  // ---------- Elements ----------
+  const setupScreen = document.getElementById('setup-screen');
+  const interviewScreen = document.getElementById('interview-screen');
+  const summaryScreen = document.getElementById('summary-screen');
+
+  const apiKeyInput = document.getElementById('api-key');
+  const jdInput = document.getElementById('jd-input');
+  const resumeInput = document.getElementById('resume-input');
+  const qCountSelect = document.getElementById('q-count-select');
+  const startBtn = document.getElementById('start-btn');
+  const setupError = document.getElementById('setup-error');
+
+  const progressLabel = document.getElementById('progress-label');
+  const progressScore = document.getElementById('progress-score');
+  const progressFill = document.getElementById('progress-fill');
+  const topicChip = document.getElementById('topic-chip');
+  const questionText = document.getElementById('question-text');
+  const answerArea = document.getElementById('answer-area');
+  const answerInput = document.getElementById('answer-input');
+  const submitAnswerBtn = document.getElementById('submit-answer-btn');
+  const interviewLoading = document.getElementById('interview-loading');
+  const loadingText = document.getElementById('loading-text');
+  const interviewError = document.getElementById('interview-error');
+  const reportSlot = document.getElementById('report-slot');
+
+  const summaryScoreEl = document.getElementById('summary-score');
+  const summaryMessage = document.getElementById('summary-message');
+  const summaryBreakdown = document.getElementById('summary-breakdown');
+  const summaryFocus = document.getElementById('summary-focus');
+  const restartBtn = document.getElementById('restart-btn');
+
+  const buildToggle = document.getElementById('build-toggle');
+  const buildContent = document.getElementById('build-content');
+
+  // ---------- Setup interactions ----------
+  qCountSelect.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      qCountSelect.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      numQuestions = parseInt(btn.dataset.val, 10);
+    });
+  });
+
+  buildToggle.addEventListener('click', () => {
+    const isOpen = buildContent.classList.toggle('open');
+    buildToggle.classList.toggle('open', isOpen);
+  });
+
+  function showScreen(el){
+    [setupScreen, interviewScreen, summaryScreen].forEach(s => s.classList.remove('active'));
+    el.classList.add('active');
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  function showSetupError(msg){
+    setupError.innerHTML = msg ? `<div class="error-box">${escapeHtml(msg)}</div>` : "";
+  }
+  function showInterviewError(msg){
+    interviewError.innerHTML = msg ? `<div class="error-box">${escapeHtml(msg)}</div>` : "";
+  }
+
+  function escapeHtml(str){
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  // ---------- API call ----------
+  async function callClaude(){
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1000,
+        system: SYSTEM_PROMPT,
+        messages: messages
+      })
+    });
+
+    if(!response.ok){
+      let detail = "";
+      try{ const errJson = await response.json(); detail = errJson?.error?.message || ""; }catch(e){}
+      throw new Error(`API request failed (${response.status}). ${detail}`);
+    }
+
+    const data = await response.json();
+    const textBlock = (data.content || []).find(b => b.type === "text");
+    if(!textBlock || !textBlock.text) throw new Error("Empty response from model.");
+
+    let raw = textBlock.text.trim();
+    raw = raw.replace(/^```json/i, "").replace(/^```/, "").replace(/```$/, "").trim();
+
+    let parsed;
+    try{
+      parsed = JSON.parse(raw);
+    }catch(e){
+      throw new Error("Could not parse the model's response. Please try again.");
+    }
+    return parsed;
+  }
+
+  // ---------- Flow ----------
+  startBtn.addEventListener('click', async () => {
+    showSetupError("");
+    apiKey = apiKeyInput.value.trim();
+    const jd = jdInput.value.trim();
+    const resume = resumeInput.value.trim();
+
+    if(!apiKey){ showSetupError("Please enter your Anthropic API key to continue."); return; }
+    if(!jd){ showSetupError("Please paste the target role or job description."); return; }
+    if(!resume){ showSetupError("Please paste your resume."); return; }
+
+    messages = [];
+    transcript = [];
+    currentQuestionIndex = 0;
+
+    const initialContent =
+`Candidate resume:
+"""
+${resume}
+"""
+
+Target job description or role:
+"""
+${jd}
+"""
+
+Total questions to ask in this mock interview: ${numQuestions}.
+This is the start of the interview. There is no previous answer to evaluate yet, set score, feedback, and model_answer to null and gap_tags to an empty array. Ask the first technical question now (question 1 of ${numQuestions}).`;
+
+    messages.push({ role: "user", content: initialContent });
+
+    startBtn.disabled = true;
+    startBtn.textContent = "Preparing your interview...";
+
+    try{
+      const result = await callClaude();
+      messages.push({ role: "assistant", content: JSON.stringify(result) });
+      currentQuestionIndex = 1;
+      pendingQuestion = { question: result.next_question, topic: result.topic };
+      renderQuestion();
+      showScreen(interviewScreen);
+    }catch(err){
+      showSetupError(err.message || "Something went wrong. Please check your API key and try again.");
+    }finally{
+      startBtn.disabled = false;
+      startBtn.textContent = "Start Mock Interview →";
+    }
+  });
+
+  function renderQuestion(){
+    progressLabel.textContent = `Question ${currentQuestionIndex} of ${numQuestions}`;
+    progressFill.style.width = `${((currentQuestionIndex - 1) / numQuestions) * 100}%`;
+    updateAvgScore();
+
+    topicChip.textContent = pendingQuestion.topic || "General";
+    questionText.textContent = pendingQuestion.question;
+
+    answerInput.value = "";
+    answerArea.style.display = "block";
+    interviewLoading.style.display = "none";
+    showInterviewError("");
+    submitAnswerBtn.disabled = false;
+    submitAnswerBtn.textContent = "Submit Answer";
+  }
+
+  function updateAvgScore(){
+    const scored = transcript.filter(t => typeof t.score === "number");
+    if(scored.length === 0){ progressScore.textContent = "Avg score: —"; return; }
+    const avg = scored.reduce((a,b) => a + b.score, 0) / scored.length;
+    progressScore.textContent = `Avg score: ${avg.toFixed(1)}/10`;
+  }
+
+  submitAnswerBtn.addEventListener('click', async () => {
+    const answer = answerInput.value.trim();
+    if(!answer){ showInterviewError("Please type an answer before submitting."); return; }
+
+    showInterviewError("");
+    answerArea.style.display = "none";
+    interviewLoading.style.display = "flex";
+    loadingText.textContent = "Evaluating your answer...";
+
+    const followUpContent =
+`My answer to the previous question ("${pendingQuestion.question}"):
+"""
+${answer}
+"""
+
+This was question ${currentQuestionIndex} of ${numQuestions}. Evaluate my answer per the JSON contract, then ask the next question, or set interview_complete to true if this was the last one.`;
+
+    messages.push({ role: "user", content: followUpContent });
+
+    try{
+      const result = await callClaude();
+      messages.push({ role: "assistant", content: JSON.stringify(result) });
+
+      transcript.push({
+        question: pendingQuestion.question,
+        topic: pendingQuestion.topic,
+        answer: answer,
+        score: result.score,
+        feedback: result.feedback,
+        model_answer: result.model_answer,
+        gap_tags: result.gap_tags || []
+      });
+
+      renderReportCard(transcript[transcript.length - 1], result.interview_complete);
+
+      if(!result.interview_complete){
+        pendingQuestion = { question: result.next_question, topic: result.topic };
+      }
+
+    }catch(err){
+      interviewLoading.style.display = "none";
+      answerArea.style.display = "block";
+      showInterviewError(err.message || "Something went wrong evaluating your answer. Please try again.");
+    }
+  });
+
+  function scoreClass(score){
+    if(score === null || score === undefined) return "mid";
+    if(score >= 7) return "good";
+    if(score >= 4) return "mid";
+    return "low";
+  }
+
+  function renderReportCard(entry, isComplete){
+    interviewLoading.style.display = "none";
+
+    const cls = scoreClass(entry.score);
+    const gapTagsHtml = (entry.gap_tags || []).map(t => `<span class="gap-tag">${escapeHtml(t)}</span>`).join("");
+
+    const card = document.createElement('div');
+    card.className = "report-card";
+    card.innerHTML = `
+      <div class="score-row">
+        <div class="score-circle ${cls}">${entry.score !== null && entry.score !== undefined ? entry.score : "–"}</div>
+        <div>
+          <div style="font-family:var(--mono); font-size:13px; color:var(--text);">${escapeHtml(entry.topic || "")}</div>
+          <div class="score-meta">Question ${currentQuestionIndex} of ${numQuestions}</div>
+        </div>
+      </div>
+      <div class="feedback-text">${escapeHtml(entry.feedback || "")}</div>
+      ${gapTagsHtml ? `<div class="gap-tags">${gapTagsHtml}</div>` : ""}
+      ${entry.model_answer ? `
+      <details class="model-answer">
+        <summary>Model answer</summary>
+        <div class="model-answer-body">${escapeHtml(entry.model_answer)}</div>
+      </details>` : ""}
+      <div class="btn-row" id="report-btn-row-${transcript.length}"></div>
+    `;
+    reportSlot.innerHTML = "";
+    reportSlot.appendChild(card);
+
+    const btnRow = card.querySelector(`#report-btn-row-${transcript.length}`);
+    const nextBtn = document.createElement('button');
+    nextBtn.className = "primary";
+
+    if(isComplete){
+      nextBtn.textContent = "See Full Report →";
+      nextBtn.addEventListener('click', () => {
+        reportSlot.innerHTML = "";
+        renderSummary();
+        showScreen(summaryScreen);
+      });
+    }else{
+      nextBtn.textContent = `Next Question (${currentQuestionIndex + 1} of ${numQuestions}) →`;
+      nextBtn.addEventListener('click', () => {
+        currentQuestionIndex += 1;
+        reportSlot.innerHTML = "";
+        renderQuestion();
+      });
+    }
+    btnRow.appendChild(nextBtn);
+
+    progressFill.style.width = `${(currentQuestionIndex / numQuestions) * 100}%`;
+    updateAvgScore();
+  }
+
+  function renderSummary(){
+    const scored = transcript.filter(t => typeof t.score === "number");
+    const avg = scored.length ? (scored.reduce((a,b) => a + b.score, 0) / scored.length) : 0;
+    summaryScoreEl.textContent = avg.toFixed(1);
+
+    let msg;
+    if(avg >= 8) msg = "Strong session. You're close to interview-ready — polish the small gaps below and you're set.";
+    else if(avg >= 6) msg = "Solid foundation with real gaps worth closing. Focus on the tags below before your next attempt.";
+    else if(avg >= 4) msg = "You've got the raw material, but there are clear fundamentals to shore up. Take the focus areas seriously and run this again.";
+    else msg = "This session surfaced some big gaps — that's exactly the point of practicing here instead of in the real interview. Work through the focus areas and come back for another round.";
+    summaryMessage.textContent = msg;
+
+    summaryBreakdown.innerHTML = transcript.map((t, i) => `
+      <div class="breakdown-item">
+        <div>
+          <div class="q-topic">${escapeHtml(t.topic || "Topic")}</div>
+          <div class="q-num">Question ${i + 1}</div>
+        </div>
+        <div class="mini-score ${scoreClass(t.score)}">${t.score !== null && t.score !== undefined ? t.score : "–"}/10</div>
+      </div>
+    `).join("");
+
+    const tagCounts = {};
+    transcript.forEach(t => (t.gap_tags || []).forEach(tag => {
+      tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+    }));
+    const sortedTags = Object.entries(tagCounts).sort((a,b) => b[1] - a[1]).slice(0, 8);
+
+    summaryFocus.innerHTML = sortedTags.length
+      ? sortedTags.map(([tag, count]) => `<span class="gap-tag">${escapeHtml(tag)}${count > 1 ? ` ×${count}` : ""}</span>`).join("")
+      : `<span style="font-size:13px; color:var(--text-faint); font-family:var(--mono);">No recurring gaps — nice and consistent.</span>`;
+  }
+
+  restartBtn.addEventListener('click', () => {
+    messages = [];
+    transcript = [];
+    currentQuestionIndex = 0;
+    pendingQuestion = null;
+    answerInput.value = "";
+    reportSlot.innerHTML = "";
+    showInterviewError("");
+    showSetupError("");
+    showScreen(setupScreen);
+  });
+
+})();
+</script>
+</body>
+</html>
