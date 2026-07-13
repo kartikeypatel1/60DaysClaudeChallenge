@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Workflow Architect — Full-Stack SaaS Build Blueprint</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --ink:#0a1120;
+  --panel:#111b2e;
+  --panel-2:#0d1626;
+  --line:#22314a;
+  --line-soft:#1a2740;
+  --text:#e7edf5;
+  --text-dim:#93a4c3;
+  --text-faint:#5c6d8c;
+  --accent:#4fd1c5;
+  --accent-dim:#2a5f5a;
+  --warm:#e8935b;
+  --warm-dim:#5c4028;
+  --danger:#e2685e;
+  --ok:#7cd992;
+  --radius:10px;
+  --font-display:'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-body:'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono:'JetBrains Mono', ui-monospace, 'SFMono-Regular', monospace;
+  --shadow: 0 8px 30px rgba(0,0,0,0.35);
+}
+html[data-theme="light"]{
+  --ink:#f3f5f9;
+  --panel:#ffffff;
+  --panel-2:#eaeff6;
+  --line:#d3dce8;
+  --line-soft:#e3e9f2;
+  --text:#101828;
+  --text-dim:#4a5878;
+  --text-faint:#8494b3;
+  --accent:#0f8a7c;
+  --accent-dim:#c7ece7;
+  --warm:#c76a2e;
+  --warm-dim:#f4dcc6;
+  --danger:#c8382c;
+  --ok:#1c8a45;
+  --shadow: 0 8px 30px rgba(20,30,60,0.08);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0; background:var(--ink); color:var(--text);
+  font-family:var(--font-body); line-height:1.55;
+  transition:background .3s ease, color .3s ease;
+}
+::selection{background:var(--accent); color:var(--ink);}
+a{color:var(--accent);}
+button{font-family:inherit; cursor:pointer;}
+.mono{font-family:var(--font-mono);}
+.wrap{max-width:1180px; margin:0 auto; padding:0 28px;}
+
+/* ---------- background schematic grid ---------- */
+.blueprint-bg{
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+  background-image:
+    linear-gradient(var(--line-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
+  background-size:42px 42px;
+  opacity:.35;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 90%);
+}
+
+/* ---------- top toolbar ---------- */
+.toolbar{
+  position:sticky; top:0; z-index:40;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 28px; background:color-mix(in srgb, var(--ink) 88%, transparent);
+  backdrop-filter:blur(10px); border-bottom:1px solid var(--line-soft);
+}
+.toolbar .brand{display:flex; align-items:center; gap:10px; font-family:var(--font-display); font-weight:600; font-size:15px;}
+.brand .dot{width:9px; height:9px; border-radius:2px; background:var(--accent); box-shadow:0 0 10px var(--accent); transform:rotate(45deg);}
+.toolbar-actions{display:flex; gap:8px; align-items:center;}
+.tbtn{
+  display:flex; align-items:center; gap:6px;
+  background:var(--panel); border:1px solid var(--line); color:var(--text-dim);
+  padding:7px 12px; border-radius:7px; font-size:12.5px; font-weight:500;
+  transition:all .15s ease;
+}
+.tbtn:hover{color:var(--text); border-color:var(--accent);}
+.tbtn.active{color:var(--accent); border-color:var(--accent-dim); background:color-mix(in srgb, var(--accent) 10%, var(--panel));}
+.progress-pill{
+  display:flex; align-items:center; gap:8px; padding:6px 12px; border-radius:20px;
+  background:var(--panel); border:1px solid var(--line); font-size:12px; color:var(--text-dim);
+}
+.progress-track{width:70px; height:5px; border-radius:3px; background:var(--line-soft); overflow:hidden;}
+.progress-fill{height:100%; background:linear-gradient(90deg, var(--accent), var(--warm)); width:0%; transition:width .4s ease;}
+
+/* ---------- hero ---------- */
+.hero{position:relative; z-index:1; padding:72px 0 40px;}
+.eyebrow{
+  font-family:var(--font-mono); font-size:12px; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--accent); display:flex; align-items:center; gap:10px; margin-bottom:18px;
+}
+.eyebrow::before{content:''; width:26px; height:1px; background:var(--accent);}
+.hero h1{
+  font-family:var(--font-display); font-weight:700; font-size:clamp(32px,4.6vw,54px);
+  line-height:1.05; margin:0 0 18px; letter-spacing:-.02em; max-width:820px;
+}
+.hero h1 em{font-style:normal; color:var(--accent);}
+.hero p.lead{color:var(--text-dim); font-size:16.5px; max-width:600px; margin:0 0 30px;}
+.hero-stats{display:flex; gap:0; flex-wrap:wrap; border-top:1px solid var(--line); border-bottom:1px solid var(--line); margin-top:10px;}
+.hstat{padding:16px 26px 16px 0; margin-right:26px; border-right:1px solid var(--line);}
+.hstat:last-child{border-right:none;}
+.hstat .n{font-family:var(--font-display); font-size:26px; font-weight:700; color:var(--text);}
+.hstat .l{font-size:11.5px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.06em; margin-top:2px;}
+
+/* ---------- layout: rail + content ---------- */
+.layout{position:relative; z-index:1; display:grid; grid-template-columns:250px 1fr; gap:40px; padding:20px 0 80px;}
+.rail{position:sticky; top:70px; align-self:start; height:calc(100vh - 100px); overflow-y:auto; padding-right:6px;}
+.rail::-webkit-scrollbar{width:4px;} .rail::-webkit-scrollbar-thumb{background:var(--line); border-radius:4px;}
+.rail-line{position:relative; padding-left:22px;}
+.rail-line::before{content:''; position:absolute; left:5px; top:6px; bottom:6px; width:2px; background:var(--line);}
+.rail-fill{position:absolute; left:5px; top:6px; width:2px; background:var(--accent); height:0%; transition:height .5s ease; box-shadow:0 0 8px var(--accent);}
+.rail-node{position:relative; margin-bottom:4px;}
+.rail-node a{
+  display:block; padding:9px 10px 9px 6px; border-radius:6px; color:var(--text-dim);
+  text-decoration:none; font-size:13px; font-weight:500; transition:all .15s ease; position:relative;
+}
+.rail-node a:hover{color:var(--text); background:var(--panel);}
+.rail-node a.active{color:var(--accent); background:color-mix(in srgb, var(--accent) 8%, transparent);}
+.rail-node::after{
+  content:''; position:absolute; left:-22px; top:14px; width:9px; height:9px; border-radius:50%;
+  background:var(--panel-2); border:2px solid var(--line); z-index:1;
+}
+.rail-node.done::after{background:var(--accent); border-color:var(--accent); box-shadow:0 0 8px var(--accent);}
+.rail-node .rn-num{font-family:var(--font-mono); font-size:10px; color:var(--text-faint); display:block; margin-bottom:1px;}
+
+.content{min-width:0;}
+
+/* ---------- section headers ---------- */
+.section-title{font-family:var(--font-display); font-size:22px; font-weight:700; margin:0 0 6px; letter-spacing:-.01em;}
+.section-sub{color:var(--text-dim); font-size:14px; margin:0 0 22px;}
+
+/* ---------- stage card ---------- */
+.stage{
+  background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+  margin-bottom:22px; scroll-margin-top:80px; overflow:hidden;
+}
+.stage-head{display:flex; align-items:flex-start; justify-content:space-between; gap:16px; padding:22px 24px 18px; border-bottom:1px solid var(--line-soft);}
+.stage-head-left{display:flex; gap:16px; align-items:flex-start;}
+.stage-num{
+  font-family:var(--font-display); font-weight:700; font-size:13px; color:var(--accent);
+  border:1px solid var(--accent-dim); background:color-mix(in srgb, var(--accent) 8%, transparent);
+  width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.stage-titles .eyebrow2{font-family:var(--font-mono); font-size:11px; color:var(--warm); text-transform:uppercase; letter-spacing:.08em; margin-bottom:3px;}
+.stage-titles h3{font-family:var(--font-display); font-size:19px; margin:0 0 4px; font-weight:600;}
+.stage-titles .stage-time{font-size:12.5px; color:var(--text-faint); font-family:var(--font-mono);}
+.stage-actions{display:flex; align-items:center; gap:8px; flex-shrink:0;}
+.icon-btn{
+  width:32px; height:32px; border-radius:7px; border:1px solid var(--line); background:var(--panel-2);
+  display:flex; align-items:center; justify-content:center; color:var(--text-faint); font-size:14px;
+  transition:all .15s ease;
+}
+.icon-btn:hover{color:var(--text); border-color:var(--text-faint);}
+.icon-btn.bookmarked{color:var(--warm); border-color:var(--warm-dim); background:color-mix(in srgb, var(--warm) 12%, transparent);}
+.check-toggle{
+  display:flex; align-items:center; gap:7px; padding:7px 13px; border-radius:7px;
+  border:1px solid var(--line); background:var(--panel-2); font-size:12.5px; font-weight:500; color:var(--text-dim);
+}
+.check-toggle .box{width:15px; height:15px; border-radius:4px; border:1.5px solid var(--text-faint); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:10px;}
+.check-toggle.done{color:var(--ok); border-color:color-mix(in srgb, var(--ok) 40%, var(--line)); background:color-mix(in srgb, var(--ok) 8%, transparent);}
+.check-toggle.done .box{background:var(--ok); border-color:var(--ok); color:var(--ink);}
+
+.stage-body{padding:22px 24px 26px;}
+.tabs{display:flex; gap:4px; flex-wrap:wrap; margin-bottom:18px; border-bottom:1px solid var(--line-soft); padding-bottom:0;}
+.tab-btn{
+  padding:8px 13px; font-size:12.5px; font-weight:500; color:var(--text-faint); background:none; border:none;
+  border-bottom:2px solid transparent; margin-bottom:-1px; transition:all .15s ease;
+}
+.tab-btn:hover{color:var(--text-dim);}
+.tab-btn.active{color:var(--accent); border-bottom-color:var(--accent);}
+.tab-pane{display:none; animation:fadein .25s ease;}
+.tab-pane.active{display:block;}
+@keyframes fadein{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;}}
+
+ul.clean{list-style:none; margin:0; padding:0;}
+ul.clean li{
+  position:relative; padding-left:18px; margin-bottom:9px; font-size:13.8px; color:var(--text-dim);
+}
+ul.clean li::before{content:'—'; position:absolute; left:0; color:var(--text-faint);}
+ul.tasks li::before{content:'▸'; color:var(--accent);}
+ul.mistakes li::before{content:'!'; color:var(--danger); font-weight:700; left:2px;}
+ul.tips li::before{content:'↳'; color:var(--warm);}
+
+.tool-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+@media(max-width:720px){.tool-grid{grid-template-columns:1fr;}}
+.tool-card{background:var(--panel-2); border:1px solid var(--line-soft); border-radius:8px; padding:14px 16px;}
+.tool-card .tname{font-family:var(--font-display); font-weight:600; font-size:14.5px; margin-bottom:6px; display:flex; align-items:center; gap:8px;}
+.tool-card .tname .badge{font-family:var(--font-mono); font-size:9.5px; background:var(--accent-dim); color:var(--accent); padding:2px 6px; border-radius:4px; text-transform:uppercase;}
+.tool-card .twhy{font-size:12.8px; color:var(--text-dim); margin-bottom:8px;}
+.tool-card .talt{font-size:11.5px; color:var(--text-faint); font-family:var(--font-mono);}
+
+.prompt-box{
+  background:var(--ink); border:1px solid var(--line); border-radius:8px; padding:14px 16px;
+  font-family:var(--font-mono); font-size:12.5px; color:var(--accent); margin-bottom:10px; position:relative;
+  white-space:pre-wrap; line-height:1.6;
+}
+html[data-theme="light"] .prompt-box{background:var(--panel-2);}
+.copy-btn{
+  position:absolute; top:10px; right:10px; font-size:10.5px; padding:4px 8px; border-radius:5px;
+  border:1px solid var(--line); background:var(--panel); color:var(--text-faint);
+}
+.copy-btn:hover{color:var(--accent);}
+
+.outputs-strip{display:flex; gap:10px; flex-wrap:wrap;}
+.output-chip{font-size:12px; padding:6px 12px; background:var(--panel-2); border:1px solid var(--line-soft); border-radius:20px; color:var(--text-dim);}
+
+.notes-area textarea{
+  width:100%; min-height:80px; background:var(--panel-2); border:1px solid var(--line-soft); border-radius:8px;
+  color:var(--text); font-family:var(--font-body); font-size:13px; padding:12px; resize:vertical;
+}
+.notes-area textarea:focus{outline:none; border-color:var(--accent);}
+.notes-hint{font-size:11px; color:var(--text-faint); margin-top:6px;}
+
+.two-col{display:grid; grid-template-columns:1fr 1fr; gap:26px;}
+@media(max-width:720px){.two-col{grid-template-columns:1fr;}}
+h4.blocklabel{font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-faint); margin:0 0 12px;}
+
+/* ---------- diagram section ---------- */
+.diagram-wrap{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:26px; margin-bottom:28px; overflow-x:auto;}
+.flow-row{display:flex; align-items:center; gap:0; min-width:900px;}
+.flow-node{
+  flex:1; background:var(--panel-2); border:1px solid var(--line-soft); border-radius:8px; padding:12px 14px;
+  text-align:center; font-size:12px; font-weight:600; color:var(--text); position:relative; cursor:pointer; transition:all .15s ease;
+}
+.flow-node:hover{border-color:var(--accent); color:var(--accent);}
+.flow-node .fn-i{font-family:var(--font-mono); font-size:10px; color:var(--accent); display:block; margin-bottom:4px;}
+.flow-arrow{width:26px; height:2px; background:var(--line); flex-shrink:0; position:relative;}
+.flow-arrow::after{content:''; position:absolute; right:0; top:-3px; border:4px solid transparent; border-left-color:var(--line); }
+
+/* ---------- decision tree ---------- */
+.dtree{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:26px; margin-bottom:28px;}
+.dt-question{font-family:var(--font-display); font-size:15.5px; font-weight:600; margin-bottom:14px; padding:12px 16px; background:var(--panel-2); border-left:3px solid var(--accent); border-radius:6px;}
+.dt-options{display:flex; gap:12px; flex-wrap:wrap; margin-bottom:10px;}
+.dt-opt{padding:10px 16px; border:1px solid var(--line); background:var(--panel-2); border-radius:7px; font-size:13px; color:var(--text-dim); transition:all .15s ease;}
+.dt-opt:hover{border-color:var(--accent); color:var(--accent);}
+.dt-result{margin-top:14px; padding:14px 16px; background:color-mix(in srgb, var(--accent) 8%, transparent); border:1px solid var(--accent-dim); border-radius:8px; font-size:13.5px; color:var(--text); display:none;}
+.dt-result.show{display:block; animation:fadein .3s ease;}
+.dt-breadcrumb{font-family:var(--font-mono); font-size:11px; color:var(--text-faint); margin-bottom:14px; min-height:14px;}
+
+/* ---------- comparison table ---------- */
+.cmp-table{width:100%; border-collapse:collapse; font-size:13px;}
+.cmp-table th{text-align:left; padding:12px 14px; font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--text-faint); border-bottom:1px solid var(--line);}
+.cmp-table td{padding:13px 14px; border-bottom:1px solid var(--line-soft); color:var(--text-dim); vertical-align:top;}
+.cmp-table tr:hover td{background:var(--panel-2);}
+.cmp-table td.name{color:var(--text); font-weight:600; font-family:var(--font-display);}
+.tag{display:inline-block; font-size:10.5px; padding:2px 8px; border-radius:10px; margin:1px 3px 1px 0; font-family:var(--font-mono);}
+.tag.good{background:color-mix(in srgb, var(--ok) 15%, transparent); color:var(--ok);}
+.tag.mid{background:color-mix(in srgb, var(--warm) 15%, transparent); color:var(--warm);}
+
+/* ---------- conclusion sections ---------- */
+.concl-grid{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
+@media(max-width:720px){.concl-grid{grid-template-columns:1fr;}}
+.concl-card{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:22px 24px;}
+.concl-card h4{font-family:var(--font-display); font-size:15.5px; margin:0 0 14px; display:flex; align-items:center; gap:8px;}
+.concl-card h4 .ic{color:var(--accent);}
+.stack-row{display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--line-soft); font-size:13px;}
+.stack-row:last-child{border-bottom:none;}
+.stack-row .role{color:var(--text-faint); font-family:var(--font-mono); font-size:11px;}
+.kw-chip{display:inline-block; background:var(--panel-2); border:1px solid var(--line-soft); padding:5px 11px; border-radius:16px; font-size:12px; color:var(--text-dim); margin:3px 4px 0 0; font-family:var(--font-mono);}
+
+footer{padding:50px 0 70px; border-top:1px solid var(--line-soft); margin-top:40px; position:relative; z-index:1;}
+footer p{color:var(--text-faint); font-size:12.5px;}
+
+/* ---------- print ---------- */
+@media print{
+  .toolbar, .rail, .icon-btn, .copy-btn, .tabs{display:none !important;}
+  body{background:#fff; color:#111;}
+  .stage{break-inside:avoid; border:1px solid #ccc;}
+  .tab-pane{display:block !important;}
+  .layout{grid-template-columns:1fr; display:block;}
+  .blueprint-bg{display:none;}
+}
+
+@media(max-width:880px){
+  .layout{grid-template-columns:1fr;}
+  .rail{display:none;}
+  .wrap{padding:0 18px;}
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;}
+}
+</style>
+</head>
+<body>
+<div class="blueprint-bg"></div>
+
+<div class="toolbar">
+  <div class="brand"><span class="dot"></span> AI Workflow Architect</div>
+  <div class="toolbar-actions">
+    <div class="progress-pill">
+      <span id="progressLabel">0/10 stages</span>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+    <button class="tbtn" id="bookmarkFilterBtn" title="Show bookmarked stages only">★ Bookmarks</button>
+    <button class="tbtn" id="printBtn">⎙ Print</button>
+    <button class="tbtn" id="themeToggle">☾ Dark</button>
+  </div>
+</div>
+
+<div class="wrap hero">
+  <div class="eyebrow">Software Development → Full-Stack → SaaS Product</div>
+  <h1>Ship an internal <em>enterprise SaaS platform</em>, start to finish — with the AI stack for every step.</h1>
+  <p class="lead">A complete, end-to-end build workflow for a full-stack internal tool: ten sequenced stages from discovery to adoption, each with the exact AI tools, prompts, pitfalls, and time budget for a small internal engineering team.</p>
+  <div class="hero-stats">
+    <div class="hstat"><div class="n">10</div><div class="l">Build stages</div></div>
+    <div class="hstat"><div class="n">6–10</div><div class="l">Weeks, typical MVP</div></div>
+    <div class="hstat"><div class="n">24</div><div class="l">AI tools mapped</div></div>
+    <div class="hstat"><div class="n">40+</div><div class="l">Ready prompts</div></div>
+  </div>
+</div>
+
+<div class="wrap layout">
+  <nav class="rail">
+    <div class="rail-line">
+      <div class="rail-fill" id="railFill"></div>
+      <div id="railNodes"></div>
+    </div>
+  </nav>
+
+  <main class="content">
+    <section id="stagesSection">
+      <h2 class="section-title">The Workflow</h2>
+      <p class="section-sub">Each stage is a checkpoint. Mark it done as you go — your progress and notes save locally in this browser.</p>
+      <div id="stagesContainer"></div>
+    </section>
+
+    <section id="diagramSection">
+      <h2 class="section-title">Pipeline at a Glance</h2>
+      <p class="section-sub">Click any node to jump to that stage.</p>
+      <div class="diagram-wrap">
+        <div class="flow-row" id="flowRow"></div>
+      </div>
+    </section>
+
+    <section id="decisionSection">
+      <h2 class="section-title">Decision Tree — Where Should AI Do the Work?</h2>
+      <p class="section-sub">Walk through this before assigning a task to a model instead of a person.</p>
+      <div class="dtree" id="dtree"></div>
+    </section>
+
+    <section id="cmpSection">
+      <h2 class="section-title">AI Tool Comparison</h2>
+      <p class="section-sub">The tools that show up most across this workflow, compared head-to-head.</p>
+      <div class="diagram-wrap" style="overflow-x:auto;">
+        <table class="cmp-table" id="cmpTable"></table>
+      </div>
+    </section>
+
+    <section id="conclSection">
+      <h2 class="section-title">Wrap-Up</h2>
+      <p class="section-sub">Summary, stack, and where to keep learning once the platform ships.</p>
+      <div class="concl-grid" id="conclGrid"></div>
+    </section>
+  </main>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p>AI Workflow Architect — generated for: Software Development → Full-Stack → SaaS Product (Internal Enterprise Tool). Progress, notes, and bookmarks are stored only in this browser (localStorage) — nothing is uploaded.</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+const STORE_KEY = 'awa_saas_internal_v1';
+let state = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
+state.done = state.done || {};
+state.notes = state.notes || {};
+state.bookmarks = state.bookmarks || {};
+state.theme = state.theme || 'dark';
+function save(){ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+
+document.documentElement.setAttribute('data-theme', state.theme);
+document.getElementById('themeToggle').textContent = state.theme === 'dark' ? '☾ Dark' : '☀ Light';
+
+/* ============ DATA ============ */
+const STAGES = [
+{
+  id:'discovery', num:1, eyebrow:'Foundations', title:'Discovery & Requirements Scoping', time:'3–5 days',
+  objectives:[
+    'Define who the tool is for inside the org and what decision or task it replaces.',
+    'Turn stakeholder asks into a scoped, buildable v1 — not a wishlist.',
+    'Agree on success metrics before writing a line of code.'
+  ],
+  tasks:[
+    'Interview 3–5 future users (or their manager) about their current workaround.',
+    'Draft user personas and the top 5 jobs-to-be-done.',
+    'Write a one-page problem statement and explicit non-goals for v1.',
+    'List data sources the tool needs to read or write (internal DBs, APIs, spreadsheets).'
+  ],
+  tools:[
+    {name:'Claude', why:'Turns messy interview notes and Slack threads into a structured requirements doc and user stories in minutes.', alt:'ChatGPT, Gemini'},
+    {name:'Notion AI', why:'Keeps requirements, personas, and open questions in one living workspace stakeholders can comment on.', alt:'Confluence + AI, Coda'},
+    {name:'Otter.ai', why:'Transcribes stakeholder interviews so nothing said in the room gets lost.', alt:'Fireflies.ai, Fathom'}
+  ],
+  prompts:[
+    'Here are raw notes from 4 stakeholder interviews about [problem]. Extract: (1) the core jobs-to-be-done, (2) recurring pain points, (3) a draft v1 scope, (4) explicit out-of-scope items. Notes:\\n[paste notes]',
+    'Turn this problem statement into 8-10 user stories in the format "As a [role], I want [capability], so that [outcome]", ranked by likely impact.'
+  ],
+  bestPractices:[
+    'Write the non-goals list before the goals list — it prevents scope creep later.',
+    'Get one internal sponsor who can say yes/no on scope disputes.',
+    'Validate demand with 3 real users before assuming the whole org needs it.'
+  ],
+  mistakes:[
+    'Skipping interviews and designing from assumptions about "what ops needs."',
+    'Scoping v1 around every feature every stakeholder mentioned.',
+    'Not identifying which existing systems the tool must integrate with early.'
+  ],
+  outputs:['Problem statement (1 page)', 'User personas', 'Prioritized user stories', 'v1 scope + non-goals doc'],
+  tips:['Timebox discovery to one week max — internal tools drift into endless requirements gathering.']
+},
+{
+  id:'architecture', num:2, eyebrow:'Foundations', title:'System Architecture & Data Modeling', time:'4–6 days',
+  objectives:[
+    'Choose a service architecture that matches team size — usually modular monolith or light microservices, not a distributed system for its own sake.',
+    'Design the data model before any schema gets written in code.',
+    'Decide auth, storage, and integration boundaries up front.'
+  ],
+  tasks:[
+    'Draw the high-level architecture: services, databases, external integrations.',
+    'Model core entities and relationships (ERD) for relational data; decide what belongs in a document store.',
+    'Pick the auth strategy — JWT + OAuth2 against the company identity provider is the default for internal tools.',
+    'Define API contracts between frontend and backend (REST or GraphQL) before implementation starts.'
+  ],
+  tools:[
+    {name:'Claude', why:'Reasons well about trade-offs (monolith vs microservices, SQL vs NoSQL per entity) when given real constraints, not generic advice.', alt:'GPT-4.1, Gemini 2.5 Pro'},
+    {name:'Eraser.io (DiagramGPT)', why:'Generates and edits architecture diagrams from a text description, kept in sync as the design changes.', alt:'Lucidchart AI, draw.io + Claude'},
+    {name:'dbdiagram.io', why:'Fast, text-based ERD modeling that exports directly to SQL DDL.', alt:'DrawSQL, Claude-generated schema'}
+  ],
+  prompts:[
+    'I\'m building an internal SaaS tool for [problem] used by ~[N] employees. Constraints: [team size, timeline, existing infra]. Propose an architecture (modular monolith vs microservices), justify the choice, and list the core services or modules.',
+    'Here are my core entities: [list entities and rough fields]. Design a normalized relational schema, flag anything better suited to a document store, and generate the SQL DDL.'
+  ],
+  bestPractices:[
+    'Default to a modular monolith for internal tools under ~10 engineers — microservices add ops overhead most internal teams don\'t need.',
+    'Model read-heavy vs write-heavy entities differently; don\'t force everything into one database.',
+    'Version your API contract (OpenAPI/Swagger) before backend work starts, so frontend and backend can build in parallel.'
+  ],
+  mistakes:[
+    'Copying a big-tech microservices diagram for a tool with 3 engineers and 200 users.',
+    'Designing the database schema inside ORM code instead of on paper/diagram first.',
+    'Leaving auth as an afterthought instead of a first-class architecture decision.'
+  ],
+  outputs:['Architecture diagram', 'ERD + schema DDL', 'API contract (OpenAPI spec)', 'Auth flow diagram'],
+  tips:['Generate the OpenAPI spec early — it becomes free documentation and lets you mock the API before backend code exists.']
+},
+{
+  id:'design', num:3, eyebrow:'Design', title:'UI/UX Wireframing & Design System', time:'4–7 days',
+  objectives:[
+    'Map the core user flows before any pixel-level design.',
+    'Establish a lightweight design system so the UI stays consistent as it grows.',
+    'Validate the flow with 2-3 target users before frontend build begins.'
+  ],
+  tasks:[
+    'Sketch low-fidelity wireframes for each user story from Stage 1.',
+    'Define a design system: type scale, spacing, color tokens, component states.',
+    'Build clickable mid-fidelity prototypes for the 2-3 highest-risk flows.',
+    'Run a 20-minute usability check with real target users.'
+  ],
+  tools:[
+    {name:'Figma (with Figma AI / First Draft)', why:'Goes from a text description of a screen to an editable layout, then supports real design refinement — better than one-shot AI-generated mockups.', alt:'Uizard, v0 by Vercel'},
+    {name:'v0.dev', why:'Generates production-ready React + Tailwind components directly from a prompt, useful for internal tools where speed beats pixel-perfection.', alt:'Galileo AI, Locofy'},
+    {name:'Claude', why:'Writes UX copy, empty states, and error messages, and can critique a flow for confusing steps when you describe it.', alt:'ChatGPT'}
+  ],
+  prompts:[
+    'Here is a user story: [story]. Propose a 3-4 screen flow (screen names + what each does) that gets the user from entry point to completed task with the fewest steps.',
+    'Write microcopy for this internal tool: empty state for [list/table], error message when [API call] fails, and a success toast after [action]. Keep it in plain, direct language — no marketing tone.'
+  ],
+  bestPractices:[
+    'Reuse your company\'s existing design system/component library if one exists — don\'t invent a new one for an internal tool.',
+    'Design the empty and error states, not just the happy path.',
+    'Prototype only the flows with real ambiguity; skip Figma for straightforward CRUD screens.'
+  ],
+  mistakes:[
+    'Spending a week polishing visuals for screens only 5 people will ever see.',
+    'Designing forms with no validation or error states, discovered only in QA.',
+    'Skipping user validation because "it\'s just an internal tool."'
+  ],
+  outputs:['Low-fi wireframes', 'Design tokens (color/type/spacing)', 'Clickable prototype', 'Usability findings note'],
+  tips:['For internal tools, a documented design-token file (JSON) saves more time long-term than pixel-perfect Figma files — it drops straight into Tailwind config.']
+},
+{
+  id:'devops', num:4, eyebrow:'Setup', title:'Environment, Repo & DevOps Setup', time:'2–3 days',
+  objectives:[
+    'Get a working local dev environment every engineer can spin up in minutes.',
+    'Establish repo structure, branching model, and code review rules before feature work starts.',
+    'Set up base CI so broken code can\'t merge from day one.'
+  ],
+  tasks:[
+    'Initialize the repo (monorepo or split repos) with a clear folder structure per module/service.',
+    'Write Docker/Docker Compose configs for local dev parity with staging.',
+    'Configure environment variables and secrets management.',
+    'Set up basic CI: lint, type-check, test on every PR.'
+  ],
+  tools:[
+    {name:'GitHub Copilot', why:'Fast for scaffolding boilerplate config files (Dockerfiles, CI YAML, .env templates) that follow well-known patterns.', alt:'Claude Code, Cursor'},
+    {name:'Claude Code', why:'Can set up an entire repo skeleton, Docker Compose stack, and CI pipeline from a description of the stack in one pass, and explain each file it creates.', alt:'GitHub Copilot Workspace'},
+    {name:'Doppler / Infisical', why:'Centralized secrets management so credentials never live in .env files committed to git.', alt:'AWS Secrets Manager, HashiCorp Vault'}
+  ],
+  prompts:[
+    'Set up a Docker Compose file for a stack with: FastAPI backend, React frontend, PostgreSQL, and MongoDB, with hot-reload for local dev and health checks for every service.',
+    'Write a GitHub Actions workflow that runs on every PR: install deps, lint, type-check, run unit tests, and block merge on failure, for a Python/FastAPI + React/TypeScript monorepo.'
+  ],
+  bestPractices:[
+    'Make "clone repo, run one command, working app" the standard for onboarding.',
+    'Pin dependency versions from day one to avoid "works on my machine" drift.',
+    'Require PR review + passing CI as a branch protection rule immediately, not after the first incident.'
+  ],
+  mistakes:[
+    'Committing real secrets or API keys to the repo, even temporarily.',
+    'Setting up CI only after several sprints of unchecked commits.',
+    'No documented local setup, so onboarding relies on tribal knowledge.'
+  ],
+  outputs:['Repo skeleton', 'Docker Compose local stack', 'CI pipeline (lint/test/build)', 'README with setup steps'],
+  tips:['A single `make dev` or `npm run dev:all` command that boots the full stack removes the biggest source of onboarding friction.']
+},
+{
+  id:'backend', num:5, eyebrow:'Build', title:'Backend Service Development', time:'2–3 weeks',
+  objectives:[
+    'Implement the API surface defined in Stage 2 against the real data model.',
+    'Build authentication, authorization (RBAC), and core business logic.',
+    'Keep endpoints tested as they\'re built, not after.'
+  ],
+  tasks:[
+    'Implement database models/migrations from the ERD.',
+    'Build auth: login, token issuance/refresh, role-based access control.',
+    'Implement core CRUD and business-logic endpoints module by module.',
+    'Write unit tests alongside each endpoint, not as a separate later phase.'
+  ],
+  tools:[
+    {name:'Claude Code', why:'Strong at implementing well-specified backend logic end-to-end (models → routes → tests) from an API contract, and at explaining trade-offs in generated code.', alt:'GitHub Copilot, Cursor'},
+    {name:'Cursor', why:'Codebase-aware autocomplete and inline edits speed up repetitive CRUD and migration work across many files.', alt:'Claude Code, Windsurf'},
+    {name:'Postman / Bruno + AI test generation', why:'Auto-generates request collections and test assertions from an OpenAPI spec, useful for manual and automated API checks.', alt:'Insomnia, Hoppscotch'}
+  ],
+  prompts:[
+    'Given this OpenAPI spec for the [module] endpoints and this SQLAlchemy schema, implement the FastAPI routes, request/response models with Pydantic, and one pytest test per endpoint covering the happy path and one failure case.',
+    'Implement JWT-based auth with access + refresh tokens and role-based access control for roles [admin, manager, contributor] in FastAPI, including middleware that protects routes by role.'
+  ],
+  bestPractices:[
+    'Validate all input at the API boundary (Pydantic/Zod schemas), never trust client data.',
+    'Return consistent, structured error responses across every endpoint.',
+    'Keep business logic out of route handlers — isolate it in a service layer so it\'s independently testable.'
+  ],
+  mistakes:[
+    'Hardcoding role checks scattered across route handlers instead of centralized middleware.',
+    'Skipping tests for "simple" CRUD endpoints that later break silently.',
+    'Letting the API contract drift from the actual implementation without updating docs.'
+  ],
+  outputs:['Working API (all v1 endpoints)', 'Auth + RBAC implementation', 'Unit test suite', 'Updated API docs'],
+  tips:['Generate tests from the OpenAPI spec directly — it catches contract drift between frontend expectations and backend reality early.']
+},
+{
+  id:'frontend', num:6, eyebrow:'Build', title:'Frontend Application Development', time:'2–3 weeks',
+  objectives:[
+    'Build the UI against the design system and API contract in parallel with backend work.',
+    'Handle loading, empty, and error states for every screen, not just the happy path.',
+    'Keep state management as simple as the app allows.'
+  ],
+  tasks:[
+    'Scaffold routing and layout shell from the wireframes.',
+    'Build components against the design tokens from Stage 3.',
+    'Wire screens to the API using mock data first, then real endpoints once backend is ready.',
+    'Implement auth flows (login, session handling, protected routes).'
+  ],
+  tools:[
+    {name:'v0.dev / Claude', why:'Generates React components matching a described design system fast, which you then wire to real state and data.', alt:'GitHub Copilot, Cursor'},
+    {name:'Claude Code', why:'Good at implementing full features across multiple files — component, hook, API call, and types — from one description.', alt:'Cursor, Windsurf'},
+    {name:'MSW (Mock Service Worker) + AI-generated fixtures', why:'Lets frontend work proceed against realistic mock API responses before backend endpoints are finished.', alt:'json-server, Postman mock servers'}
+  ],
+  prompts:[
+    'Build a React + TypeScript component for [screen] using these design tokens: [tokens]. It should call [endpoint] via a custom hook, and handle loading, empty, and error states distinctly.',
+    'Given this OpenAPI spec, generate a typed API client (fetch wrapper + TypeScript types) for the frontend, plus mock fixture data for local development before the backend is live.'
+  ],
+  bestPractices:[
+    'Build against mocked API responses so frontend isn\'t blocked by backend timelines.',
+    'Centralize API calls in one client layer instead of scattering fetch calls through components.',
+    'Treat loading/empty/error as required states for every data-driven screen, not optional polish.'
+  ],
+  mistakes:[
+    'Waiting for the backend to be 100% done before starting frontend work.',
+    'Inconsistent state management (mixing context, local state, and a state library ad hoc).',
+    'No handling for expired sessions or failed auth refresh, discovered only in production.'
+  ],
+  outputs:['Working frontend (all v1 screens)', 'Typed API client', 'Auth flow implementation', 'Component library aligned to design tokens'],
+  tips:['Generate the typed API client directly from the OpenAPI spec — it keeps frontend and backend in sync automatically as the contract evolves.']
+},
+{
+  id:'qa', num:7, eyebrow:'Verify', title:'Integration, QA & Automated Testing', time:'1–2 weeks',
+  objectives:[
+    'Verify frontend and backend work correctly together against real data, not mocks.',
+    'Build a regression safety net before the first real users touch the tool.',
+    'Catch role/permission bugs before they become access-control incidents.'
+  ],
+  tasks:[
+    'Replace mocked API calls with real endpoints and re-test every flow.',
+    'Write end-to-end tests for the critical user journeys identified in Stage 1.',
+    'Run role-based access testing — every role should be blocked from what it shouldn\'t see.',
+    'Load-test key endpoints against expected internal usage patterns.'
+  ],
+  tools:[
+    {name:'Playwright + AI test generation', why:'Generates end-to-end test scripts from a plain-language description of a user flow, and is more reliable than Selenium for modern SPAs.', alt:'Cypress, Testim'},
+    {name:'Claude Code', why:'Reviews a diff or PR and flags edge cases, missing error handling, and untested branches before a human reviewer does.', alt:'CodeRabbit, GitHub Copilot review'},
+    {name:'k6', why:'Scriptable load testing to validate the API holds up under realistic internal concurrent-user counts.', alt:'Locust, Apache JMeter'}
+  ],
+  prompts:[
+    'Write a Playwright end-to-end test for this user journey: [login → create record → assign role → view in dashboard]. Cover the happy path and one permission-denied case.',
+    'Review this PR diff for: unhandled error cases, missing input validation, and any endpoint reachable without the correct role check. Diff:\\n[paste diff]'
+  ],
+  bestPractices:[
+    'Test permission boundaries explicitly — for every role, list what it should NOT be able to do, and test that.',
+    'Run integration tests against a database seeded with realistic (not trivial) data volumes.',
+    'Treat every bug found here as a missing test case to add, not just a one-off fix.'
+  ],
+  mistakes:[
+    'Testing only the happy path and skipping negative/permission-denied cases.',
+    'Running QA only against clean, empty databases that don\'t reflect real usage.',
+    'Discovering N+1 queries or slow endpoints only after real users complain.'
+  ],
+  outputs:['E2E test suite', 'QA bug log (triaged)', 'Load test results', 'Permission-matrix verification report'],
+  tips:['Build the role-permission matrix as a literal table (role × action) and turn every cell into a test case — it\'s the fastest way to catch access-control gaps.']
+},
+{
+  id:'security', num:8, eyebrow:'Verify', title:'Security, Compliance & Access Review', time:'3–5 days',
+  objectives:[
+    'Confirm the tool meets internal security baseline before it touches real company data.',
+    'Close common web app vulnerabilities before launch, not after an audit finds them.',
+    'Document data handling for anything sensitive (PII, financial, HR data).'
+  ],
+  tasks:[
+    'Run a dependency vulnerability scan across frontend and backend packages.',
+    'Check for OWASP Top 10 issues: injection, broken auth, exposed sensitive data, misconfigured CORS.',
+    'Confirm secrets are not exposed in logs, error responses, or client-side bundles.',
+    'Get sign-off from IT/security on data classification and retention if the tool handles sensitive data.'
+  ],
+  tools:[
+    {name:'Snyk', why:'Scans dependencies and containers for known vulnerabilities and suggests safe upgrade paths automatically.', alt:'Dependabot, OWASP Dependency-Check'},
+    {name:'Claude', why:'Reviews auth code, CORS config, and API error handling specifically for security gaps when asked to think like an attacker.', alt:'ChatGPT, semgrep + AI triage'},
+    {name:'Semgrep', why:'Static analysis with security-focused rulesets that catch injection and auth flaws directly in code review.', alt:'SonarQube, CodeQL'}
+  ],
+  prompts:[
+    'Review this authentication and RBAC middleware code as a security auditor. Look specifically for: privilege escalation paths, missing checks on any route, and token handling weaknesses. Code:\\n[paste code]',
+    'This internal tool will store [data types, e.g. employee salary data]. List the access-control, encryption-at-rest, and logging requirements it should meet before launch, based on common enterprise data-handling policy.'
+  ],
+  bestPractices:[
+    'Treat internal tools with the same auth rigor as external ones — internal breaches are still breaches.',
+    'Log access to sensitive data, not just errors.',
+    'Get security review scheduled early in the timeline, not squeezed in the day before launch.'
+  ],
+  mistakes:[
+    'Assuming "internal only" means lower security standards.',
+    'Leaving default/example credentials in staging configs that get copied to production.',
+    'No plan for what happens when an employee with access leaves the company.'
+  ],
+  outputs:['Vulnerability scan report (resolved)', 'Security review sign-off', 'Data classification note', 'Access/offboarding policy for the tool'],
+  tips:['Add an automated dependency scan to CI so new vulnerabilities are caught on every PR, not just at a pre-launch review.']
+},
+{
+  id:'deploy', num:9, eyebrow:'Ship', title:'Deployment, CI/CD & Release', time:'3–5 days',
+  objectives:[
+    'Automate the path from merged code to a running production environment.',
+    'Deploy with a rollback plan, not just a forward path.',
+    'Roll out to a small pilot group before company-wide access.'
+  ],
+  tasks:[
+    'Build the CI/CD pipeline: automated build, test, and deploy on merge to main.',
+    'Provision staging and production environments with infrastructure-as-code.',
+    'Set up a pilot rollout (single team) before broadening access.',
+    'Write a rollback runbook in case the release needs to be reverted.'
+  ],
+  tools:[
+    {name:'GitHub Actions', why:'Integrates directly with the repo for CI/CD without extra tooling, sufficient for most internal-tool deployment needs.', alt:'GitLab CI, CircleCI'},
+    {name:'Claude Code', why:'Writes and debugs deployment configs (Dockerfiles, Kubernetes manifests, Terraform) and explains what each resource does.', alt:'GitHub Copilot'},
+    {name:'Terraform', why:'Infrastructure-as-code so environments are reproducible and reviewable, instead of manually clicked cloud console changes.', alt:'Pulumi, AWS CDK'}
+  ],
+  prompts:[
+    'Write a GitHub Actions deployment workflow that builds a Docker image, pushes it to [registry], and deploys to [ECS/Kubernetes/App Runner] on merge to main, with a manual approval step before production.',
+    'Write a rollback runbook for this deployment: what to check first, how to revert to the previous release, and who to notify, for a FastAPI + React app deployed via [platform].'
+  ],
+  bestPractices:[
+    'Deploy to a pilot group of real users first and gather feedback before organization-wide rollout.',
+    'Make rollback a one-command action, tested before you need it for real.',
+    'Keep production config in version control (infrastructure-as-code), never manual console edits.'
+  ],
+  mistakes:[
+    'No staging environment, testing changes directly against production.',
+    'Rolling out to the entire company on day one with no pilot phase.',
+    'No monitoring or alerting configured before the first real users arrive.'
+  ],
+  outputs:['CI/CD pipeline (build→test→deploy)', 'Provisioned staging + prod environments', 'Rollback runbook', 'Pilot rollout plan'],
+  tips:['Feature-flag risky new capabilities so they can be turned off instantly without a full redeploy.']
+},
+{
+  id:'adopt', num:10, eyebrow:'Grow', title:'Adoption, Monitoring & Iteration', time:'Ongoing',
+  objectives:[
+    'Get the tool actually used, not just deployed.',
+    'Instrument the product so decisions about what to build next are data-driven.',
+    'Build a lightweight cadence for triaging feedback and bugs.'
+  ],
+  tasks:[
+    'Set up error tracking, uptime monitoring, and basic usage analytics.',
+    'Write a short onboarding doc/loom and announce the tool with a clear "what problem this solves" message.',
+    'Create a lightweight feedback channel (Slack channel, in-app widget, or form).',
+    'Establish a biweekly or monthly triage of bugs and feature requests against the roadmap.'
+  ],
+  tools:[
+    {name:'Sentry', why:'Catches and groups production errors with stack traces and user context, the fastest way to know something broke before users report it.', alt:'Rollbar, Bugsnag'},
+    {name:'PostHog', why:'Self-hostable product analytics (usage funnels, session replay) suited to internal tools where you don\'t want to send data to a third party.', alt:'Mixpanel, Amplitude'},
+    {name:'Claude', why:'Summarizes feedback threads and bug reports into a prioritized backlog, and drafts release notes/announcements from a changelog.', alt:'ChatGPT'}
+  ],
+  prompts:[
+    'Here is two weeks of feedback and bug reports from Slack and our form: [paste]. Group them into themes, flag anything that looks like a security or data-integrity issue, and propose a prioritized backlog for next sprint.',
+    'Write a short internal announcement (Slack post, ~150 words) introducing [tool name] to the team: what problem it solves, who it\'s for, and how to get access, in a plain, non-marketing tone.'
+  ],
+  bestPractices:[
+    'Ship monitoring before ship day, not after the first incident.',
+    'Close the loop with users who report bugs — tell them when it\'s fixed.',
+    'Track a small number of adoption metrics (weekly active users, task completion) rather than vanity metrics.'
+  ],
+  mistakes:[
+    'Launching with no analytics, so "is this actually being used" stays unanswerable.',
+    'Treating launch as the finish line instead of the start of the feedback loop.',
+    'Letting the backlog grow unsorted with no regular triage cadence.'
+  ],
+  outputs:['Monitoring + analytics dashboard', 'Onboarding doc', 'Feedback channel', 'Prioritized post-launch backlog'],
+  tips:['Set one adoption metric as the "is this working" signal (e.g. weekly active users / eligible users) and review it monthly.']
+}
+];
+
+const FLOW = STAGES.map(s => ({id:s.id, num:s.num, title:s.title.split(' ').slice(0,2).join(' ')}));
+
+const CMP_TOOLS = [
+  {name:'Claude', best:'Reasoning, requirements, code review, docs', strengths:['good|Long-context reasoning','good|Careful code review','mid|IDE-native autocomplete'], notes:'Best where judgment matters — architecture trade-offs, security review, turning ambiguity into a spec.'},
+  {name:'Claude Code', best:'Multi-file feature implementation', strengths:['good|Full-feature builds','good|Repo-aware edits','mid|Visual design'], notes:'Strongest for backend/frontend features that span models, routes, and tests in one pass.'},
+  {name:'GitHub Copilot', best:'In-editor autocomplete', strengths:['good|Inline suggestions','mid|Large refactors','mid|Planning'], notes:'Fastest for line-by-line and boilerplate; less suited to multi-file architectural changes.'},
+  {name:'Cursor', best:'Codebase-aware editing', strengths:['good|Codebase context','good|Inline edits','mid|Non-code planning'], notes:'A strong middle ground between Copilot-style autocomplete and full agentic builds.'},
+  {name:'v0.dev', best:'UI component generation', strengths:['good|React/Tailwind UI','mid|Backend logic','mid|Complex state'], notes:'Fastest path from a design description to a real, editable component.'},
+];
+
+const CONCLUSION = {
+  summary: 'This workflow takes a full-stack internal SaaS tool from an unscoped request to a monitored, adopted product across ten stages: two of foundation (discovery, architecture), one of design, one of setup, two of build (backend, frontend), two of verification (QA, security), and two of launch and growth (deploy, adoption). AI tools compress the slowest parts — requirements synthesis, boilerplate, test generation, and code review — while judgment calls (scope, architecture trade-offs, security sign-off) stay with the team.',
+  stack: [
+    {role:'Reasoning / planning', tool:'Claude'},
+    {role:'Feature implementation', tool:'Claude Code'},
+    {role:'In-editor autocomplete', tool:'GitHub Copilot or Cursor'},
+    {role:'UI generation', tool:'v0.dev'},
+    {role:'API testing', tool:'Postman / Bruno'},
+    {role:'E2E testing', tool:'Playwright'},
+    {role:'Security scanning', tool:'Snyk + Semgrep'},
+    {role:'CI/CD', tool:'GitHub Actions'},
+    {role:'Monitoring', tool:'Sentry + PostHog'},
+  ],
+  resources: [
+    {t:'FastAPI official docs — Advanced User Guide', u:'https://fastapi.tiangolo.com/advanced/'},
+    {t:'OWASP Top 10 (web app security baseline)', u:'https://owasp.org/www-project-top-ten/'},
+    {t:'React docs — Thinking in React', u:'https://react.dev/learn/thinking-in-react'},
+    {t:'Refactoring UI (design fundamentals for engineers)', u:'https://www.refactoringui.com/'},
+    {t:'The Twelve-Factor App', u:'https://12factor.net/'}
+  ],
+  communities: ['r/ExperiencedDevs', 'r/SaaS', 'Indie Hackers', 'DEV Community', 'Internal Tools Slack/Discord communities', 'ABTalks build-in-public circle'],
+  keywords: ['internal tool architecture', 'FastAPI RBAC tutorial', 'React design tokens', 'modular monolith vs microservices', 'OpenAPI codegen typescript', 'Playwright role based testing', 'internal SaaS security checklist', 'CI CD GitHub Actions FastAPI'],
+  prompts2: [
+    'Audit this entire codebase structure [paste tree] against the twelve-factor app principles and flag violations.',
+    'Given our current v1 feature set [list], propose 3 automation opportunities that would save the most manual effort in month 2.',
+    'Write a postmortem template we can reuse any time this internal tool has an incident.'
+  ],
+  future: [
+    'Auto-generate release notes from merged PR titles each deploy.',
+    'Add an AI-assisted support bot trained on the tool\'s docs to deflect repeat questions.',
+    'Automate weekly usage-metric summaries posted to the team channel.',
+    'Auto-triage incoming bug reports into the backlog with suggested priority and owner.'
+  ]
+};
+
+/* ============ RENDER ============ */
+const container = document.getElementById('stagesContainer');
+const railNodes = document.getElementById('railNodes');
+
+STAGES.forEach(stage => {
+  // rail node
+  const rn = document.createElement('div');
+  rn.className = 'rail-node';
+  rn.id = 'rail-' + stage.id;
+  rn.innerHTML = `<a href="#stage-${stage.id}"><span class="rn-num">0${stage.num}</span>${stage.title}</a>`;
+  railNodes.appendChild(rn);
+
+  // stage card
+  const card = document.createElement('div');
+  card.className = 'stage';
+  card.id = 'stage-' + stage.id;
+  card.innerHTML = `
+    <div class="stage-head">
+      <div class="stage-head-left">
+        <div class="stage-num">0${stage.num}</div>
+        <div class="stage-titles">
+          <div class="eyebrow2">${stage.eyebrow}</div>
+          <h3>${stage.title}</h3>
+          <div class="stage-time mono">⏱ ${stage.time}</div>
+        </div>
+      </div>
+      <div class="stage-actions">
+        <button class="icon-btn" data-bookmark="${stage.id}" title="Bookmark">★</button>
+        <button class="check-toggle" data-check="${stage.id}"><span class="box"></span><span class="check-label">Mark done</span></button>
+      </div>
+    </div>
+    <div class="stage-body">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="overview">Overview</button>
+        <button class="tab-btn" data-tab="tools">AI Tools</button>
+        <button class="tab-btn" data-tab="prompts">Prompts</button>
+        <button class="tab-btn" data-tab="practice">Practices & Pitfalls</button>
+        <button class="tab-btn" data-tab="notes">Notes</button>
+      </div>
+      <div class="tab-pane active" data-pane="overview">
+        <div class="two-col">
+          <div>
+            <h4 class="blocklabel">Objectives</h4>
+            <ul class="clean">${stage.objectives.map(o=>`<li>${o}</li>`).join('')}</ul>
+          </div>
+          <div>
+            <h4 class="blocklabel">Tasks</h4>
+            <ul class="clean tasks">${stage.tasks.map(o=>`<li>${o}</li>`).join('')}</ul>
+          </div>
+        </div>
+        <h4 class="blocklabel" style="margin-top:20px;">Expected Outputs</h4>
+        <div class="outputs-strip">${stage.outputs.map(o=>`<span class="output-chip">${o}</span>`).join('')}</div>
+      </div>
+      <div class="tab-pane" data-pane="tools">
+        <div class="tool-grid">
+          ${stage.tools.map(t=>`
+            <div class="tool-card">
+              <div class="tname">${t.name} <span class="badge">Recommended</span></div>
+              <div class="twhy">${t.why}</div>
+              <div class="talt">Alt: ${t.alt}</div>
+            </div>`).join('')}
+        </div>
+      </div>
+      <div class="tab-pane" data-pane="prompts">
+        ${stage.prompts.map(p=>`<div class="prompt-box">${p.replace(/</g,'&lt;')}<button class="copy-btn" data-copy>Copy</button></div>`).join('')}
+      </div>
+      <div class="tab-pane" data-pane="practice">
+        <div class="two-col">
+          <div>
+            <h4 class="blocklabel">Best Practices</h4>
+            <ul class="clean tips">${stage.bestPractices.map(o=>`<li>${o}</li>`).join('')}</ul>
+          </div>
+          <div>
+            <h4 class="blocklabel">Common Mistakes</h4>
+            <ul class="clean mistakes">${stage.mistakes.map(o=>`<li>${o}</li>`).join('')}</ul>
+          </div>
+        </div>
+        <h4 class="blocklabel" style="margin-top:20px;">Efficiency Tips</h4>
+        <ul class="clean tips">${stage.tips.map(o=>`<li>${o}</li>`).join('')}</ul>
+      </div>
+      <div class="tab-pane" data-pane="notes">
+        <div class="notes-area">
+          <textarea placeholder="Notes for this stage — decisions made, links, blockers..." data-notes="${stage.id}"></textarea>
+          <div class="notes-hint">Saved automatically in this browser.</div>
+        </div>
+      </div>
+    </div>
+  `;
+  container.appendChild(card);
+});
+
+// flow diagram
+const flowRow = document.getElementById('flowRow');
+FLOW.forEach((f,i)=>{
+  const node = document.createElement('a');
+  node.href = '#stage-' + f.id;
+  node.className = 'flow-node';
+  node.innerHTML = `<span class="fn-i">0${f.num}</span>${f.title}`;
+  flowRow.appendChild(node);
+  if(i < FLOW.length-1){
+    const arrow = document.createElement('div');
+    arrow.className = 'flow-arrow';
+    flowRow.appendChild(arrow);
+  }
+});
+
+// comparison table
+const cmpTable = document.getElementById('cmpTable');
+cmpTable.innerHTML = `
+  <thead><tr><th>Tool</th><th>Best for</th><th>Strengths</th><th>Notes</th></tr></thead>
+  <tbody>
+    ${CMP_TOOLS.map(t=>`
+      <tr>
+        <td class="name">${t.name}</td>
+        <td>${t.best}</td>
+        <td>${t.strengths.map(s=>{const [cls,label]=s.split('|'); return `<span class="tag ${cls}">${label}</span>`;}).join('')}</td>
+        <td>${t.notes}</td>
+      </tr>`).join('')}
+  </tbody>
+`;
+
+// conclusion
+const conclGrid = document.getElementById('conclGrid');
+conclGrid.innerHTML = `
+  <div class="concl-card" style="grid-column:1/-1;">
+    <h4><span class="ic">◆</span> Workflow Summary</h4>
+    <p style="color:var(--text-dim); font-size:13.8px; margin:0;">${CONCLUSION.summary}</p>
+  </div>
+  <div class="concl-card">
+    <h4><span class="ic">◆</span> Recommended AI Stack</h4>
+    ${CONCLUSION.stack.map(s=>`<div class="stack-row"><span>${s.tool}</span><span class="role">${s.role}</span></div>`).join('')}
+  </div>
+  <div class="concl-card">
+    <h4><span class="ic">◆</span> Learning Resources</h4>
+    <ul class="clean">${CONCLUSION.resources.map(r=>`<li><a href="${r.u}" target="_blank" rel="noopener">${r.t}</a></li>`).join('')}</ul>
+  </div>
+  <div class="concl-card">
+    <h4><span class="ic">◆</span> Communities</h4>
+    <ul class="clean">${CONCLUSION.communities.map(c=>`<li>${c}</li>`).join('')}</ul>
+  </div>
+  <div class="concl-card">
+    <h4><span class="ic">◆</span> Search Keywords</h4>
+    <div>${CONCLUSION.keywords.map(k=>`<span class="kw-chip">${k}</span>`).join('')}</div>
+  </div>
+  <div class="concl-card" style="grid-column:1/-1;">
+    <h4><span class="ic">◆</span> Additional AI Prompts</h4>
+    ${CONCLUSION.prompts2.map(p=>`<div class="prompt-box">${p}<button class="copy-btn" data-copy>Copy</button></div>`).join('')}
+  </div>
+  <div class="concl-card" style="grid-column:1/-1;">
+    <h4><span class="ic">◆</span> Future Automation Opportunities</h4>
+    <ul class="clean tips">${CONCLUSION.future.map(f=>`<li>${f}</li>`).join('')}</ul>
+  </div>
+`;
+
+/* ============ DECISION TREE ============ */
+const DTREE = {
+  q: 'Is the task well-specified with a clear right answer (a spec, schema, or known pattern)?',
+  yes: {
+    q: 'Does it span multiple files or require repo context?',
+    yes: {result: 'Use Claude Code or an agentic coding assistant — let it implement across files, then review the diff yourself.'},
+    no: {result: 'Use inline autocomplete (Copilot/Cursor) — fastest for single-file, well-defined work.'}
+  },
+  no: {
+    q: 'Does it require judgment, trade-offs, or synthesizing ambiguous input (interviews, feedback, architecture)?',
+    yes: {result: 'Use Claude (chat) — think through it with the model, don\'t delegate the decision entirely. Keep a human sign-off.'},
+    no: {result: 'This is likely better done by a person directly — AI adds overhead without enough structure to work from.'}
+  }
+};
+let dtPath = [];
+function renderDtree(node){
+  const wrap = document.getElementById('dtree');
+  const breadcrumb = dtPath.length ? dtPath.join(' → ') : '';
+  if(node.result){
+    wrap.innerHTML = `
+      <div class="dt-breadcrumb">${breadcrumb}</div>
+      <div class="dt-result show">${node.result}</div>
+      <div class="dt-options" style="margin-top:14px;"><button class="dt-opt" id="dtRestart">↺ Start over</button></div>
+    `;
+    document.getElementById('dtRestart').onclick = ()=>{ dtPath=[]; renderDtree(DTREE); };
+    return;
+  }
+  wrap.innerHTML = `
+    <div class="dt-breadcrumb">${breadcrumb}</div>
+    <div class="dt-question">${node.q}</div>
+    <div class="dt-options">
+      <button class="dt-opt" data-branch="yes">Yes</button>
+      <button class="dt-opt" data-branch="no">No</button>
+    </div>
+  `;
+  wrap.querySelectorAll('[data-branch]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const branch = btn.getAttribute('data-branch');
+      dtPath.push(branch === 'yes' ? 'Yes' : 'No');
+      renderDtree(node[branch]);
+    };
+  });
+}
+renderDtree(DTREE);
+
+/* ============ INTERACTIONS ============ */
+// tabs
+container.addEventListener('click', (e)=>{
+  const tabBtn = e.target.closest('.tab-btn');
+  if(tabBtn){
+    const stageBody = tabBtn.closest('.stage-body');
+    stageBody.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    stageBody.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+    tabBtn.classList.add('active');
+    stageBody.querySelector(`.tab-pane[data-pane="${tabBtn.dataset.tab}"]`).classList.add('active');
+  }
+  const copyBtn = e.target.closest('[data-copy]');
+  if(copyBtn){
+    const text = copyBtn.parentElement.textContent.replace('Copy','').trim();
+    navigator.clipboard.writeText(text).then(()=>{
+      copyBtn.textContent = 'Copied!';
+      setTimeout(()=>copyBtn.textContent='Copy', 1400);
+    });
+  }
+  const bookmarkBtn = e.target.closest('[data-bookmark]');
+  if(bookmarkBtn){
+    const id = bookmarkBtn.dataset.bookmark;
+    state.bookmarks[id] = !state.bookmarks[id];
+    save();
+    renderBookmarkState();
+  }
+  const checkBtn = e.target.closest('[data-check]');
+  if(checkBtn){
+    const id = checkBtn.dataset.check;
+    state.done[id] = !state.done[id];
+    save();
+    renderDoneState();
+  }
+});
+
+document.body.addEventListener('input', (e)=>{
+  if(e.target.matches('[data-notes]')){
+    state.notes[e.target.dataset.notes] = e.target.value;
+    save();
+  }
+});
+
+function renderBookmarkState(){
+  document.querySelectorAll('[data-bookmark]').forEach(btn=>{
+    const id = btn.dataset.bookmark;
+    btn.classList.toggle('bookmarked', !!state.bookmarks[id]);
+  });
+}
+function renderDoneState(){
+  let count = 0;
+  STAGES.forEach(s=>{
+    const btn = document.querySelector(`[data-check="${s.id}"]`);
+    const railNode = document.getElementById('rail-' + s.id);
+    const isDone = !!state.done[s.id];
+    if(isDone) count++;
+    btn.classList.toggle('done', isDone);
+    btn.querySelector('.box').textContent = isDone ? '✓' : '';
+    btn.querySelector('.check-label').textContent = isDone ? 'Done' : 'Mark done';
+    railNode.classList.toggle('done', isDone);
+  });
+  document.getElementById('progressLabel').textContent = `${count}/${STAGES.length} stages`;
+  document.getElementById('progressFill').style.width = (count/STAGES.length*100) + '%';
+  document.getElementById('railFill').style.height = (count/STAGES.length*100) + '%';
+}
+function restoreNotes(){
+  document.querySelectorAll('[data-notes]').forEach(ta=>{
+    ta.value = state.notes[ta.dataset.notes] || '';
+  });
+}
+renderBookmarkState();
+renderDoneState();
+restoreNotes();
+
+// bookmark filter toggle
+let bookmarkFilterOn = false;
+document.getElementById('bookmarkFilterBtn').addEventListener('click', ()=>{
+  bookmarkFilterOn = !bookmarkFilterOn;
+  document.getElementById('bookmarkFilterBtn').classList.toggle('active', bookmarkFilterOn);
+  STAGES.forEach(s=>{
+    const card = document.getElementById('stage-' + s.id);
+    const show = !bookmarkFilterOn || state.bookmarks[s.id];
+    card.style.display = show ? '' : 'none';
+  });
+});
+
+// theme toggle
+document.getElementById('themeToggle').addEventListener('click', ()=>{
+  state.theme = state.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', state.theme);
+  document.getElementById('themeToggle').textContent = state.theme === 'dark' ? '☾ Dark' : '☀ Light';
+  save();
+});
+
+// print
+document.getElementById('printBtn').addEventListener('click', ()=>window.print());
+
+// rail active-state on scroll
+const stageEls = STAGES.map(s=>document.getElementById('stage-'+s.id));
+const observer = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      document.querySelectorAll('.rail-node a').forEach(a=>a.classList.remove('active'));
+      const id = entry.target.id.replace('stage-','');
+      const link = document.querySelector(`#rail-${id} a`);
+      if(link) link.classList.add('active');
+    }
+  });
+}, {rootMargin:'-20% 0px -70% 0px'});
+stageEls.forEach(el=>observer.observe(el));
+
+})();
+</script>
+</body>
+</html>
