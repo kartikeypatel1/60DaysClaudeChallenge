@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cloud Host Picker — Compare & Decide</title>
+<style>
+  :root{
+    --bg:#0a0a0a;
+    --bg-panel:#121212;
+    --bg-panel-2:#161616;
+    --border:#2a2a2a;
+    --border-soft:#1f1f1f;
+    --amber:#F2A627;
+    --amber-dim:#8a6318;
+    --text:#e8e6e1;
+    --text-dim:#9a978f;
+    --text-faint:#66645d;
+    --green:#4caf6a;
+    --red:#d85f5f;
+    --blue:#5b9fd8;
+    --radius:10px;
+    --mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+  }
+  @font-face{
+    font-family:'IBM Plex Mono';
+    src: local('IBM Plex Mono');
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      linear-gradient(var(--bg-panel-2) 1px, transparent 1px) 0 0/100% 34px,
+      linear-gradient(90deg, var(--bg-panel-2) 1px, transparent 1px) 0 0/34px 100%,
+      var(--bg);
+    background-attachment: fixed;
+    color:var(--text);
+    font-family: var(--mono);
+    font-size:14px;
+    line-height:1.5;
+    padding:24px 16px 80px;
+  }
+  .wrap{max-width:1180px;margin:0 auto;}
+
+  header{margin-bottom:28px;}
+  .eyebrow{
+    color:var(--amber);
+    font-size:11px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    margin-bottom:10px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:"";width:8px;height:8px;background:var(--amber);display:inline-block;}
+  h1{
+    font-size:26px;
+    margin:0 0 8px;
+    font-weight:600;
+    letter-spacing:-0.01em;
+  }
+  .sub{color:var(--text-dim);max-width:720px;font-size:13px;}
+
+  .panel{
+    background:var(--bg-panel);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:20px;
+    margin-bottom:20px;
+  }
+  .panel-title{
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:.12em;
+    color:var(--amber);
+    margin:0 0 4px;
+  }
+  .panel-desc{color:var(--text-faint);font-size:12px;margin-bottom:16px;}
+
+  /* Weight sliders */
+  .weights-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+    gap:16px;
+  }
+  .weight-item{
+    background:var(--bg-panel-2);
+    border:1px solid var(--border-soft);
+    border-radius:8px;
+    padding:14px 14px 12px;
+  }
+  .weight-item label{
+    display:flex;justify-content:space-between;align-items:baseline;
+    font-size:12.5px;margin-bottom:8px;
+  }
+  .weight-item .wname{color:var(--text);font-weight:600;}
+  .weight-item .wpct{color:var(--amber);font-variant-numeric:tabular-nums;}
+  input[type=range]{
+    -webkit-appearance:none;
+    width:100%;
+    height:4px;
+    background:var(--border);
+    border-radius:2px;
+    outline:none;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    width:16px;height:16px;border-radius:50%;
+    background:var(--amber);
+    cursor:pointer;
+    border:2px solid #000;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:16px;height:16px;border-radius:50%;
+    background:var(--amber);cursor:pointer;border:2px solid #000;
+  }
+  .reset-row{display:flex;justify-content:flex-end;margin-top:14px;gap:10px;}
+  .btn{
+    font-family:var(--mono);
+    background:transparent;
+    border:1px solid var(--border);
+    color:var(--text-dim);
+    font-size:11.5px;
+    padding:8px 14px;
+    border-radius:6px;
+    cursor:pointer;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    transition:.15s;
+  }
+  .btn:hover{border-color:var(--amber);color:var(--amber);}
+
+  /* Ranking */
+  .rank-list{display:flex;flex-direction:column;gap:10px;}
+  .rank-card{
+    background:var(--bg-panel-2);
+    border:1px solid var(--border-soft);
+    border-radius:8px;
+    padding:16px;
+    display:grid;
+    grid-template-columns:36px 1fr 120px;
+    gap:16px;
+    align-items:center;
+    transition:.2s border-color;
+    position:relative;
+  }
+  .rank-card.top{border-color:var(--amber-dim);}
+  .rank-num{
+    font-size:18px;font-weight:700;color:var(--text-faint);
+    text-align:center;
+  }
+  .rank-card.top .rank-num{color:var(--amber);}
+  .rank-main .rname{font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+  .badge-top{
+    font-size:9.5px;background:var(--amber);color:#1a1200;
+    padding:2px 6px;border-radius:3px;letter-spacing:.05em;text-transform:uppercase;font-weight:700;
+  }
+  .bar-track{height:8px;background:var(--border-soft);border-radius:4px;overflow:hidden;margin-top:2px;}
+  .bar-fill{height:100%;background:linear-gradient(90deg,var(--amber-dim),var(--amber));border-radius:4px;transition:width .3s ease;}
+  .rank-score{text-align:right;}
+  .rank-score .num{font-size:20px;color:var(--amber);font-weight:700;font-variant-numeric:tabular-nums;}
+  .rank-score .lbl{font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.06em;}
+
+  /* Comparison table */
+  .table-scroll{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:760px;}
+  th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border-soft);vertical-align:top;}
+  th{color:var(--text-faint);text-transform:uppercase;font-size:10.5px;letter-spacing:.08em;font-weight:600;background:var(--bg-panel-2);position:sticky;top:0;}
+  td.crit-name{color:var(--amber);font-weight:600;white-space:nowrap;}
+  .fact{color:var(--text);}
+  .cite{
+    color:var(--blue);
+    text-decoration:none;
+    font-size:10.5px;
+    margin-left:3px;
+    border-bottom:1px dotted var(--blue);
+  }
+  .cite:hover{color:var(--amber);border-color:var(--amber);}
+  .flag{
+    display:inline-block;
+    font-size:9.5px;
+    padding:1px 6px;
+    border-radius:3px;
+    margin-top:6px;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+  }
+  .flag.estimate{background:rgba(216,95,95,.12);color:var(--red);border:1px solid rgba(216,95,95,.35);}
+  .flag.conflict{background:rgba(91,159,216,.12);color:var(--blue);border:1px solid rgba(91,159,216,.35);}
+  .flag.synth{background:rgba(242,166,39,.1);color:var(--amber);border:1px solid rgba(242,166,39,.3);}
+  .score-pill{
+    display:inline-flex;align-items:center;gap:4px;
+    font-size:11px;color:var(--text-dim);margin-top:6px;
+  }
+  .dots{display:flex;gap:2px;}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--border);}
+  .dot.on{background:var(--amber);}
+
+  /* Sources panel */
+  .sources-list{display:flex;flex-direction:column;gap:10px;}
+  .source-item{
+    display:flex;gap:10px;
+    padding:10px 12px;
+    background:var(--bg-panel-2);
+    border:1px solid var(--border-soft);
+    border-radius:6px;
+    font-size:12px;
+  }
+  .source-id{color:var(--amber);font-weight:700;min-width:24px;}
+  .source-item a{color:var(--text);text-decoration:none;}
+  .source-item a:hover{color:var(--amber);}
+  .source-meta{color:var(--text-faint);font-size:10.5px;margin-top:2px;}
+
+  /* Collapsible */
+  .collapsible summary{
+    cursor:pointer;
+    list-style:none;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:4px 0;
+  }
+  .collapsible summary::-webkit-details-marker{display:none;}
+  .collapsible summary .arrow{transition:.2s transform;color:var(--amber);}
+  .collapsible[open] summary .arrow{transform:rotate(90deg);}
+  .research-body{padding-top:14px;color:var(--text-dim);font-size:12.5px;}
+  .research-body h4{color:var(--text);font-size:12.5px;margin:16px 0 6px;text-transform:uppercase;letter-spacing:.06em;color:var(--amber);}
+  .research-body p{margin:0 0 10px;}
+  .research-body ul{margin:0 0 10px;padding-left:18px;}
+  .research-body li{margin-bottom:6px;}
+
+  .empty-state{
+    text-align:center;padding:40px 20px;color:var(--text-faint);
+  }
+  .empty-state .icon{font-size:28px;margin-bottom:10px;}
+
+  .skeleton{
+    height:16px;background:linear-gradient(90deg,var(--border-soft),var(--border),var(--border-soft));
+    background-size:200% 100%;
+    animation:shimmer 1.4s infinite;
+    border-radius:4px;
+  }
+  @keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+
+  footer{
+    margin-top:30px;
+    text-align:center;
+    color:var(--text-faint);
+    font-size:11px;
+  }
+
+  @media (max-width:640px){
+    .rank-card{grid-template-columns:28px 1fr;grid-template-rows:auto auto;}
+    .rank-score{grid-column:1/-1;text-align:left;display:flex;gap:8px;align-items:baseline;}
+    h1{font-size:21px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Compare &amp; Decide</div>
+    <h1>Which cloud host should you actually use for a side project or portfolio?</h1>
+    <p class="sub">Built for students and solo developers picking a cheap host — comparing Vercel, Netlify, Render, and Railway on cost, free-tier generosity, ease of setup, and performance/uptime. Adjust the weights below to match what you actually care about; the ranking updates live.</p>
+  </header>
+
+  <div id="loadingState" class="panel">
+    <div class="panel-title">Loading comparison data…</div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px;">
+      <div class="skeleton" style="width:100%;"></div>
+      <div class="skeleton" style="width:80%;"></div>
+      <div class="skeleton" style="width:60%;"></div>
+    </div>
+  </div>
+
+  <div id="appContent" style="display:none;">
+
+    <!-- WEIGHTS -->
+    <div class="panel">
+      <div class="panel-title">① Set your priorities</div>
+      <div class="panel-desc">Drag each slider. Weights auto-normalize to 100% — the ranking below recalculates instantly.</div>
+      <div class="weights-grid" id="weightsGrid"></div>
+      <div class="reset-row">
+        <button class="btn" id="btnEqual">Equal weights</button>
+        <button class="btn" id="btnCostFirst">Cost matters most</button>
+      </div>
+    </div>
+
+    <!-- RANKING -->
+    <div class="panel">
+      <div class="panel-title">② Live ranking</div>
+      <div class="panel-desc">Weighted score = Σ (criterion score × your weight). Scores are 1–5 editorial ratings synthesized from the sourced facts in the table below — see "How this was researched" for the exact method.</div>
+      <div class="rank-list" id="rankList"></div>
+      <div id="emptyState" class="empty-state" style="display:none;">
+        <div class="icon">⚖️</div>
+        <div>All weights are at zero — set at least one priority above to see a ranking.</div>
+      </div>
+    </div>
+
+    <!-- DATA TABLE -->
+    <div class="panel">
+      <div class="panel-title">③ The underlying data</div>
+      <div class="panel-desc">Every cell traces to a numbered source in the panel below. Red flags mark estimates or figures with conflicting sources — not verified single-source fact.</div>
+      <div class="table-scroll">
+        <table id="dataTable"></table>
+      </div>
+    </div>
+
+    <!-- SOURCES -->
+    <div class="panel">
+      <div class="panel-title">④ Sources</div>
+      <div class="panel-desc">Every citation used to build this comparison, numbered to match the superscripts in the table above.</div>
+      <div class="sources-list" id="sourcesList"></div>
+    </div>
+
+    <!-- HOW RESEARCHED -->
+    <div class="panel">
+      <details class="collapsible" id="researchPanel">
+        <summary>
+          <span class="panel-title" style="margin:0;">⑤ How this was researched <span style="color:var(--text-faint);font-weight:400;text-transform:none;letter-spacing:0;">— methodology &amp; conflicts</span></span>
+          <span class="arrow">▶</span>
+        </summary>
+        <div class="research-body" id="researchBody"></div>
+      </details>
+    </div>
+
+  </div>
+
+  <footer>Data verified against provider pricing pages and independent trackers, June–July 2026. Pricing and free-tier limits change frequently — always confirm on the provider's own pricing page before committing.</footer>
+</div>
+
+<script>
+/* ---------------------------------------------------------
+   SOURCES
+--------------------------------------------------------- */
+const SOURCES = [
+  {id:1, title:"Vercel — Pricing (official)", url:"https://vercel.com/pricing", meta:"vercel.com · official pricing page, fetched Jul 2026"},
+  {id:2, title:"Netlify Pricing — Outmano (verified against Netlify's official pricing page)", url:"https://outmano.com/tools/netlify/pricing", meta:"outmano.com · verified Jun 9, 2026"},
+  {id:3, title:"The Complete Guide to Netlify Pricing and Plans 2026 — Flexprice", url:"https://flexprice.io/blog/complete-guide-to-netlify-pricing-and-plans", meta:"flexprice.io · updated ~Jul 2026"},
+  {id:4, title:"Netlify Free Tier 2026: Limits, Pricing & What Changed — AgentDeals", url:"https://agentdeals.dev/vendor/netlify", meta:"agentdeals.dev · verified May 20, 2026"},
+  {id:5, title:"Platforms with a real free tier for developers in 2026 — Render (official blog)", url:"https://render.com/articles/platforms-with-a-real-free-tier-for-developers-in-2026", meta:"render.com · official, Apr 23, 2026"},
+  {id:6, title:"Heroku vs Render: I Tested Both (2026 Pricing Inside) — ExpressTech", url:"https://expresstech.io/heroku-vs-render-an-honest-comparison-for-2026/", meta:"expresstech.io · May 12, 2026"},
+  {id:7, title:"Render Review 2026 — Lucky Media", url:"https://www.luckymedia.dev/insights/render", meta:"luckymedia.dev · Apr 20, 2026"},
+  {id:8, title:"Render Pricing 2026: Free Tier, RAM Limits & Alternatives — srvrlss.io", url:"https://www.srvrlss.io/provider/render/", meta:"srvrlss.io · Mar 11, 2025"},
+  {id:9, title:"Render — Pricing (official)", url:"https://render.com/pricing", meta:"render.com · official pricing page"},
+  {id:10, title:"How to Deploy a Static Website for FREE on Render — DEV Community", url:"https://dev.to/stephengade/how-to-deploy-static-website-for-free-on-render-with-custom-domain-4efo", meta:"dev.to · tutorial, no-credit-card confirmation"},
+  {id:11, title:"Railway — Pricing Plans (official docs)", url:"https://docs.railway.com/pricing/plans", meta:"docs.railway.com · official, fetched Jul 2026"},
+  {id:12, title:"Railway — Pricing (official)", url:"https://railway.com/pricing", meta:"railway.com · official pricing page"},
+  {id:13, title:"Railway Pricing 2026: Free Plan, Postgres & Alternatives — srvrlss.io", url:"https://www.srvrlss.io/provider/railway/", meta:"srvrlss.io · Mar 17, 2026"},
+  {id:14, title:"Railway Pricing Calculator (2026) — MakerKit", url:"https://makerkit.dev/pricing-calculator/railway", meta:"makerkit.dev · usage-based billing model, verified May 2026"},
+  {id:15, title:"Netlify status — incident history — StatusSight", url:"https://statussight.com/status/netlify", meta:"statussight.com · live status mirror, May 2026 incidents"},
+  {id:16, title:"Is Netlify Down? — Netlify Status & Outage Tracker — StackSheriff", url:"https://stacksheriff.com/status/netlify/", meta:"stacksheriff.com · incident log, May–Jun 2026"},
+];
+const src = id => `<a class="cite" href="${SOURCES.find(s=>s.id===id).url}" target="_blank" rel="noopener">[${id}]</a>`;
+const srcs = ids => ids.map(src).join('');
+
+/* ---------------------------------------------------------
+   CRITERIA
+--------------------------------------------------------- */
+const CRITERIA = [
+  {key:"cost", name:"Cost", desc:"Realistic monthly spend for an always-live side project"},
+  {key:"freeTier", name:"Free-tier generosity", desc:"How much you actually get without paying"},
+  {key:"easeOfSetup", name:"Ease of setup", desc:"Friction from repo to live URL"},
+  {key:"performance", name:"Performance / uptime", desc:"Cold starts, sleep behavior, edge delivery"},
+];
+
+/* ---------------------------------------------------------
+   PROVIDER DATA
+   score: 1-5 editorial synthesis (see methodology panel)
+   facts: sourced, cited text
+   flags: 'estimate' | 'conflict' | 'synth'
+--------------------------------------------------------- */
+const PROVIDERS = [
+  {
+    id:"vercel", name:"Vercel", tagline:"Hobby plan — frontend-first, edge-native",
+    data:{
+      cost:{
+        score:5,
+        facts:[`Hobby plan is free forever with no expiry, positioned for personal, non-commercial projects ${srcs([1])}.`],
+        flags:[]
+      },
+      freeTier:{
+        score:4,
+        facts:[`Free allowances: 100GB Fast Data Transfer, 1M Edge Requests, 1M Function Invocations, 4 hrs Active CPU, 360 GB-hrs Provisioned Memory, 1GB Blob Storage, and 5,000 Image Transformations per month ${srcs([1])}.`, `Hobby use is restricted to non-commercial projects — turning on paid features or ads technically requires upgrading to Pro ($20/user/month) ${srcs([1])}.`],
+        flags:[]
+      },
+      easeOfSetup:{
+        score:5,
+        facts:[`Import a Git repo and deploy in seconds, with automatic CI/CD, unlimited deployments, and instant rollback included on every plan including Hobby ${srcs([1])}.`],
+        flags:[]
+      },
+      performance:{
+        score:5,
+        facts:[`Global CDN, automated DDoS mitigation, and a Web Application Firewall are included on the free Hobby tier ${srcs([1])}.`, `Functions run on Vercel's edge/serverless model rather than a single always-on server, so there's no "sleeping dyno" cold-start pattern the way container-based free tiers have.`],
+        flags:["synth"]
+      }
+    }
+  },
+  {
+    id:"netlify", name:"Netlify", tagline:"Free plan — credit-based usage model",
+    data:{
+      cost:{
+        score:5,
+        facts:[`Free plan is $0/month with 300 credits/month; sites pause (rather than bill you) once credits run out ${srcs([2,3])}.`],
+        flags:[]
+      },
+      freeTier:{
+        score:4,
+        facts:[`Credits are consumed by usage type: deploys cost 15 credits each, bandwidth 20 credits/GB, compute 10 credits/GB-hour, and web requests 2 credits per 10K ${srcs([4])}.`, `Free plan includes unlimited deploy previews, custom domains with SSL, serverless functions, and global CDN ${srcs([2])}.`],
+        flags:["estimate"]
+      },
+      easeOfSetup:{
+        score:5,
+        facts:[`Deploys directly from Git, AI tooling, or API with zero required config ${srcs([2])}.`],
+        flags:[]
+      },
+      performance:{
+        score:4,
+        facts:[`Global CDN with no "sleeping" behavior for static output.`, `Netlify's public status history shows periodic incidents — e.g. elevated image-delivery latency and build-pipeline delays tied to a GitHub outage in May 2026 — though Netlify does not publish a comparable uptime percentage for the free tier ${srcs([15,16])}.`],
+        flags:["synth"]
+      }
+    }
+  },
+  {
+    id:"render", name:"Render", tagline:"Free static hosting + free (sleeping) web services",
+    data:{
+      cost:{
+        score:4,
+        facts:[`Static site hosting is free and unlimited, with no credit card required ${srcs([7,10])}.`, `Free web services get 750 compute hours/month; paid instances start at $7/month once you need always-on hosting ${srcs([6]) }.`],
+        flags:[]
+      },
+      freeTier:{
+        score:4,
+        facts:[`Free web service instances get 512MB RAM and 0.1 CPU ${srcs([8])}.`, `Sources disagree on the free PostgreSQL allowance: Render's own blog states 1GB storage that expires 30 days after creation (14-day grace period before deletion) ${srcs([5])}, while a third-party comparison cites 256MB expiring after 90 days ${srcs([6])} — the official Render figure (1GB/30 days) is treated as authoritative here.`],
+        flags:["conflict"]
+      },
+      easeOfSetup:{
+        score:4,
+        facts:[`Connect a GitHub, GitLab, or Bitbucket repo and Render auto-detects the runtime, no Dockerfile or CLI required, to give you a live HTTPS URL ${srcs([5])}.`],
+        flags:[]
+      },
+      performance:{
+        score:3,
+        facts:[`Free web services spin down after 15 minutes of inactivity, with cold starts taking roughly 30–60 seconds on the next request ${srcs([6,5])}.`, `Static sites are CDN-backed and do not sleep ${srcs([7])}.`],
+        flags:[]
+      }
+    }
+  },
+  {
+    id:"railway", name:"Railway", tagline:"Usage-based — no permanent free tier",
+    data:{
+      cost:{
+        score:1,
+        facts:[`New accounts get a one-time $5 trial credit valid for 30 days, no credit card required ${srcs([11,12])}.`, `After the trial, continued hosting requires the Hobby plan at $5/month (which includes $5 of usage credit) or Pro at $20/month ${srcs([11])}.`],
+        flags:[]
+      },
+      freeTier:{
+        score:2,
+        facts:[`The $5 one-time trial credit is reported by third-party trackers to cover only a few days to a week of a small always-on service ${srcs([13,14])}.`, `Some independent trackers describe a residual "Free" plan with ~$1/month credit after the trial expires, but this is not confirmed on Railway's own official pricing or docs pages as of this research ${srcs([13])}.`],
+        flags:["conflict","estimate"]
+      },
+      easeOfSetup:{
+        score:4,
+        facts:[`Connect a GitHub repo and Railway auto-detects the framework (Next.js, Node, Python, Go, etc.) for a push-to-deploy workflow ${srcs([13])}.`],
+        flags:[]
+      },
+      performance:{
+        score:4,
+        facts:[`Containers run persistently rather than sleeping, and billing has no per-request charges — cost is purely a function of provisioned compute time ${srcs([14])}.`, `Because idle containers still accrue cost, "always-on" here is a billing trade-off rather than a pure reliability advantage ${srcs([14])}.`],
+        flags:["synth"]
+      }
+    }
+  }
+];
+
+/* ---------------------------------------------------------
+   STATE
+--------------------------------------------------------- */
+let weights = {cost:25, freeTier:25, easeOfSetup:25, performance:25};
+
+/* ---------------------------------------------------------
+   RENDER: WEIGHT SLIDERS
+--------------------------------------------------------- */
+function renderWeights(){
+  const grid = document.getElementById('weightsGrid');
+  grid.innerHTML = '';
+  CRITERIA.forEach(c=>{
+    const div = document.createElement('div');
+    div.className = 'weight-item';
+    div.innerHTML = `
+      <label>
+        <span class="wname">${c.name}</span>
+        <span class="wpct" id="pct-${c.key}">${weights[c.key]}%</span>
+      </label>
+      <input type="range" min="0" max="100" value="${weights[c.key]}" id="slider-${c.key}">
+      <div style="color:var(--text-faint);font-size:10.5px;margin-top:8px;">${c.desc}</div>
+    `;
+    grid.appendChild(div);
+  });
+  CRITERIA.forEach(c=>{
+    document.getElementById(`slider-${c.key}`).addEventListener('input', e=>{
+      weights[c.key] = parseInt(e.target.value,10);
+      renderAll(false);
+    });
+  });
+}
+
+/* ---------------------------------------------------------
+   COMPUTE RANKING
+--------------------------------------------------------- */
+function computeScores(){
+  const total = Object.values(weights).reduce((a,b)=>a+b,0);
+  return PROVIDERS.map(p=>{
+    let weighted = 0;
+    CRITERIA.forEach(c=>{
+      const w = total > 0 ? weights[c.key]/total : 0;
+      weighted += p.data[c.key].score * w;
+    });
+    return {...p, weighted, total};
+  }).sort((a,b)=>b.weighted - a.weighted);
+}
+
+/* ---------------------------------------------------------
+   RENDER: RANKING
+--------------------------------------------------------- */
+function renderRanking(){
+  const list = document.getElementById('rankList');
+  const empty = document.getElementById('emptyState');
+  const results = computeScores();
+
+  if(results[0].total === 0){
+    list.style.display = 'none';
+    empty.style.display = 'block';
+    return;
+  }
+  list.style.display = 'flex';
+  empty.style.display = 'none';
+  list.innerHTML = '';
+
+  results.forEach((p,i)=>{
+    const pct = (p.weighted/5*100).toFixed(0);
+    const card = document.createElement('div');
+    card.className = 'rank-card' + (i===0 ? ' top' : '');
+    card.innerHTML = `
+      <div class="rank-num">${i+1}</div>
+      <div class="rank-main">
+        <div class="rname">${p.name} ${i===0 ? '<span class="badge-top">Best fit</span>' : ''}<span style="color:var(--text-faint);font-weight:400;font-size:11.5px;">— ${p.tagline}</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+      </div>
+      <div class="rank-score">
+        <div class="num">${p.weighted.toFixed(2)}</div>
+        <div class="lbl">of 5.00</div>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+/* ---------------------------------------------------------
+   RENDER: DATA TABLE
+--------------------------------------------------------- */
+function scoreDots(score){
+  let dots = '';
+  for(let i=1;i<=5;i++){
+    dots += `<div class="dot ${i<=score?'on':''}"></div>`;
+  }
+  return `<div class="dots">${dots}</div>`;
+}
+function flagLabel(f){
+  if(f==='estimate') return '<span class="flag estimate">⚠ estimate / unverified</span>';
+  if(f==='conflict') return '<span class="flag conflict">↔ sources conflict</span>';
+  if(f==='synth') return '<span class="flag synth">◆ editorial synthesis</span>';
+  return '';
+}
+function renderTable(){
+  const table = document.getElementById('dataTable');
+  let thead = '<thead><tr><th>Criterion</th>' + PROVIDERS.map(p=>`<th>${p.name}</th>`).join('') + '</tr></thead>';
+  let tbody = '<tbody>';
+  CRITERIA.forEach(c=>{
+    tbody += `<tr><td class="crit-name">${c.name}</td>`;
+    PROVIDERS.forEach(p=>{
+      const d = p.data[c.key];
+      tbody += `<td>
+        <div class="fact">${d.facts.join(' ')}</div>
+        <div class="score-pill">Editorial score: ${d.score}/5 ${scoreDots(d.score)}</div>
+        ${d.flags.map(flagLabel).join(' ')}
+      </td>`;
+    });
+    tbody += '</tr>';
+  });
+  tbody += '</tbody>';
+  table.innerHTML = thead + tbody;
+}
+
+/* ---------------------------------------------------------
+   RENDER: SOURCES
+--------------------------------------------------------- */
+function renderSources(){
+  const list = document.getElementById('sourcesList');
+  list.innerHTML = SOURCES.map(s=>`
+    <div class="source-item">
+      <div class="source-id">[${s.id}]</div>
+      <div>
+        <a href="${s.url}" target="_blank" rel="noopener">${s.title}</a>
+        <div class="source-meta">${s.meta}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ---------------------------------------------------------
+   RENDER: METHODOLOGY PANEL
+--------------------------------------------------------- */
+function renderResearch(){
+  document.getElementById('researchBody').innerHTML = `
+    <h4>What's a sourced fact vs. an editorial score</h4>
+    <p>Every bullet of prose in the data table (③) is a claim traced to a numbered source in the panel above, cited inline like ${src(1)}. The "Editorial score: X/5" underneath each cell is <strong>not</strong> itself pulled from any source — none of these four providers publish a comparable 1–5 rating for "ease of setup" or "performance." That score is a transparent synthesis of the sourced facts directly above it, using the rule described below.</p>
+
+    <h4>Scoring rule per criterion</h4>
+    <ul>
+      <li><strong>Cost</strong> — 5 = genuinely free indefinitely for this use case, 1 = paid usage required almost immediately. Vercel and Netlify's free tiers have no expiry; Render's free web-service tier is time-unlimited but the free database is not; Railway has no ongoing free tier at all after its one-time trial credit.</li>
+      <li><strong>Free-tier generosity</strong> — scored on the breadth of what's usable for free (bandwidth, compute, database, requests) relative to what a portfolio/side-project site actually needs.</li>
+      <li><strong>Ease of setup</strong> — scored on documented friction: whether a Dockerfile, CLI, or manual config is required versus pure Git-push deploys.</li>
+      <li><strong>Performance / uptime</strong> — none of these providers publish a free-tier uptime SLA, so this is scored on documented cold-start/sleep behavior and CDN/edge coverage instead of a raw percentage.</li>
+    </ul>
+
+    <h4>Conflicts found during research</h4>
+    <ul>
+      <li><strong>Render's free PostgreSQL duration:</strong> Render's own blog states free databases hold 1GB and expire 30 days after creation with a 14-day grace period ${src(5)}, while an independent comparison site states 256MB expiring after 90 days ${src(6)}. The official render.com figure was treated as authoritative, and the discrepancy is flagged in the table.</li>
+      <li><strong>Railway's post-trial "Free" plan:</strong> A couple of independent trackers describe a residual free plan with ~$1/month of credit after the initial $5 trial expires ${src(13)}, but this could not be confirmed against Railway's own official pricing or docs pages ${src(11,12)}. It's flagged as unverified rather than presented as fact.</li>
+    </ul>
+
+    <h4>What's marked as an estimate</h4>
+    <p>Netlify's credit-cost-per-resource figures (bandwidth, compute, deploys) come from a third-party tracker rather than Netlify's own pricing page directly, so they're flagged as an estimate pending direct confirmation. Railway's real-world "how long does $5 actually last" figures are also flagged as estimates since they come from usage modeling by third parties, not an official Railway benchmark.</p>
+
+    <h4>What this tool intentionally does not do</h4>
+    <p>It does not invent numbers where sources disagreed or were silent — for example, no single comparable uptime percentage exists across all four free tiers, so "performance" is scored on documented behavior (cold starts, CDN presence) rather than a fabricated SLA number.</p>
+  `;
+}
+
+/* ---------------------------------------------------------
+   RESET BUTTONS
+--------------------------------------------------------- */
+document.getElementById('btnEqual').addEventListener('click', ()=>{
+  weights = {cost:25, freeTier:25, easeOfSetup:25, performance:25};
+  renderWeights();
+  renderAll(false);
+});
+document.getElementById('btnCostFirst').addEventListener('click', ()=>{
+  weights = {cost:55, freeTier:25, easeOfSetup:10, performance:10};
+  renderWeights();
+  renderAll(false);
+});
+
+/* ---------------------------------------------------------
+   MASTER RENDER
+--------------------------------------------------------- */
+function renderAll(rerenderSliders){
+  if(rerenderSliders) renderWeights();
+  renderRanking();
+}
+
+function init(){
+  try{
+    renderWeights();
+    renderTable();
+    renderSources();
+    renderResearch();
+    renderRanking();
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('appContent').style.display = 'block';
+  }catch(err){
+    document.getElementById('loadingState').innerHTML =
+      `<div class="panel-title" style="color:var(--red);">Something went wrong loading this comparison</div>
+       <div style="color:var(--text-dim);margin-top:8px;">${err.message}. Try refreshing the page.</div>`;
+  }
+}
+
+// simulate a brief, honest loading state before revealing data
+setTimeout(init, 450);
+</script>
+</body>
+</html>
